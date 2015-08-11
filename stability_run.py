@@ -7,6 +7,7 @@ args = [1, 0.5, 0.2, 30, 0.2]
 sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
 ext             = [ "0", "p25", "p5", "p75", "1", "2", "3", "4"]
 N               = 8
+M               = 0
 back_time       = str(args[0])
 r0              = str(args[1])
 light_r_ratio   = str(args[2])
@@ -21,11 +22,11 @@ os.system("make -j ")
 
 
 os.chdir("../")
-for i in range(0, N):
+for i in range(M, N):
     os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
         -f ~/Desktop/research/lua/Null_even.lua \
         -o ~/Desktop/research/data_testing/sim_outputs/output_" + (ext[i]) + "gy.out \
-        -n 4 -P -x -e  125896 -i "+ str(sim_time[i]) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
+        -n 4 -P -x -e  846597 -i "+ str(sim_time[i]) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
 
 os.chdir("data_testing")    
 os.system("python stability_test.py")
