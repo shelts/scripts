@@ -4,8 +4,8 @@ import os
 
 args = [1, 0.5, 0.2, 30, 0.2]
 
-sim_time      = [0.0001, 0.0001, 4, 4]
-#sim_time      = [0.0001, 4]
+#sim_time      = [0.0001, 0.0001, 4, 4]
+sim_time      = [0.0001, 4]
 N             = 2
 back_time     = str(args[0])
 r0            = str(args[1])

@@ -11,24 +11,24 @@
     time  ./milkyway_nbody \
     -f ~/Desktop/research/lua/Null_even.lua \
     -o output_test.out \
-    -n 4 -x -e 32407 -i   0.01 1 0.5 0.2 30 .2 \
-#     2>>~/Desktop/research/piped_output.txt  
-#     rm ./milkyway_nbody
+    -n 4 -x  -i   0.01 1 0.5 0.2 30 .2 \
+    2>>~/Desktop/research/piped_output.txt  
+    rm ./milkyway_nbody
 
-    mv rho.txt  ~/Desktop/research/quick_plots
-    mv dist.txt  ~/Desktop/research/quick_plots
-    mv dist2.txt  ~/Desktop/research/quick_plots
-    mv dist3.txt  ~/Desktop/research/quick_plots
-    mv pot.txt ~/Desktop/research/quick_plots
-    mv fun.txt ~/Desktop/research/quick_plots
-    mv fun2.txt ~/Desktop/research/quick_plots
-    mv denom.txt ~/Desktop/research/quick_plots
-    mv num.txt ~/Desktop/research/quick_plots
-    cd ~/Desktop/research/gnuplot_scripts
-    gnuplot rho_plot.gnuplot
-    gnuplot dist_plot.gnuplot 
-    gnuplot pot_plot.gnuplot
-    gnuplot fun.gnuplot
+#     mv rho.txt  ~/Desktop/research/quick_plots
+#     mv dist.txt  ~/Desktop/research/quick_plots
+#     mv dist2.txt  ~/Desktop/research/quick_plots
+#     mv dist3.txt  ~/Desktop/research/quick_plots
+#     mv pot.txt ~/Desktop/research/quick_plots
+#     mv fun.txt ~/Desktop/research/quick_plots
+#     mv fun2.txt ~/Desktop/research/quick_plots
+#     mv denom.txt ~/Desktop/research/quick_plots
+#     mv num.txt ~/Desktop/research/quick_plots
+#     cd ~/Desktop/research/gnuplot_scripts
+#     gnuplot rho_plot.gnuplot
+#     gnuplot dist_plot.gnuplot 
+#     gnuplot pot_plot.gnuplot
+#     gnuplot fun.gnuplot
 
     cd ~/Desktop/research	 
 python outputparser.py ~/Desktop/research/nbody_test/bin/output_test.out
