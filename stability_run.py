@@ -5,7 +5,7 @@ import os
 args = [1, 0.5, 0.2, 30, 0.2]
 
 sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
-ext             = [ "0", "p25", "p5", "p75", "1", "2", "3", "4"]
+ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
 N               = 8
 M               = 0
 back_time       = str(args[0])
@@ -16,17 +16,17 @@ mass_ratio      = str(args[4])
 
 #os.system("rm -r nbody_test")
 #os.system("mkdir nbody_test")
-os.chdir("nbody_test")
-os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
-os.system("make -j ")
+#os.chdir("nbody_test")
+#os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
+#os.system("make -j ")
+#os.chdir("../")
 
 
-os.chdir("../")
 for i in range(M, N):
     os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
-        -f ~/Desktop/research/lua/Null_even.lua \
+        -f ~/Desktop/research/lua/Null.lua \
         -o ~/Desktop/research/data_testing/sim_outputs/output_" + (ext[i]) + "gy.out \
-        -n 4 -P -x -e  846597 -i "+ str(sim_time[i]) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
+        -n 8 -x -e 27744245 -i "+ str(sim_time[i]) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
 
 os.chdir("data_testing")    
 os.system("python stability_test.py")

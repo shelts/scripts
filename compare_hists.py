@@ -16,10 +16,10 @@ mass_ratio    = str(args[4])
 
 #os.system("rm -r nbody_test")
 #os.system("mkdir nbody_test")
-os.chdir("nbody_test")
-os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
-os.system("make -j ")
-os.chdir("../")
+#os.chdir("nbody_test")
+#os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
+#os.system("make -j ")
+#os.chdir("../")
 
 #file:///home/sidd/Desktop/research/lua/Null_even.lua
 #file:///home/sidd/Desktop/research/lua/EMD_20k_isotropic_1_52.lua
