@@ -14,12 +14,12 @@ light_r_ratio   = str(args[2])
 mass            = str(args[3])
 mass_ratio      = str(args[4])
 
-#os.system("rm -r nbody_test")
-#os.system("mkdir nbody_test")
-#os.chdir("nbody_test")
-#os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
-#os.system("make -j ")
-#os.chdir("../")
+os.system("rm -r nbody_test")
+os.system("mkdir nbody_test")
+os.chdir("nbody_test")
+os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
+os.system("make -j ")
+os.chdir("../")
 
 
 for i in range(M, N):

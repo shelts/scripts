@@ -2,7 +2,7 @@
 import os
 from subprocess import call
 
-args = [1, 1.0, 30]
+args = [1, 1.0, 8100.0]
 
 sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
 ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
