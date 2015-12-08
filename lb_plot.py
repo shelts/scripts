@@ -33,7 +33,9 @@ def __main__(arg):
     for line in lines:
         tokens = line.split(', ');
         isDark = int(tokens[0]);
-        l = float(tokens[1]) - 180.0;
+        l = float(tokens[1]);
+        if(l > 180.0):
+            l = l - 360.0
         b = float(tokens[2]);
         r = float(tokens[3]);
         vx = float(tokens[4]);
