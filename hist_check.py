@@ -8,7 +8,7 @@ import math
 #######################################################################
 #    LIBRARY   #
 #args = [3.945, 0.9862, 0.2, 0.25, 12, 1]
-args = [3.945, 0.9862, 0.2, 0.25, 60, 0.2] #for hist with dark matter
+args = [3.945, 0.9862, 0.2, 0.25, 12, 0.2] #for hist with dark matter
 #args = [2.05710712777658, 0.979670310788359, 0.466870336798855, 0.799794703757613, 70.7842113426619, 0.167724983660806]
 #data from orphan stream paper. approximate counts
 counts = [150, 0, 0, 0, 275, 150, 100, 75, 110, 110, 100, 110, 100, 120, 110, 150, 130, 75, 150, 100, 50, 50, 0, 20, 20]
@@ -30,9 +30,9 @@ remake    = n
 run_single_plum = n
 remake_single   = n
 
-plot_nbody_hist      = y
+plot_nbody_hist      = n
 plot_distruption_map = n
-make_1d_data_hist    = y
+make_1d_data_hist    = n
 make_2d_data_hist    = n
 match_histograms     = y
 
@@ -40,8 +40,10 @@ match_histograms     = y
 histogram_all_light_1d = "hist_all_light.hist"
 histogram_all_light_2d = "hist_all_light_2d.hist"
 
-histogram_mw_1d_2 = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mr0p2.hist" #histogram up on MW
+histogram_mw_1d_3 = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mlmdr0p25.hist" #histogram up on MW_but with different parameter structure
+histogram_mw_1d_2 = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mr0p2.hist"
 histogram_mw_1d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_m60_mr0p2.hist" #histogram up on MW
+
 histogram_mw_2d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_m60_mr0p2_2D.hist" #histogram up on MW
 
 histogram_best_fit_1d = "best_fit_parameter_hist.hist" #best fit para hist from MW
@@ -56,15 +58,15 @@ data_1d = "data_1d.hist"
 data_2d = "data_2d.hist"
 
 #names for the histograms below
-histogram_for_nbody_run = histogram_mw_1d
+histogram_for_nbody_run = histogram_mw_1d_2
 
-disruption_hist = histogram_all_light_2d
+disruption_hist = histogram_mw_2d
 
 plot_hist1 = histogram_mw_1d
 plot_hist2 = data_1d
 
-match_hist_correct = histogram_mw_1d_2 
-match_hist_compare = histogram_mw_1d 
+match_hist_correct = histogram_mw_1d
+match_hist_compare = histogram_mw_1d_2
 
 #######################################################################
 
@@ -81,7 +83,7 @@ if(run_nbody == True):
         os.system("make -j ")
         os.chdir("../")
     os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
-        -f ~/Desktop/research/lua/EMD_20k_isotropic_1_54.lua \
+        -f ~/Desktop/research/lua/EMD_20k_isotropic_1_54_npa.lua \
         -z ~/Desktop/research/quick_plots/hists_outputs/" + histogram_for_nbody_run + " \
         -o ~/Desktop/research/quick_plots/hists_outputs/out.out \
         -n 8 -e 123124 -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
