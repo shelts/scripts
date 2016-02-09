@@ -7,12 +7,11 @@ from matplotlib import cm
 import math
 #######################################################################
 #    LIBRARY   #
-#args = [3.945, 0.9862, 0.2, 0.25, 12, 1]
-args = [3.945, 0.9862, 0.2, 0.25, 12, 0.2] #for hist with dark matter
-#args = [2.05710712777658, 0.979670310788359, 0.466870336798855, 0.799794703757613, 70.7842113426619, 0.167724983660806]
-#data from orphan stream paper. approximate counts
-counts = [150, 0, 0, 0, 275, 150, 100, 75, 110, 110, 100, 110, 100, 120, 110, 150, 130, 75, 150, 100, 50, 50, 0, 20, 20]
-
+#args = [4.99173769639671, 0.942804164974926, 0.2, 0.25, 85.8392609500472, 0.54935592912011]
+#5.767473701483428
+#args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [4.0, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [4.71610580824149, 0.950365563365074, 1.09915465915825, 0.80449678392262, 20.8920281528104, 0.461408185258316]
 sim_time      = str(args[0])
 back_time     = str(args[1])
 r0            = str(args[2])
@@ -24,11 +23,9 @@ mass_ratio    = str(args[5])
 y = True
 n = False
 
-run_nbody = n
+#    SWITCHES  #
+run_nbody = y
 remake    = n
-
-run_single_plum = n
-remake_single   = n
 
 plot_nbody_hist      = n
 plot_distruption_map = n
@@ -36,29 +33,30 @@ make_1d_data_hist    = n
 make_2d_data_hist    = n
 match_histograms     = y
 
+run_single_plum = n
+remake_single   = n
 
-histogram_all_light_1d = "hist_all_light.hist"
-histogram_all_light_2d = "hist_all_light_2d.hist"
 
-histogram_mw_1d_3 = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mlmdr0p25.hist" #histogram up on MW_but with different parameter structure
-histogram_mw_1d_2 = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mr0p2.hist"
-histogram_mw_1d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_m60_mr0p2.hist" #histogram up on MW
+#    Histogram names     #
+histogram_mw_1d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p2_ml12_mr0p2_10_20_15.hist"
+histogram_mw_2d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mr0p2_2D.hist" #histogram up on MW
 
-histogram_mw_2d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_m60_mr0p2_2D.hist" #histogram up on MW
 
 histogram_best_fit_1d = "best_fit_parameter_hist.hist" #best fit para hist from MW
 histogram_best_fit_2d = "best_fit_parameter_hist_2d.hist" #best fit para hist from MW
 
 histogram_2dpara = "histogram_in_seed98213548_20kEMD_2_1_p5_p2_30_p2.hist" #one used in 2d sweeps
-#histogram = "tidal_histogram.hist"
 
 data = "Orphan_Data_September_2014.hist"
 
 data_1d = "data_1d.hist"
 data_2d = "data_2d.hist"
 
-#names for the histograms below
-histogram_for_nbody_run = histogram_mw_1d_2
+histogram_all_light_1d = "hist_all_light.hist"
+histogram_all_light_2d = "hist_all_light_2d.hist"
+
+#    histograms for runs #
+histogram_for_nbody_run = histogram_best_fit_1d
 
 disruption_hist = histogram_mw_2d
 
@@ -66,8 +64,9 @@ plot_hist1 = histogram_mw_1d
 plot_hist2 = data_1d
 
 match_hist_correct = histogram_mw_1d
-match_hist_compare = histogram_mw_1d_2
-
+match_hist_compare = histogram_best_fit_1d
+seed = '379780525'
+lua = "EMD_20k_1_54.lua"
 #######################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
@@ -83,10 +82,10 @@ if(run_nbody == True):
         os.system("make -j ")
         os.chdir("../")
     os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
-        -f ~/Desktop/research/lua/EMD_20k_isotropic_1_54_npa.lua \
+        -f ~/Desktop/research/lua/" + lua + " \
         -z ~/Desktop/research/quick_plots/hists_outputs/" + histogram_for_nbody_run + " \
         -o ~/Desktop/research/quick_plots/hists_outputs/out.out \
-        -n 8 -e 123124 -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
+        -n 8 -e " + seed + " -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio )
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 if(run_single_plum == True):
@@ -109,6 +108,8 @@ if(run_single_plum == True):
         -n 8 -x -e  961694  -i "+ sim_time + " " + back_time + " " + r0 + " " + mass)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+#data from orphan stream paper. approximate counts
+counts = [150, 0, 0, 0, 275, 150, 100, 75, 110, 110, 100, 110, 100, 120, 110, 150, 130, 75, 150, 100, 50, 50, 0, 20, 20]
 
 if(make_1d_data_hist == True):
     g = open("quick_plots/hists_outputs/" + data_1d, 'w')
@@ -127,46 +128,46 @@ if(make_1d_data_hist == True):
     total = total * 5.0 / 222288.24  #each count is fturn off star which reps about a cluster of 5 solar masses
     
     #this follows the format of the histrograms
-    g.write("#\n\
-# Generated Sun Nov 29 22:13:36 2015\n\
-#\n\
-# (phi,   theta,  psi) = (128.790000, 54.390000, 90.700000)\n\
-# (lambdaStart, lambdaCenter, lambdaEnd) = (" + str(-lambda_start) + ", 0.000000, " + str(lambda_start) + ")\n\
-# (betaStart, betaCenter, betaEnd) = (" + str(beta_start) + ", 0.000000, " + str(-beta_start) + ")\n\
-# Lambda Bin size = " + str(lambda_bin_size) + "\n\
-# Beta Bin size = " + str(beta_bin_size) + "\n\
-#\n\
-#\n\
-# Nbody = 50000\n\
-# Evolve time = 3.945000\n\
-# Timestep = 0.000514\n\
-# Sun GC Dist = 8.000000\n\
-# Criterion = NewCriterion\n\
-# Theta = 1.000000\n\
-# Quadrupole Moments = true\n\
-# Eps = 0.000481\n\
-#\n\
-#\n\
-# Potential: (Milkyway@Home N-body potential)\n\
-#\n\
-# Disk: MiaymotoNagai\n\
-#   mass = 445865.888000\n\
-#   a = 6.500000\n\
-#   b = 0.260000\n\
-#\n\
-# Halo: Logarithmic\n\
-#   vhalo = 73.000000\n\
-#   d = 12.000000\n\
-#\n\
-#\n\
-# UseBin  Lambda  Beta  Probability  Error\n\
-#\n\
-\n\
-n = 50000\n\
-massPerParticle = 0.0002400000\n\
-totalSimulated = 50000\n\
-lambdaBins = " + str(n) + "\n\
-betaBins = 1\n")
+    g.write("#\n"
+    + "# Generated Sun Nov 29 22:13:36 2015\n"
+    + "#\n"
+    + "# (phi,   theta,  psi) = (128.790000, 54.390000, 90.700000)\n"
+    + "# (lambdaStart, lambdaCenter, lambdaEnd) = (" + str(-lambda_start) + ", 0.000000, " + str(lambda_start) + ")\n"
+    + "# (betaStart, betaCenter, betaEnd) = (" + str(beta_start) + ", 0.000000, " + str(-beta_start) + ")\n"
+    + "# Lambda Bin size = " + str(lambda_bin_size) + "\n"
+    + "# Beta Bin size = " + str(beta_bin_size) + "\n"
+    + "#\n"
+    + "#\n"
+    + "# Nbody = 50000\n"
+    + "# Evolve time = 3.945000\n"
+    + "# Timestep = 0.000514\n"
+    + "# Sun GC Dist = 8.000000\n"
+    + "# Criterion = NewCriterion\n"
+    + "# Theta = 1.000000\n"
+    + "# Quadrupole Moments = true\n"
+    + "# Eps = 0.000481\n"
+    + "#\n"
+    + "#\n"
+    + "# Potential: (Milkyway@Home N-body potential)\n"
+    + "#\n"
+    + "# Disk: MiaymotoNagai\n"
+    + "#   mass = 445865.888000\n"
+    + "#   a = 6.500000\n"
+    + "#   b = 0.260000\n"
+    + "#\n"
+    + "# Halo: Logarithmic\n"
+    + "#   vhalo = 73.000000\n"
+    + "#   d = 12.000000\n"
+    + "#\n"
+    + "#\n"
+    + "# UseBin  Lambda  Beta  Probability  Error\n"
+    + "#\n"
+    + "\n"
+    + "n = 50000\n"
+    + "massPerParticle = 0.0002400000\n"
+    + "totalSimulated = 50000\n"
+    + "lambdaBins = " + str(n) + "\n"
+    + "betaBins = 1\n")
     
     for i in range(0, int(n_lambda)):
         bodies = counts[i] * 5.0 / (222288.24  * total)#this is N
@@ -201,46 +202,46 @@ if(make_2d_data_hist == True):
         total = total + counts[i]
     total = total * 5.0 / 222288.24  #each count is fturn off star which reps about a cluster of 5 solar masses
     #this follows the format of the histrograms
-    g.write("#\n\
-# Generated Sun Nov 29 22:13:36 2015\n\
-#\n\
-# (phi,   theta,  psi) = (128.790000, 54.390000, 90.700000)\n\
-# (lambdaStart, lambdaCenter, lambdaEnd) = (" + str(-lambda_start) + ", 0.000000, " + str(lambda_start) + ")\n\
-# (betaStart, betaCenter, betaEnd) = (" + str(beta_start) + ", 0.000000, " + str(-beta_start) + ")\n\
-# Lambda Bin size = " + str(lambda_bin_size) + "\n\
-# Beta Bin size = " + str(beta_bin_size) + "\n\
-#\n\
-#\n\
-# Nbody = 50000\n\
-# Evolve time = 3.945000\n\
-# Timestep = 0.001200\n\
-# Sun GC Dist = 8.000000\n\
-# Criterion = NewCriterion\n\
-# Theta = 1.000000\n\
-# Quadrupole Moments = true\n\
-# Eps = 0.000481\n\
-#\n\
-#\n\
-# Potential: (Milkyway@Home N-body potential)\n\
-#\n\
-# Disk: MiaymotoNagai\n\
-#   mass = 445865.888000\n\
-#   a = 6.500000\n\
-#   b = 0.260000\n\
-#\n\
-# Halo: Logarithmic\n\
-#   vhalo = 73.000000\n\
-#   d = 12.000000\n\
-#\n\
-#\n\
-# UseBin  Lambda  Beta  Probability  Error\n\
-#\n\
-\n\
-n = 50000\n\
-massPerParticle = 0.0002400000\n\
-totalSimulated = 50000\n\
-lambdaBins = 50\n\
-betaBins = 50\n")
+    g.write("#\n"
+    + "# Generated Sun Nov 29 22:13:36 2015\n"
+    + "#\n"
+    + "# (phi,   theta,  psi) = (128.790000, 54.390000, 90.700000)\n"
+    + "# (lambdaStart, lambdaCenter, lambdaEnd) = (" + str(-lambda_start) + ", 0.000000, " + str(lambda_start) + ")\n"
+    + "# (betaStart, betaCenter, betaEnd) = (" + str(beta_start) + ", 0.000000, " + str(-beta_start) + ")\n"
+    + "# Lambda Bin size = " + str(lambda_bin_size) + "\n"
+    + "# Beta Bin size = " + str(beta_bin_size) + "\n"
+    + "#\n"
+    + "#\n"
+    + "# Nbody = 50000\n"
+    + "# Evolve time = 3.945000\n"
+    + "# Timestep = 0.001200\n"
+    + "# Sun GC Dist = 8.000000\n"
+    + "# Criterion = NewCriterion\n"
+    + "# Theta = 1.000000\n"
+    + "# Quadrupole Moments = true\n"
+    + "# Eps = 0.000481\n"
+    + "#\n"
+    + "#\n"
+    + "# Potential: (Milkyway@Home N-body potential)\n"
+    + "#\n"
+    + "# Disk: MiaymotoNagai\n"
+    + "#   mass = 445865.888000\n"
+    + "#   a = 6.500000\n"
+    + "#   b = 0.260000\n"
+    + "#\n"
+    + "# Halo: Logarithmic\n"
+    + "#   vhalo = 73.000000\n"
+    + "#   d = 12.000000\n"
+    + "#\n"
+    + "#\n"
+    + "# UseBin  Lambda  Beta  Probability  Error\n"
+    + "#\n"
+    + "\n"
+    + "n = 50000\n"
+    + "massPerParticle = 0.0002400000\n"
+    + "totalSimulated = 50000\n"
+    + "lambdaBins = 50\n"
+    + "betaBins = 50\n") 
     
     for i in range(0, int(n_lambda)):
         bodies = counts[i] * 5.0 / (222288.24  * total)#this is N
@@ -330,6 +331,7 @@ if(plot_nbody_hist == True):
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 if(plot_distruption_map == True):
     print("plotting distruption map")
+    #This is the heat map plot
     f = open('quick_plots/histogram_distrupt.gnuplot', 'w')
     f.write("reset\n")
     f.write("set terminal png\n")

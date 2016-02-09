@@ -7,13 +7,21 @@
 
     cd ~/Desktop/research/nbody_test/bin
     
-    time  ./milkyway_nbody -i\
+    time  ./milkyway_nbody \
     -f ~/Desktop/research/lua/EMD_20k_isotropic_1_54.lua \
     -o output_test.out \
-    -n 8 -e 9876543 \
-    --visualizer-args '-r -q '\
-    -i 0.01 .6 0.2 0.2 30 .2 \
+    -z ~/Desktop/research/quick_plots/hists_outputs/hist_test.hist \
+    -n 8  -e 27744245 \
+    -i 0.01 .9862 0.2 0.2 12 .2 \
 #     2>>~/Desktop/research/piped_output.txt  \
 #     rm ./milkyway_nbody
     cd $r
     python outputparser.py ./nbody_test/bin/output_test.out
+#     --visualizer-args '-r -q '\
+
+rm dark_matter.dat light_matter.dat
+# ./hist_check.py
+# 9876543
+
+cd quick_plots
+./quick_plot.py
