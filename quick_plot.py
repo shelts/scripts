@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
-#######################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 os.system("mv ~/Desktop/research/nbody_test/bin/invertfunc.txt ./")
 os.system("mv ~/Desktop/research/nbody_test/bin/invertfunc_den.txt ./")

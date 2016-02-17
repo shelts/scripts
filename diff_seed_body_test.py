@@ -5,9 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
-#######################################################################
 #this script runs sims with different bodies and different seeds
-#    LIBRARY   #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Control Panel       #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 args = [4, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 sim_time      = str(args[0])
@@ -33,7 +36,11 @@ cross_compare = n
 make_plots = y
 prefix = "4gy"
 lua = "EMD_154_alternating_bodies.lua"
-#######################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Engine Room         #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 if(remake == True):
     os.chdir("./")

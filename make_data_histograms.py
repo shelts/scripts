@@ -5,9 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
-#######################################################################
 #This script creates the data histograms, both 1d and 2d
-#    LIBRARY   #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Control Panel       #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
 
@@ -28,7 +31,11 @@ match_hist_compare = data_2d
 
 seed = '379780525'
 lua = "EMD_20k_1_54.lua"
-#######################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Engine Room         #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 #data from orphan stream paper. approximate counts
 counts = [150, 0, 0, 0, 275, 150, 100, 75, 110, 110, 100, 110, 100, 120, 110, 150, 130, 75, 150, 100, 50, 50, 0, 20, 20]

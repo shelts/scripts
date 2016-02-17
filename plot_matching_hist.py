@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
 args = sys.argv;
-
-#######################################################################
 #This script plots two histograms next to each other and also produces their matching likelihood
-#It also plots their distribution heat maps 
-#    LIBRARY   #
+#-It also plots their distribution heat maps 
+#######################################################################
+                #/# # # # # # # # # # # # # # \#
+                #          Control Panel       #
+                #\# # # # # # # # # # # # # # /#
 y = True
 n = False
 
@@ -54,12 +55,15 @@ match_hist_compare = hist2
 
 folder = 'quick_plots/hists_outputs'
 name = 'comparison_hists'
-#######################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Engine Room         #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 if(match_histograms == True):
     os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
     -h ~/Desktop/research/" + folder + "/" + match_hist_correct + "\
     -s ~/Desktop/research/" + folder + "/" + match_hist_compare)
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #     
 if(plot_nbody_hist == True):
     print("plotting histograms\n")
@@ -110,7 +114,6 @@ if(plot_nbody_hist == True):
     plt.savefig('quick_plots/' + name + '.png', format='png')
     #plt.show()
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 if(plot_distruption_map == True):
     print("plotting distruption map")
     f = open('~/Desktop/research/quick_plots/histogram_distrupt.gnuplot', 'w')
@@ -137,5 +140,4 @@ if(plot_distruption_map == True):
     os.system("gnuplot ~/Desktop/research/quick_plots/histogram_distrupt.gnuplot")
     os.system("rm ~/Desktop/research/quick_plots/histogram_distrupt.gnuplot")
     
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

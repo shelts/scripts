@@ -5,9 +5,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
-#######################################################################
 #This creates a histrogram and matches to another histogram.
-#    LIBRARY   #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Control Panel       #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
 
@@ -62,7 +65,10 @@ lua = "EMD_20k_1_54_fixed_seed.lua"
 #lua = "Null.lua"
 output = "regular.out"
 output2 = "shifted.out"
-#######################################################################
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Engine Room         #
+                #\# # # # # # # # # # # # # # /#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 if(run_nbody == True):
     print('running nbody')
