@@ -129,8 +129,8 @@ def com(file_name, mass_l, mass_d, N):
     cmv[2] = cm_vz / (mass_l + mass_d)    
     CM = math.sqrt( cm[0] * cm[0] + cm[1] * cm[1] + cm[2] * cm[2] )
     CMV = math.sqrt( cmv[0] * cmv[0] + cmv[1] * cmv[1] + cmv[2] * cmv[2] )
-    print cm[0], cm[1], cm[2]
-    print cmv[0], cmv[1], cmv[2]
+    print "COM of (x, y, z): (", cm[0], cm[1], cm[2], ")"
+    print "COV of (x, y, z): (",cmv[0], cmv[1], cmv[2], ")"
     return CM, CMV
     
 
@@ -138,23 +138,31 @@ def main():
     mass_l = float( sys.argv[1] )
     mass_ratio = float( sys.argv[2] )
     
+   
+    file1 = 'quick_plots/hists_outputs/0gy_null_pot.out'
+    file2 = 'quick_plots/hists_outputs/4gy_null_pot.out'
+   
+    if(len(sys.argv) == 5):
+        name1 = str(sys.argv[3])
+        name2 = str(sys.argv[4])
+        file1 = 'quick_plots/hists_outputs/' + name1
+        file2 = 'quick_plots/hists_outputs/' + name2
+        
     #print mass_l, mass_ratio, N
     dwarfMass = mass_l / mass_ratio
     mass_d    = dwarfMass * (1.0 - mass_ratio)
     
-    file1 = 'quick_plots/hists_outputs/0gy_null_pot.out'
-    file2 = 'quick_plots/hists_outputs/4gy_null_pot.out'
     #file1 = 'quick_plots/hists_outputs/regular.out'
     #file2 = 'quick_plots/hists_outputs/regular.out'
+    print "for output: ", name1 
     N1 = get_N(file1)
-    
     cm1, cmv1 = com(file1, mass_l, mass_d, N1)
-    print "initial position: ", cm1, "\t initial velocity: ", cmv1 
+    print "initial COM: ", cm1, "\ninitial COV: ", cmv1, "\n" 
     
+    print "for output: ", name2
     N2 = get_N(file2)
-    
     cm2, cmv2 = com(file2, mass_l, mass_d, N2)
-    print "final position: ", cm2, "\t final velocity: ", cmv2
+    print "initial COM: ", cm2, "\ninitial COV: ", cmv2, "\n" 
     
     
     v_ave = (cm2 - cm1) / (4.0)
