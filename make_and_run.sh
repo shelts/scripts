@@ -8,11 +8,11 @@
     cd ~/Desktop/research/nbody_test/bin
     
     time  ./milkyway_nbody \
-    -f ~/Desktop/research/lua/EMD_20k_isotropic_1_54.lua \
+    -f ~/Desktop/research/lua/EMD_20k_1_54_fixed_seed.lua \
     -o output_test.out \
     -z ~/Desktop/research/quick_plots/hists_outputs/hist_test.hist \
     -n 8  -e 27744245 \
-    -i 0.01 .9862 0.2 0.2 12 .2 \
+    -i 0.1 1.0 0.2 0.2 12 .2 \
 #     2>>~/Desktop/research/piped_output.txt  \
 #     rm ./milkyway_nbody
     cd $r

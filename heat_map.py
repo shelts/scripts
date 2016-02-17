@@ -2,12 +2,13 @@
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
+#this plots the distribution heat map with matplotlib
 
 #Command Line Args
 #input = sys.argv[1];
 
 lines = []
-lines = open('quick_plots/heat_map_test_data.txt').readlines();
+lines = open('quick_plots/hists_outputs/heat_map_test_data.txt').readlines();
 lines = lines[0: len(lines)]
 mass  = [] 
 m_r   = []
@@ -69,3 +70,56 @@ plt.show()
 #plt.ylim([extent[2], extent[3]]);
 #plt.grid();
 #plt.show();
+
+
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+    #distrupt_pyplot = n
+    #if(distrupt_pyplot == True):
+        #lines = []
+        #lines = open('quick_plots/hists_outputs/' + histogram).readlines();
+        #lines = lines[40:len(lines)]
+        #sim_lx = []
+        #sim_by = []
+        #sim_nz = []
+        #for line in lines:
+            #tokens = line.split();
+            #if tokens: #tests to make sure tokens is not empty
+                #lda = float(tokens[1])
+                #bta = float(tokens[2])
+                #cts = float(tokens[3])
+                #sim_lx.append(lda)
+                #sim_by.append(bta)
+                #sim_nz.append(cts)
+        #print("%f \t %f \t %f\n" % (len(sim_lx), len(sim_by), len(sim_nz)))
+        
+        #sim_l = np.asarray(sim_lx)
+        #sim_b = np.asarray(sim_by)
+        #sim_n = np.asarray(sim_nz)
+        
+        #nx = sim_l.max() - sim_l.min() + 1
+        #ny = sim_b.max() - sim_b.min() + 1
+        #Z = np.zeros((nx,ny)) 
+        #print("%f \n" % (Z.shape[0]))
+        
+        #assert sim_l.shape == sim_b.shape == sim_n.shape
+        #for i in range(len(sim_l)):
+            #Z[sim_l[i] - sim_l.min()][sim_b[i] - sim_b.min()] = sim_n[i] 
+
+        #fig = plt.figure()
+        #plt.scatter(sim_l, sim_b, c=sim_n)
+        ##plt.show()
+        
+        #plt.pcolor(np.arange(nx), np.arange(ny), Z, cmap = plt.cm.Reds)
+        #plt.colorbar()
+        #plt.xlim(0, sim_l.max() - sim_l.min())
+        #plt.ylim(0, sim_b.max() - sim_b.min())
+        
+        #xlabels = np.arange(sim_l.min(), sim_l.max(), Nspacingx) # define Nspacing accordingly 
+        #ylabels = np.arange(sim_b.min(), sim_b.max(), Nspacingy) 
+        #plt.xticks(np.arange(0, sim_l.max() - sim_l.min(), Nspacingx), xlabels)
+        #plt.yticks(np.arange(0, sim_b.max() - sim_b.min(), Nspacingy), ylabels)
+
+        #plt.savefig('quick_plots/distruption2.png', format='png')
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+## # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 

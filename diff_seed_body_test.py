@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
 #######################################################################
+#this script runs sims with different bodies and different seeds
 #    LIBRARY   #
 #args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 args = [4, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
