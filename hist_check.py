@@ -15,11 +15,9 @@ y = True
 n = False
 
 #args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [4, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-# -5.533137043,
-#args = [3.66095915716141, 0.937350090872496, 0.861348122358322, 0.870432981872, 13.5649889884517, 0.45703884701361]
-#-0.1085871427, laptop calced: 0.508502685556493
-#args = [3.68159410255875, 0.860706978637003, 0.995861475185167, 0.68189520501899, 60.6192551418029, 0.487269480544337]
+#args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [4.0, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+
 sim_time      = str(args[0])
 back_time     = str(args[1])
 r0            = str(args[2])
@@ -29,14 +27,14 @@ mass_ratio    = str(args[5])
 
 
 #    SWITCHES  #
-run_nbody = n
-remake    = n
+run_nbody = y
+remake    = y
 
-plot_plot_hists  = n
-match_histograms = n
-calc_cm = n
+plot_plot_hists  = y
+match_histograms = y
+calc_cm = y
 
-plot_stability = y
+plot_stability = n
 plot_lb = n
 
 
@@ -44,27 +42,37 @@ plot_lb = n
 histogram_mw_1d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p2_ml12_mr0p2_10_20_15.hist"
 histogram_mw_1d_new = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p2_ml12_mr0p2_2_9_16.hist"
 
-histogram_mw_2d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p25_ml12_mr0p2_2D.hist" #histogram up on MW
+#0.000355062517318
+test_seed1_124135 = "test_seed1_124135.hist"
+test_seed2_765483 = "test_seed2_765483.hist"
 
-best_fit_narrow = 'fixed_seed_new_hist_best_fit_narrow.hist'
-best_fit_wide = 'fixed_seed_new_hist_best_fit_wide.hist'
-test = 'regular_vel.hist'
-test1 = 'shifted_vel.hist'
-test3 = 'shifted_vel2.hist'
+#0.000320048580327
+test_seed1_124135_wo_cm_correction = "test_seed1_124135_wo_cm_correction.hist"
+test_seed2_765483_wo_cm_correction = "test_seed2_765483_wo_cm_correction.hist"
 
 
-histogram_best_fit_2d = "best_fit_parameter_hist_2d.hist" #best fit para hist from MW
+test_seed1_124135_4gy = "test_seed1_124135_4gy.hist"
+test_seed2_765483_4gy = "test_seed2_765483_4gy.hist"
+
+test_seed1_124135_4gy_wo_cm_correction = "test_seed1_124135_4gy_wo_cm_correction.hist"
+test_seed2_765483_4gy_wo_cm_correction = "test_seed2_765483_4gy_wo_cm_correction.hist"
 
 #    histograms for runs #
-histogram_for_nbody_run = best_fit_wide
+histogram_for_nbody_run = test_seed2_765483_4gy
 
-match_hist_correct = histogram_mw_1d_new
-match_hist_compare = best_fit_wide
-seed = '98756'
-lua = "EMD_20k_1_54_fixed_seed.lua"
+match_hist_correct = test_seed1_124135_4gy
+match_hist_compare = test_seed2_765483_4gy
+#seed = '86043093'
+#seed = '124135'
+seed = '765483'
+lua = "EMD_20k_1_54_fixed_seed_cm_correction.lua"
+#lua = "EMD_20k_v154_fixed_seed.lua"
 #lua = "Null.lua"
-output = "regular.out"
-output2 = "shifted.out"
+
+output1 = "regular.out"
+output2 = "out.out"
+output = "out.out"
+outs = 1
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Engine Room         #
@@ -72,12 +80,13 @@ output2 = "shifted.out"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 if(run_nbody == True):
     print('running nbody')
+    #-h ~/Desktop/research/quick_plots/hists_outputs/" + match_hist_correct + " \
     if(remake == True):
         os.chdir("./")
-        os.system("rm -r nbody_test")
-        os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")
+        #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
     os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody \
@@ -107,4 +116,7 @@ if(match_histograms == True):
 print "\n"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #    
 if(calc_cm == True):
-    os.system("./cm_shift_test.py " + mass_l + " " + mass_ratio + " " + output + " " + output2)
+    if(outs == 2):
+        os.system("./cm_shift_test.py " + mass_l + " " + mass_ratio + " " + output1 + " " + output2)
+    if(outs == 1):
+        os.system("./cm_shift_test.py " + mass_l + " " + mass_ratio + " " + output)

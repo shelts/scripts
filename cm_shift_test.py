@@ -4,12 +4,6 @@ from subprocess import call
 import math
 import sys
 
-#def __main__(args):
-        #mass_l = float( args[1] )
-        #mass_ratio = float( args[2] )
-        #N = float( args[3] )
-        #main2(mass_l, mass_ratio, N)
-#__main__(args);
 
 class body:
     'these are bodies'
@@ -141,6 +135,9 @@ def main():
    
     file1 = 'quick_plots/hists_outputs/0gy_null_pot.out'
     file2 = 'quick_plots/hists_outputs/4gy_null_pot.out'
+    if(len(sys.argv) == 4):
+        name1 = str(sys.argv[3])
+        file1 = 'quick_plots/hists_outputs/' + name1
    
     if(len(sys.argv) == 5):
         name1 = str(sys.argv[3])
@@ -159,16 +156,17 @@ def main():
     cm1, cmv1 = com(file1, mass_l, mass_d, N1)
     print "initial COM: ", cm1, "\ninitial COV: ", cmv1, "\n" 
     
-    print "for output: ", name2
-    N2 = get_N(file2)
-    cm2, cmv2 = com(file2, mass_l, mass_d, N2)
-    print "initial COM: ", cm2, "\ninitial COV: ", cmv2, "\n" 
-    
-    
-    v_ave = (cm2 - cm1) / (4.0)
-    
-    ace = 2.0 * ( (cm2 - cm1) - cmv1 * 4.0) / ( 16.0)
-    
-    print "average velocity: ", v_ave, "\tacceleration ", ace
+    if(len(sys.argv) == 5):
+        print "for output: ", name2
+        N2 = get_N(file2)
+        cm2, cmv2 = com(file2, mass_l, mass_d, N2)
+        print "initial COM: ", cm2, "\ninitial COV: ", cmv2, "\n" 
+        
+        
+        v_ave = (cm2 - cm1) / (4.0)
+        
+        ace = ((cmv2 * cmv2) - (cmv1 * cmv1)) / (2.0)
+        
+        print "average velocity: ", v_ave, "\tacceleration ", ace
 
 main()
