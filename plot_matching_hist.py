@@ -32,7 +32,7 @@ hist2 = hist_from_MW_new
 #    SWITCHES  #
 plot_nbody_hist      = y
 plot_distruption_map = n
-match_histograms     = y
+match_histograms     = n
 
 if(len(sys.argv) == 3):
     hist1 = str(args[1])
@@ -53,7 +53,12 @@ disruption_hist2 = hist2
 match_hist_correct = hist1
 match_hist_compare = hist2
 
-folder = 'quick_plots/hists_outputs'
+
+ylimit = 0.4
+xlower = 150
+xupper = -150
+w = 1.5
+folder = 'quick_plots/hists'
 name = 'comparison_hists'
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
@@ -96,18 +101,18 @@ if(plot_nbody_hist == True):
     
     #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
     plt.subplot(211)
-    plt.bar(sim_l, sim_n, width=1, color='b')
+    plt.bar(sim_l, sim_n, width = w, color='b')
     plt.legend(handles=[mpatches.Patch(color='b', label='MW')])
     plt.title('Histogram of Light Matter Distribution After 4 Gy')
-    plt.xlim((140, -140))
-    plt.ylim((0.0, 0.25))
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
     plt.ylabel('counts')
     
     plt.subplot(212)
-    plt.bar(data_l, data_n, width=1, color='k')
+    plt.bar(data_l, data_n, width = w, color='k')
     plt.legend(handles=[mpatches.Patch(color='k', label='New')])
-    plt.xlim((140, -140))
-    plt.ylim((0.0, 0.25))
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
     plt.xlabel('l')
     plt.ylabel('counts')
     #f.subplots_adjust(hspace=0)

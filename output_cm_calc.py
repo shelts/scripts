@@ -125,6 +125,9 @@ def com(file_name, mass_l, mass_d, N):
     CMV = math.sqrt( cmv[0] * cmv[0] + cmv[1] * cmv[1] + cmv[2] * cmv[2] )
     print "COM of (x, y, z): (", cm[0], cm[1], cm[2], ")"
     print "COV of (x, y, z): (",cmv[0], cmv[1], cmv[2], ")"
+   
+    print("COM of (x, y, z): ( %.15f, %.15f, %.15f )" % ( cm[0], cm[1], cm[2]))
+    print ("COV of (x, y, z): ( %.15f, %.15f, %15f )" % ( cmv[0], cmv[1], cmv[2]))
     return CM, CMV
     
 
