@@ -76,8 +76,8 @@ def calc_chi_sq(x, y):
     
 def main():
     
-    file1 = "ipv_old_binary0gy.txt"
-    file2 = "ipv_new_binary0gy.txt"
+    file1 = "/home/sidd/Desktop/research/ipv_old_binary0gy.txt"
+    file2 = "/home/sidd/Desktop/research/ipv_new_binary0gy.txt"
     
     if(len(sys.argv) == 4):
         file1 = str(args[1])

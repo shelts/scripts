@@ -136,17 +136,17 @@ def main():
     mass_ratio = float( sys.argv[2] )
     
    
-    file1 = 'quick_plots/hists_outputs/0gy_null_pot.out'
-    file2 = 'quick_plots/hists_outputs/4gy_null_pot.out'
+    file1 = '~/Desktop/research/quick_plots/outputs/0gy_null_pot.out'
+    file2 = '~/Desktop/research/quick_plots/outputs/4gy_null_pot.out'
     if(len(sys.argv) == 4):
         name1 = str(sys.argv[3])
-        file1 = 'quick_plots/hists_outputs/' + name1
+        file1 = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1
    
     if(len(sys.argv) == 5):
         name1 = str(sys.argv[3])
         name2 = str(sys.argv[4])
-        file1 = 'quick_plots/hists_outputs/' + name1
-        file2 = 'quick_plots/hists_outputs/' + name2
+        file1 = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1
+        file2 = '/home/sidd/Desktop/research/quick_plots/outputs/' + name2
         
     #print mass_l, mass_ratio, N
     dwarfMass = mass_l / mass_ratio

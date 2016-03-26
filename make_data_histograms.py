@@ -17,7 +17,7 @@ n = False
 #    SWITCHES  #
 make_1d_data_hist = y
 make_2d_data_hist = y
-match_histograms  = y
+match_histograms  = n
 #    Histogram names     #
 data = "Orphan_Data_September_2014.hist"
 
@@ -41,7 +41,7 @@ lua = "EMD_20k_1_54.lua"
 counts = [150, 0, 0, 0, 275, 150, 100, 75, 110, 110, 100, 110, 100, 120, 110, 150, 130, 75, 150, 100, 50, 50, 0, 20, 20]
 
 if(make_1d_data_hist == True):
-    g = open("quick_plots/hists_outputs/" + data_1d, 'w')
+    g = open("/home/sidd/Desktop/research/quick_plots/" + data_1d, 'w')
     
     lambda_start = 37 #where the data starts in lambda
     lambda_bin_size = 3.0 #how far apart the data seems
@@ -108,7 +108,7 @@ if(make_1d_data_hist == True):
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #     
 if(make_2d_data_hist == True):
-    g = open("quick_plots/hists_outputs/" + data_2d, 'w')
+    g = open("/home/sidd/Desktop/research/quick_plots/" + data_2d, 'w')
     
     lambda_start = 37#where the data starts in lambda
     lambda_bin_size = 3.0#how far apart the data seems
@@ -192,7 +192,7 @@ if(make_2d_data_hist == True):
     
     f = open('hist_data.gnuplot', 'w')
     f.write("reset\n")
-    f.write("set terminal wxt persist\n")
+    f.write("set terminal png\n")
     f.write("set key on\n")
     f.write("set ylabel 'beta'\n")
     f.write("set xlabel 'lambda'\n")
@@ -202,18 +202,18 @@ if(make_2d_data_hist == True):
 
     f.write("set output \"~/Desktop/research/quick_plots/hist_data.png\" \n")
     f.write("set title '' \n")
-    f.write("splot './quick_plots/hists_outputs/" + data_2d + "' u 2:3:4  w boxes title 'hist' \n\n", )
+    f.write("splot '/home/sidd/Desktop/research/quick_plots/" + data_2d + "' u 2:3:4  w boxes title 'hist' \n\n", )
+   
+    f.write("set terminal wxt persist\n")
+    f.write("set title '' \n")
+    f.write("splot '/home/sidd/Desktop/research/quick_plots/" + data_2d + "' u 2:3:4  w boxes title 'hist' \n\n", )
+    f.close()
     os.system("gnuplot hist_data.gnuplot")
-    #os.system("rm hist_data.gnuplot")
-    
+    os.system("rm hist_data.gnuplot")
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-os.chdir("./quick_plots")
-os.system("python lb_plot.py hists_outputs/out.out")
-os.chdir("../")
-#os.system("./stability_test.py " + back_time + " " + r0 + " " + light_r_ratio + " " + mass + " " + mass_ratio)
 
 if(match_histograms == True):
     os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
-    -h ~/Desktop/research/quick_plots/hists_outputs/" + match_hist_correct + "\
-    -s ~/Desktop/research/quick_plots/hists_outputs/" + match_hist_compare)
+    -h ~/Desktop/research/quick_plots/" + match_hist_correct + "\
+    -s ~/Desktop/research/quick_plots/" + match_hist_compare)
