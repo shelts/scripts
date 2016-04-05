@@ -10,8 +10,8 @@ import math
 
 
 
-file1 = 'h.c'
-file2 = 'milkywayathome_client/nbody/src/nbody_emd.c'
+file1 = 'scripts/plot_matching_hist.py'
+file2 = 'quick_plots/plot_matching_hist.py'
 
 lines1 = []
 lines2 = []

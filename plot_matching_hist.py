@@ -32,12 +32,10 @@ hist2 = hist_from_MW_new
 #    SWITCHES  #
 plot_nbody_hist      = y
 plot_distruption_map = n
-match_histograms     = n
 
 if(len(sys.argv) == 3):
     hist1 = str(args[1])
     hist2 = str(args[2])
-    match_histograms = n
 print "plot histogram 1: ", hist1
 print "plot histogram 2: ", hist2
     
@@ -55,20 +53,16 @@ match_hist_compare = hist2
 
 
 ylimit = 0.4
-xlower = 150
-xupper = -150
+xlower = 50
+xupper = -75
 w = 1.5
+#the current working directory is in the folder of the script that calls this
 folder = 'quick_plots/hists'
 name = 'comparison_hists'
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Engine Room         #
                 #\# # # # # # # # # # # # # # /#
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-if(match_histograms == True):
-    os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
-    -h ~/Desktop/research/" + folder + "/" + match_hist_correct + "\
-    -s ~/Desktop/research/" + folder + "/" + match_hist_compare)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #     
 if(plot_nbody_hist == True):
     print("plotting histograms\n")
@@ -102,7 +96,7 @@ if(plot_nbody_hist == True):
     #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
     plt.subplot(211)
     plt.bar(sim_l, sim_n, width = w, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label='MW')])
+    plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
     plt.title('Histogram of Light Matter Distribution After 4 Gy')
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
@@ -110,7 +104,7 @@ if(plot_nbody_hist == True):
     
     plt.subplot(212)
     plt.bar(data_l, data_n, width = w, color='k')
-    plt.legend(handles=[mpatches.Patch(color='k', label='New')])
+    plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
     plt.xlabel('l')
