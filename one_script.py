@@ -22,27 +22,22 @@ import matplotlib.patches as mpatches
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [3.95, 0.98, 0.2, 0.2, 15, 0.2] #hist3
-#args = [3.93, 0.98, 0.2, 0.2, 12, 0.2] #hist4
-args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #hist2
-
-args = [0.0000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [4.0, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [4, 0.9862, 0.2, 0.2, 12, 0.2]
-
+#args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [0.0000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [3.945, 0.9862, 0.2, 0.8, 12, 48] #for hist with dark matter
 #    SWITCHES for standard_run()  #
 run_nbody = n
-remake    = n
+remake    = y
 match_histograms = y
 
 calc_cm = n
-plot_hists = y
-plot_overlapping = y
+plot_hists = n
+plot_overlapping = n
 plot_adjacent = y
 plot_lb = n 
 
 # possible tests #
+recalc_para_sweep_likes = n
 make_a_few_hists = n
 run_diff_OS_test = n
 run_binary_compare = n
@@ -54,17 +49,17 @@ histogram_mw_1d_v158 = "tidal_histogram_EMD_20k_v158_ft3p945_rt0p98_r0p2_rr0p2_m
 #    histograms for runs #
 histogram_for_nbody_run = 'test'
 
-match_hist_correct = 'total_sim_test2'
-match_hist_compare = 'total_sim_test3'
-plot_name = '2-3'
+match_hist_correct = 'arg_3.95_3.95_0.2_0.8_12_48_correct'
+match_hist_compare = 'arg_3.95_3.95_0.2_0.8_12.0_48'
+plot_name = '2-4'
 
 output = histogram_for_nbody_run
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 version = '' #determines which binary is run
-lua = "EMD_20k_v158_fixed_seed.lua"
-#lua = "EMD_20k_v158_fixed_seed_fit_parameters_directly.lua"
+#lua = "EMD_20k_v158_fixed_seed.lua"
+lua = "EMD_20k_v158_fixed_seed_fit_parameters_directly.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -120,10 +115,11 @@ def nbody(paras, lua_file, hist, out, ver):
         -f ~/Desktop/research/lua/" + lua_file + " \
         -z ~/Desktop/research/quick_plots/hists/" + hist + ".hist \
         -o ~/Desktop/research/quick_plots/outputs/" + out + ".out \
-        -n 8 -x -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 8 -x -u -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #       
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
+    f = open("mr.txt", "a")
     #using call here instead so the format of using it is on record
     call([" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver  
           + " -h ~/Desktop/research/quick_plots/hists/" + hist1 + '.hist'
@@ -131,6 +127,14 @@ def match_hists(hist1, hist2, ver):
     print hist1, "\n", hist2
     print "\n"
 # # # # # # # # # #       
+def match_hists_piped(hist1, hist2, ver, pipe_name):
+    f = open("mr.txt", "a")
+    os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver  
+                + " -h ~/Desktop/research/quick_plots/hists/" + hist1 + '.hist'
+                + " -s ~/Desktop/research/quick_plots/hists/" + hist2 + '.hist'
+                + "  2>>'" + pipe_name + ".txt' ")
+
+# # # # # # # # # #  
 def plot(hist1, hist2, name):
     ylimit = 0.4
     xlower = 50
@@ -148,7 +152,7 @@ def plot(hist1, hist2, name):
     
     print("plotting histograms\n")
     lines = []
-    print(os.getcwd())
+    #print(os.getcwd())
     lines = open(folder + plot_hist1).readlines();
     lines = lines[40:len(lines)]
     sim_l = []
@@ -227,14 +231,97 @@ def calculate_cm(paras, output1, output2, outs):
 # # # # # # # # # # # # # # # # # # # # # #
 #        differenct test functions        #
 # # # # # # # # # # # # # # # # # # # # # #
+def recalculate_parameter_sweep_likelihoods():
+    args = [3.95, 3.95, 0.2, 0.8, 12, 48]
+    sim_time      = str(args[0])
+    back_time     = str(args[1])
+    rl            = str(args[2])
+    rd            = str(args[3])
+    mass_l        = str(args[4])
+    mass_d        = str(args[5])
+    names   = ['ft', 'rad', 'rr', 'mass', 'mr_50bins']
+    folder = "parameter_sweep_hists/"
+    
+    hist_range = [2., 1200.0, 23.0]
+    hist_correct = folder + names[4] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
+    name = hist_range[0]
+    os.system("rm " + names[4] + ".txt")
+    while(name <= hist_range[1]):
+        mass_d = str(name)
+        hist_name = folder + names[4] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
+        match_hists_piped(hist_correct, hist_name, '', names[4])
+        name += hist_range[2]
+    mass_d = str(args[5])
+    
+    hist_range = [8.0, 16.0, 0.25]
+    hist_correct = folder + names[3] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
+    name = hist_range[0]
+    os.system("rm mass.txt")
+    while(name <= hist_range[1]):
+        mass_l = str(name)
+        hist_name = folder + names[3] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
+        match_hists_piped(hist_correct, hist_name, '', 'mass')
+        name += hist_range[2]
+    mass_l = str(args[4])
+    
+    hist_range = [0.7, 0.9, 0.01]
+    hist_correct = folder + names[2] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
+    name = hist_range[0]
+    os.system("rm rr.txt")
+    while(name <= hist_range[1]):
+        rd = str(name)
+        hist_name = folder + names[2] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
+        match_hists_piped(hist_correct, hist_name, '', 'rr')
+        name += hist_range[2]
+    rd = str(args[3])
+    
+    
+    hist_range = [0.1, 0.3, 0.01]
+    hist_correct = folder + names[1] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
+    name = hist_range[0]
+    os.system("rm rad.txt")
+    while(name <= hist_range[1]):
+        rl = str(name)
+        hist_name = folder + names[1] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
+        match_hists_piped(hist_correct, hist_name, '', 'rad')
+        name += hist_range[2]
+    rl = str(args[2])    
+        
+    args = [3.95, 0.98, 0.2, 0.8, 12, 48]
+    sim_time      = str(args[0])
+    back_time     = str(args[1])
+    rl            = str(args[2])
+    rd            = str(args[3])
+    mass_l        = str(args[4])
+    mass_d        = str(args[5])
+    
+    hist_range = [3.85, 4.3, 0.025]
+    hist_correct = folder + names[0] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
+    name = hist_range[0]
+    os.system("rm ft.txt")
+    while(name <= hist_range[1]):
+        sim_time = str(name)
+        hist_name = folder + names[0] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
+        match_hists_piped(hist_correct, hist_name, '', 'ft')
+        name += hist_range[2]
+
+    os.system("mv " + names[4] + ".txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv mass.txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv rad.txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv rr.txt  ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv ft.txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
+    os.chdir("like_surface")
+    os.system("./one_like_script.py")
+    return 1
+# # # # # # # # # # # # # # # # # # # # # #
 def make_some_hists():
     ver = ''
     para = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #hist2 correct
     hist = "total_sim_test2"
     #nbody(para, lua, hist, hist, ver)
     
-    #para = [3.95, 0.98, 0.2, 0.2, 15, 0.2] #hist3
-    #hist = "total_sim_test3"
+    para = [3.95, 0.98, 0.2, 0.2, 15, 0.2] #hist3 different mass
+    hist = "total_sim_test3"
     #nbody(para, lua, hist, hist, ver)
     
     para = [3.93, 0.98, 0.2, 0.2, 12, 0.2] #hist4 slightly different sim time
@@ -258,7 +345,7 @@ def make_some_hists():
     #0.2  0.8
     #48   13
     nbody(para, lua, hist, hist, ver)
-
+# # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
 
@@ -494,6 +581,9 @@ def main():
     
     if(run_stability_test == True):
         stabity_test()
+    
+    if(recalc_para_sweep_likes == True):
+        recalculate_parameter_sweep_likelihoods()
     #clean()
     
 main()
