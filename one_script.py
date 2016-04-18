@@ -24,42 +24,44 @@ y = True
 n = False
 #args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [0.0000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [3.945, 0.9862, 0.2, 0.8, 12, 48] #for hist with dark matter
+#args = [3.95, 0.98, 0.2, 0.8, 12, 48] #for hist with dark matter
+args = [3.96509911271539, 0.931875356807537, 0.46182892204695, 0.206712561291835, 13.1087647177516, 69.9587140449245]
 #    SWITCHES for standard_run()  #
 run_nbody = n
-remake    = y
-match_histograms = y
+remake    = n
+match_histograms = n
 
 calc_cm = n
 plot_hists = n
 plot_overlapping = n
-plot_adjacent = y
+plot_adjacent = n
 plot_lb = n 
 
 # possible tests #
 recalc_para_sweep_likes = n
 make_a_few_hists = n
-run_diff_OS_test = n
+run_diff_OS_test = y
 run_binary_compare = n
 run_stability_test = n
+run_seed_fluctuation_test = y
+
 
 #    Histogram names     #
-histogram_mw_1d_v158 = "tidal_histogram_EMD_20k_v158_ft3p945_rt0p98_r0p2_rr0p2_ml12_mr0p2__3_21_16"
-
+histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16'
 #    histograms for runs #
 histogram_for_nbody_run = 'test'
 
-match_hist_correct = 'arg_3.95_3.95_0.2_0.8_12_48_correct'
-match_hist_compare = 'arg_3.95_3.95_0.2_0.8_12.0_48'
-plot_name = '2-4'
+match_hist_correct = histogram_mw_1d_v160
+match_hist_compare = histogram_for_nbody_run
+plot_name = 'mw_hist'
 
 output = histogram_for_nbody_run
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
-version = '' #determines which binary is run
-#lua = "EMD_20k_v158_fixed_seed.lua"
-lua = "EMD_20k_v158_fixed_seed_fit_parameters_directly.lua"
+version = '_160' #determines which binary is run
+#lua = "EMD_20k_v160_fixed_seed.lua"
+lua = "EMD_v160_direct_fit.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -115,7 +117,24 @@ def nbody(paras, lua_file, hist, out, ver):
         -f ~/Desktop/research/lua/" + lua_file + " \
         -z ~/Desktop/research/quick_plots/hists/" + hist + ".hist \
         -o ~/Desktop/research/quick_plots/outputs/" + out + ".out \
-        -n 8 -x -u -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 8 -x  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+    
+# # # # # # # # # #     
+def nbody_custom_lua(paras, lua_file, hist, out, ver, seed, bins):#this is for lua files that have non-normal parameters
+    sim_time      = str(paras[0])
+    back_time     = str(paras[1])
+    r0            = str(paras[2])
+    light_r_ratio = str(paras[3])
+    mass_l        = str(paras[4])
+    mass_ratio    = str(paras[5])
+        #-h ~/Desktop/research/quick_plots/hists/" + match_hist_correct + ".hist \
+    
+    print('running nbody')
+    os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver + " \
+        -f ~/Desktop/research/lua/" + lua_file + " \
+        -z ~/Desktop/research/quick_plots/hists/" + hist + ".hist \
+        -o ~/Desktop/research/quick_plots/outputs/" + out + ".out \
+        -n 8 -x -e " + seed + " -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " " + bins)
 # # # # # # # # # #       
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -154,10 +173,19 @@ def plot(hist1, hist2, name):
     lines = []
     #print(os.getcwd())
     lines = open(folder + plot_hist1).readlines();
-    lines = lines[40:len(lines)]
+    
+    starting_line = 0
+    for line in lines:
+        starting_line += 1
+        if (line.startswith("betaBins")):
+            break 
+    lines = lines[starting_line:len(lines)]
+    
     sim_l = []
     sim_n = []
     for line in lines:
+        if (line.startswith("</histogram>")):
+            continue
         tokens = line.split();
         if tokens: #tests to make sure tokens is not empty
             lda = float(tokens[1])
@@ -167,10 +195,19 @@ def plot(hist1, hist2, name):
 
     lines = []
     lines = open(folder + plot_hist2).readlines();
-    lines = lines[40:len(lines)]
+    
+    starting_line = 0
+    for line in lines:
+        starting_line += 1
+        if (line.startswith("betaBins")):
+            break 
+    lines = lines[starting_line:len(lines)]
+    
     data_l = []
     data_n = []
     for line in lines:
+        if (line.startswith("</histogram>")):
+            continue
         tokens = line.split()
         if tokens:
             dat_l = float(tokens[1])
@@ -226,10 +263,9 @@ def calculate_cm(paras, output1, output2, outs):
     if(outs == 1):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
     
-# # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # #
-#        differenct test functions        #
+#        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
 def recalculate_parameter_sweep_likelihoods():
     args = [3.95, 3.95, 0.2, 0.8, 12, 48]
@@ -412,7 +448,87 @@ def old_new_binary_compare():
     if(binary_calc_chi_sq == True):
         os.system("./scripts/old_new_binary_chi_sq.py " + folder + outputs[0] + " " + folder + outputs[1] + " " + "output")
 # # # # # # # # # # # # # # # # # # # # # #
-def diff_OS_test():
+def different_seed_fluctuation():
+    args = [3.95, 0.98, 0.2, 0.8, 12, 48]
+    v = '_160'
+    l = 'seed_test.lua'
+    seed = [435833, 8376425, 34857265, 3462946, 8974526, 87625496, 76235986. 136725897, 39685235, 51699263]
+    bins = [100, 200, 300, 400]
+    for j in range(0, len(bins)):
+        for i in range(0, len(seed)):
+            hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
+            nbody_custom_lua(args, l, hist, hist, v, str(seed[i]), str(bins[j]))
+            match_hists(histogram_mw_1d_v160, hist, v )
+
+# # # # # # # # # # # # # # # # # # # # # #
+def diff_OS_test_v160():
+    v = '_160'
+    #linux
+    args = [3.70778452511877, 1.01667175907642, 0.254742649011314, 0.143711601383984, 11.3450273240451, 574.759386941092]
+    #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
+    #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757434 [1146228735]
+    #MW_like = 579.736066389484677
+    #laptop_like = 
+    hist = 'OS_test/linux_multithreaded1'
+    output = hist
+    nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    
+    
+    args = [4.27052977262065, 0.898590506706387, 1.13573807105422, 1.05763955467846, 4.26117976009846, 505.117312682793]
+    #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
+    #workunit:ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757546 [1146230255]
+    #MW_like = -2411.196889060096055
+    #laptop_like = 
+    hist = 'OS_test/linux_multithreaded2'
+    output = hist
+    nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    
+    args = [4.28939779102802, 1.1479856419377, 0.81844124076888, 1.40610990077257, 42.8358124603983, 493.859601157717]
+    #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
+    #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757751 [1146232693]
+    #MW_like = -12991.388977929243993
+    #laptop_like = 
+    hist = 'OS_test/linux_multithreaded3'
+    output = hist
+    nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    
+    args = [3.90124507574365, 0.940801729913801, 0.864376512635499, 0.365644396073185, 54.3746401073877, 376.632761744782]
+    #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
+    #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757837 [1146235164]
+    #MW_like = -1103.915226218623047
+    #laptop_like = 
+    hist = 'OS_test/linux_multithreaded4'
+    output = hist
+    nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    
+    args = [3.15275016007945, 1.01077198171988, 0.518699688930064, 1.16948326204438, 45.0927923207637, 224.0722140742]
+    #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
+    #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2758001 [1146237706]
+    #MW_like = -7276.429429114665254
+    #laptop_like = 
+    hist = 'OS_test/linux_multithreaded5'
+    output = hist
+    nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    
+    args = [3.47986795054749, 1.13666507601738, 0.755570971686393, 1.23453689094167, 50.398002382135, 426.925432941876]
+    #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
+    #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_2758209 [1146240830]
+    #MW_like = -17637.067619180670590
+    #laptop_like = 
+    hist = 'OS_test/linux_multithreaded6'
+    output = hist
+    nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+# # # # # # # # # # # # # # # # # # # # # #
+def diff_OS_test_v158():
     v = ''
     #windows
     args = [4.29822369291337, 0.903418915209326, 0.96168017496667, 0.636458776995275, 34.646854473218, 0.310731262105537]
@@ -577,13 +693,18 @@ def main():
         old_new_binary_compare()
         
     if(run_diff_OS_test == True):
-        diff_OS_test()
+        diff_OS_test_v160()
+        #diff_OS_test_v158()
     
     if(run_stability_test == True):
         stabity_test()
     
     if(recalc_para_sweep_likes == True):
         recalculate_parameter_sweep_likelihoods()
-    #clean()
+    
+    if(run_seed_fluctuation_test == True):
+        different_seed_fluctuation()
+        
+    clean()
     
 main()
