@@ -60,7 +60,7 @@ output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 version = '_160' #determines which binary is run
-#lua = "EMD_20k_v160_fixed_seed.lua"
+#lua = "EMD_v160.lua"
 lua = "EMD_v160_direct_fit.lua"
 
 outs = 2 #for the cm calculation function
@@ -452,7 +452,7 @@ def different_seed_fluctuation():
     args = [3.95, 0.98, 0.2, 0.8, 12, 48]
     v = '_160'
     l = 'seed_test.lua'
-    seed = [435833, 8376425, 34857265, 3462946, 8974526, 87625496, 76235986. 136725897, 39685235, 51699263]
+    seed = [435833, 8376425, 34857265, 3462946, 8974526, 87625496, 76235986, 136725897, 39685235, 51699263]
     bins = [100, 200, 300, 400]
     for j in range(0, len(bins)):
         for i in range(0, len(seed)):
