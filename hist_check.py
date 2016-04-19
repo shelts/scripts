@@ -14,14 +14,20 @@ import math
 y = True
 n = False
 
-#args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [0.000000000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [0.000000000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [4.0, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 
-#-1.403549100742481 , 
-#Name ps_nbody_2_10_16_orphan1_1_v154_1453826702_744952_7
-#Workunit  ps_nbody_2_10_16_orphan1_1_v154_1453826702_744952 [1096242405]
-#args = args = [4.11503687418494, 0.870267120797343, 0.537036828384213, 0.325201157589727, 73.3972095967662, 0.418435603009849]
+#args = [4.2041079448536, 0.960966924019158, 0.484794405009598, 0.479905157536268, 16.1179897373077, 0.512380058807321]
+
+#milkyway_nbody 1.58 Linux x86_64 double ps_nbody_3_21_16_orphansim_v158_1_1453826702_1418990 [1122644556]
+#l= -135.500988330967346 rep = 135.500958116596394
+args = [4.21055801725015, 1.09857470542192, 1.09701466690749, 0.228068244457245, 11.4035462443717, 0.0868122079118621]
+
+#milkyway_nbody 1.58 Windows x86_64 double ps_nbody_3_21_16_orphansim_v158_3_1453826702_1419047 [1122645405]
+#l=-11.259544051913556 rep = 9.020718669753517
+#args = [3.5778652629815, 0.90785959744826, 0.535200041718781, 0.585243403911591, 51.6602049868088, 0.105707221332705]
+
 sim_time      = str(args[0])
 back_time     = str(args[1])
 r0            = str(args[2])
@@ -32,10 +38,10 @@ mass_ratio    = str(args[5])
 
 #    SWITCHES  #
 run_nbody = y
-remake    = y
-remake_only = y
+remake    = n
+remake_only = n
 
-plot_hists  = n
+plot_hists  = y
 match_histograms = y
 calc_cm = n
 
@@ -46,9 +52,7 @@ plot_lb = n
 #    Histogram names     #
 
 test = "test"
-mw_hist_1d = 'tidal_histogram_EMD_20k_v156_ft3p945_rt0p9862_r0p2_rr0p2_ml12_mr0p2_3_8_16' 
-histogram_mw_1d_newer = "tidal_histogram_EMD_20k_v156_ft3p9_rt0p9862_r0p2_rr0p2_ml12_mr0p2_3_8_16"
-histogram_mw_1d_new = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p2_ml12_mr0p2_2_9_16"
+histogram_mw_1d_v158 = "tidal_histogram_EMD_20k_v158_ft3p945_rt0p98_r0p2_rr0p2_ml12_mr0p2__3_21_16"
 
 def stuff():
     histogram_mw_1d = "tidal_histogram_EMD_20k_v154_ft3p945_rt0p9862_r0p2_rr0p2_ml12_mr0p2_10_20_15.hist"
@@ -68,14 +72,14 @@ def stuff():
 #    histograms1 for runs #
 histogram_for_nbody_run = test 
 
-match_hist_correct = mw_hist_1d 
-match_hist_compare = mw_hist_1d
+match_hist_correct = histogram_mw_1d_v158 
+match_hist_compare = test
 
 seed = '124135'
 #lua = "EMD_20k_1_54_fixed_seed_cm_correction.lua"
-lua = "EMD_20k_v154_fixed_seed.lua"
+lua = "EMD_20k_v158_fixed_seed.lua"
 #lua = "Null.lua"
-version = ''
+version = '_158'
 versioning = '1'
 output1 = "regular.out"
 output2 = "out.out"

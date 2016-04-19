@@ -40,11 +40,11 @@ plot_lb = n
 # possible tests #
 recalc_para_sweep_likes = n
 make_a_few_hists = n
-run_diff_OS_test = y
+run_diff_OS_test = n
 run_binary_compare = n
 run_stability_test = n
-run_seed_fluctuation_test = y
-
+run_seed_fluctuation_test = n
+velocity_dispersion_calc = y
 
 #    Histogram names     #
 histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16'
@@ -59,7 +59,7 @@ output = histogram_for_nbody_run
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
-version = '_160' #determines which binary is run
+version = '' #determines which binary is run
 #lua = "EMD_v160.lua"
 lua = "EMD_v160_direct_fit.lua"
 
@@ -138,7 +138,6 @@ def nbody_custom_lua(paras, lua_file, hist, out, ver, seed, bins):#this is for l
 # # # # # # # # # #       
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
-    f = open("mr.txt", "a")
     #using call here instead so the format of using it is on record
     call([" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver  
           + " -h ~/Desktop/research/quick_plots/hists/" + hist1 + '.hist'
@@ -147,7 +146,6 @@ def match_hists(hist1, hist2, ver):
     print "\n"
 # # # # # # # # # #       
 def match_hists_piped(hist1, hist2, ver, pipe_name):
-    f = open("mr.txt", "a")
     os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver  
                 + " -h ~/Desktop/research/quick_plots/hists/" + hist1 + '.hist'
                 + " -s ~/Desktop/research/quick_plots/hists/" + hist2 + '.hist'
@@ -262,10 +260,16 @@ def calculate_cm(paras, output1, output2, outs):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output1 + " " + output2)
     if(outs == 1):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
-    
-
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
+# # # # # # # # # # # # # # # # # # # # # #
+def velocity_dispersion():
+    args = [0.1, 1.0, 0.2, 0.8, 12, 48]
+    file_name = 'velocity_dispersion_test_pot'
+    #l = 'Null.lua'
+    l = 'EMD_v160_direct_fit.lua'
+    nbody(args, l, file_name, file_name, version)
+    os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
 def recalculate_parameter_sweep_likelihoods():
     args = [3.95, 3.95, 0.2, 0.8, 12, 48]
@@ -449,17 +453,36 @@ def old_new_binary_compare():
         os.system("./scripts/old_new_binary_chi_sq.py " + folder + outputs[0] + " " + folder + outputs[1] + " " + "output")
 # # # # # # # # # # # # # # # # # # # # # #
 def different_seed_fluctuation():
+    make_compare_hists = n
+    make_correct_hists = y
+    compare_only = n
+    
     args = [3.95, 0.98, 0.2, 0.8, 12, 48]
     v = '_160'
     l = 'seed_test.lua'
     seed = [435833, 8376425, 34857265, 3462946, 8974526, 87625496, 76235986, 136725897, 39685235, 51699263]
     bins = [100, 200, 300, 400]
-    for j in range(0, len(bins)):
-        for i in range(0, len(seed)):
-            hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
-            nbody_custom_lua(args, l, hist, hist, v, str(seed[i]), str(bins[j]))
-            match_hists(histogram_mw_1d_v160, hist, v )
-
+    if(make_correct_hists == True):
+        for j in range(1, len(bins)):
+            seed_default = '34086709' #this is the seed it was originally created with
+            hist = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16_bins' + str(bins[j])
+            nbody_custom_lua(args, l, hist, hist, v, seed_default, str(bins[j]))
+    
+    if(make_compare_hists == True):
+        for j in range(0, len(bins)):
+            for i in range(0, len(seed)):
+                hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
+                nbody_custom_lua(args, l, hist, hist, v, str(seed[i]), str(bins[j]))
+                match_hists(histogram_mw_1d_v160, hist, v )
+                
+    if(compare_only == True):
+        for j in range(0, len(bins)):
+            for i in range(0, len(seed)):
+                hist_correct = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16_bins' + str(bins[j])
+                hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
+                match_hists(hist_correct, hist, v )
+                
+                
 # # # # # # # # # # # # # # # # # # # # # #
 def diff_OS_test_v160():
     v = '_160'
@@ -704,7 +727,10 @@ def main():
     
     if(run_seed_fluctuation_test == True):
         different_seed_fluctuation()
-        
-    clean()
+    
+    if(velocity_dispersion_calc == True):
+        velocity_dispersion()
+    
+    #clean()
     
 main()
