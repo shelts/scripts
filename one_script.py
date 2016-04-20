@@ -681,8 +681,9 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757434 [1146228735]
     #MW_like = 579.736066389484677
-    #laptop_like = -564.961726428886095
-    hist = 'OS_test/linux_multithreaded1'
+    #laptop_like_multi = -564.961726428886095
+    #laptop_single = 
+    hist = 'OS_test/linux_singlethreaded1'
     output = hist
     nbody(args, lua, hist, output, v)
     match_hists(histogram_mw_1d_v160, hist, v)
@@ -692,8 +693,9 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit:ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757546 [1146230255]
     #MW_like = -2411.196889060096055
-    #laptop_like = -2407.992198395417290
-    hist = 'OS_test/linux_multithreaded2'
+    #laptop_like_multi = -2407.992198395417290
+    #laptop_single = 
+    hist = 'OS_test/linux_singlethreaded2'
     output = hist
     nbody(args, lua, hist, output, v)
     match_hists(histogram_mw_1d_v160, hist, v)
@@ -702,8 +704,9 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757751 [1146232693]
     #MW_like = -12991.388977929243993
-    #laptop_like = -13097.004861729281401
-    hist = 'OS_test/linux_multithreaded3'
+    #laptop_like_multi = -13097.004861729281401
+    #laptop_single = 
+    hist = 'OS_test/linux_singlethreaded3'
     output = hist
     nbody(args, lua, hist, output, v)
     match_hists(histogram_mw_1d_v160, hist, v)
@@ -712,8 +715,9 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757837 [1146235164]
     #MW_like = -1103.915226218623047
-    #laptop_like = -1059.128753402558232
-    hist = 'OS_test/linux_multithreaded4'
+    #laptop_like_multi = -1059.128753402558232
+    #laptop_single = 
+    hist = 'OS_test/linux_singlethreaded4'
     output = hist
     nbody(args, lua, hist, output, v)
     match_hists(histogram_mw_1d_v160, hist, v)
@@ -722,8 +726,9 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2758001 [1146237706]
     #MW_like = -7276.429429114665254
-    #laptop_like = -7253.815399924838857
-    hist = 'OS_test/linux_multithreaded5'
+    #laptop_like_multi = -7253.815399924838857
+    #laptop_single = 
+    hist = 'OS_test/linux_singlethreaded5'
     output = hist
     nbody(args, lua, hist, output, v)
     match_hists(histogram_mw_1d_v160, hist, v)
@@ -732,8 +737,9 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_2758209 [1146240830]
     #MW_like = -17637.067619180670590
-    #laptop_like = -17812.410820521141432
-    hist = 'OS_test/linux_multithreaded6'
+    #laptop_like_multi = -17812.410820521141432
+    #laptop_single = 
+    hist = 'OS_test/linux_singlethreaded6'
     output = hist
     nbody(args, lua, hist, output, v)
     match_hists(histogram_mw_1d_v160, hist, v)
