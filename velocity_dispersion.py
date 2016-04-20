@@ -9,12 +9,15 @@ class body:
     'these are bodies'
     body_count = 0
 
-    def __init__(self, mtype, mass, x, y, z, vx, vy, vz):
+    def __init__(self, mtype, mass, x, y, z, l, b, r, vx, vy, vz):
       self.mtype = mtype
       self.mass = mass
       self.x = x
       self.y = y
       self.z = z
+      self.l = l
+      self.b = b
+      self.r = r
       self.vx = vx
       self.vy = vy
       self.vz =  vz
@@ -59,11 +62,14 @@ def get_data(file_name):
         x  = (float(ss[1]))
         y  = (float(ss[2]))
         z  = (float(ss[3]))
-        vx = (float(ss[4]))
-        vy = (float(ss[5]))
-        vz = (float(ss[6]))
-        m  = (float(ss[7]))
-        b = body(ty, m , x, y, z, vx, vy, vz) 
+        l  = (float(ss[4]))
+        b  = (float(ss[5]))
+        r  = (float(ss[6]))
+        vx = (float(ss[7]))
+        vy = (float(ss[8]))
+        vz = (float(ss[9]))
+        m  = (float(ss[10]))
+        b = body(ty, m , x, y, z, l, b, r, vx, vy, vz) 
         bodies.append(b)
         i += 1
     #print bodies[0].y
@@ -96,6 +102,7 @@ def vel_disp(file_name):
     disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
     
     return disp_vx, disp_vy, disp_vz
+
 def main():
     name1 = str(sys.argv[1])
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'

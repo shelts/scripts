@@ -26,25 +26,41 @@ n = False
 #args = [0.0000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [3.95, 0.98, 0.2, 0.8, 12, 48] #for hist with dark matter
 args = [3.96509911271539, 0.931875356807537, 0.46182892204695, 0.206712561291835, 13.1087647177516, 69.9587140449245]
-#    SWITCHES for standard_run()  #
-run_nbody = n
-remake    = n
-match_histograms = n
 
-calc_cm = n
-plot_hists = n
-plot_overlapping = n
-plot_adjacent = n
-plot_lb = n 
+# # # # # # # # # # # # # # # # # # # # # # # #
+#    SWITCHES for standard_run()  #           #
+# # # # # # # # # # # # # # # # # # # # # # # #
+run_nbody                 = n                 #
+remake                    = n                 #
+match_histograms          = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+calc_cm                   = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+plot_hists                = n                 #
+plot_overlapping          = n                 #
+plot_adjacent             = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+plot_lb                   = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
 
-# possible tests #
-recalc_para_sweep_likes = n
-make_a_few_hists = n
-run_diff_OS_test = n
-run_binary_compare = n
-run_stability_test = n
-run_seed_fluctuation_test = n
-velocity_dispersion_calc = y
+# # # # # # # # # # # # # # # # # # # # # # # #
+# possible tests #                            #
+# # # # # # # # # # # # # # # # # # # # # # # #
+recalc_para_sweep_likes   = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+make_a_few_hists          = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+run_diff_OS_test          = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+run_binary_compare        = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+run_stability_test        = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+run_seed_fluctuation_test = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+velocity_dispersion_calc  = y                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+
 
 #    Histogram names     #
 histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16'
@@ -65,6 +81,10 @@ lua = "EMD_v160_direct_fit.lua"
 
 outs = 2 #for the cm calculation function
 
+#I am tired of constantly adapting it for the servers
+lmc_dir = '~/research/'
+sid_dir = '~/Desktop/research/'
+path = sid_dir
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Engine Room         #
@@ -99,7 +119,7 @@ def make_nbody():
         #os.system("rm -r nbody_test")
         #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -110,15 +130,14 @@ def nbody(paras, lua_file, hist, out, ver):
     light_r_ratio = str(paras[3])
     mass_l        = str(paras[4])
     mass_ratio    = str(paras[5])
-        #-h ~/Desktop/research/quick_plots/hists/" + match_hist_correct + ".hist \
+        #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     
     print('running nbody')
-    os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver + " \
-        -f ~/Desktop/research/lua/" + lua_file + " \
-        -z ~/Desktop/research/quick_plots/hists/" + hist + ".hist \
-        -o ~/Desktop/research/quick_plots/outputs/" + out + ".out \
-        -n 8 -x  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
-    
+    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+        -f " + path + "lua/" + lua_file + " \
+        -z " + path + "quick_plots/hists/" + hist + ".hist \
+        -o " + path + "quick_plots/outputs/" + out + ".out \
+        -n 8 -b -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def nbody_custom_lua(paras, lua_file, hist, out, ver, seed, bins):#this is for lua files that have non-normal parameters
     sim_time      = str(paras[0])
@@ -127,30 +146,29 @@ def nbody_custom_lua(paras, lua_file, hist, out, ver, seed, bins):#this is for l
     light_r_ratio = str(paras[3])
     mass_l        = str(paras[4])
     mass_ratio    = str(paras[5])
-        #-h ~/Desktop/research/quick_plots/hists/" + match_hist_correct + ".hist \
+        #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     
     print('running nbody')
-    os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver + " \
-        -f ~/Desktop/research/lua/" + lua_file + " \
-        -z ~/Desktop/research/quick_plots/hists/" + hist + ".hist \
-        -o ~/Desktop/research/quick_plots/outputs/" + out + ".out \
+    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+        -f " + path + "lua/" + lua_file + " \
+        -z " + path + "quick_plots/hists/" + hist + ".hist \
+        -o " + path + "quick_plots/outputs/" + out + ".out \
         -n 8 -x -e " + seed + " -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " " + bins)
 # # # # # # # # # #       
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
     #using call here instead so the format of using it is on record
-    call([" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver  
-          + " -h ~/Desktop/research/quick_plots/hists/" + hist1 + '.hist'
-          + " -s ~/Desktop/research/quick_plots/hists/" + hist2 + '.hist'], shell=True)
+    call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
+          + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
+          + " -s " + path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
     print hist1, "\n", hist2
     print "\n"
 # # # # # # # # # #       
 def match_hists_piped(hist1, hist2, ver, pipe_name):
-    os.system(" ~/Desktop/research/nbody_test/bin/milkyway_nbody" + ver  
-                + " -h ~/Desktop/research/quick_plots/hists/" + hist1 + '.hist'
-                + " -s ~/Desktop/research/quick_plots/hists/" + hist2 + '.hist'
+    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver  
+                + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
+                + " -s " + path + "quick_plots/hists/" + hist2 + '.hist'
                 + "  2>>'" + pipe_name + ".txt' ")
-
 # # # # # # # # # #  
 def plot(hist1, hist2, name):
     ylimit = 0.4
@@ -161,7 +179,7 @@ def plot(hist1, hist2, name):
     folder = 'quick_plots/hists/'
     save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
     save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
-    #os.system("~/Desktop/research/scripts/plot_matching_hist.py " + hist1 + " " + hist2)
+    #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
     print "plot histogram 1: ", hist1
     print "plot histogram 2: ", hist2
     plot_hist1 = hist1
@@ -260,18 +278,144 @@ def calculate_cm(paras, output1, output2, outs):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output1 + " " + output2)
     if(outs == 1):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
+# # # # # # # # # #
+def lb_plot(file_name):
+    plot_light_and_dark = y
+    plot_lbr = y
+    plot_xyz = n
+    f = open('quick_plots/outputs/' + file_name + '.out')
+    lines = []
+    lines = f.readlines()
+    lines = lines[5:len(lines)]
+
+    light_x , light_y , light_z = ([] for i in range(3))
+    light_l , light_b , light_r = ([] for i in range(3))
+    light_vx , light_vy , light_vz = ([] for i in range(3))
+    
+    dark_x , dark_y , dark_z = ([] for i in range(3))
+    dark_l , dark_b , dark_r = ([] for i in range(3))
+    dark_vx , dark_vy , dark_vz = ([] for i in range(3))
+
+    for line in lines:
+
+        tokens = line.split(', ')
+        isDark = int(tokens[0])
+        X = float(tokens[1])
+        Y = float(tokens[2])
+        Z = float(tokens[3])
+        l = float(tokens[4])
+        if(l > 180.0):
+            l = l - 360.0
+        b = float(tokens[5])
+        r = float(tokens[6])
+        vx = float(tokens[7])
+        vy = float(tokens[8])
+        vz = float(tokens[9])
+        if(isDark == 0):
+            light_x.append(X)
+            light_y.append(Y)
+            light_z.append(Z)
+            light_l.append(l)
+            light_b.append(b)
+            light_r.append(r)
+            light_vx.append(vx)
+            light_vy.append(vy)
+            light_vz.append(vz)
+        if(isDark == 1):
+            dark_x.append(X)
+            dark_y.append(Y)
+            dark_z.append(Z)
+            dark_l.append(l)
+            dark_b.append(b)
+            dark_r.append(r)
+            dark_vx.append(vx)
+            dark_vy.append(vy)
+            dark_vz.append(vz)    
+    print(len(light_l))
+    light_x = np.array(light_x)
+    light_y = np.array(light_y)
+    light_z = np.array(light_z)
+    light_l = np.array(light_l)
+    light_b = np.array(light_b)
+    light_r = np.array(light_r)
+    light_vx = np.array(light_vx)
+    light_vy = np.array(light_vy)
+    light_vz = np.array(light_vz)
+    
+    dark_x = np.array(dark_x)
+    dark_y = np.array(dark_y)
+    dark_z = np.array(dark_z)
+    dark_l = np.array(dark_l)
+    dark_b = np.array(dark_b)
+    dark_r = np.array(dark_r)
+    dark_vx = np.array(dark_vx)
+    dark_vy = np.array(dark_vy)
+    dark_vz = np.array(dark_vz)
+    
+    fig = plt.figure()
+    fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
+    
+    if(plot_lbr == True):
+        plt.plot(light_l, light_b, '.', markersize = 1, color = 'r', marker = 'o')
+        if(plot_light_and_dark == True):
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+        plt.xlim((180, -180))
+        plt.ylim((-80, 80))
+        plt.xlabel('l')
+        plt.ylabel('b')
+        plt.title('l vs b')
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr', format='png')
+        #plt.show()
+        
+    if(plot_xyz == True):
+        xlower = 50
+        xupper = -50
+        fig.tight_layout()
+        plt.axes().set_aspect('equal')
+        plt.subplot(131, aspect='equal')
+        plt.plot(light_x, light_y, '.', markersize = 1, color = 'r', marker = 'o')
+        if(plot_light_and_dark == True):
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+        plt.xlim((xlower, xupper))
+        plt.ylim((-80, 80))
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('x vs y')
+        
+        plt.subplot(132,aspect='equal')
+        plt.plot(light_x, light_z, '.', markersize = 1, color = 'r', marker = 'o')
+        if(plot_light_and_dark == True):
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+        plt.xlim((xlower, xupper))
+        plt.ylim((-80, 80))
+        plt.xlabel('x')
+        plt.ylabel('z')
+        plt.title('x vs z')
+        
+        plt.subplot(133, aspect='equal')
+        plt.plot(light_z, light_y, '.', markersize = 1, color = 'r', marker = 'o')
+        if(plot_light_and_dark == True):
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+        plt.xlim((xlower, xupper))
+        plt.ylim((-80, 80))
+        plt.xlabel('z')
+        plt.ylabel('y')
+        plt.title('z vs y')
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_xyz', format='png')
+        
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
 def velocity_dispersion():
-    args = [0.1, 1.0, 0.2, 0.8, 12, 48]
-    file_name = 'velocity_dispersion_test_pot'
+    args = [3.95, 1.0, 0.2, 0.8, 12, 48]
+    file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
     #l = 'Null.lua'
     l = 'EMD_v160_direct_fit.lua'
-    nbody(args, l, file_name, file_name, version)
-    os.system("./scripts/velocity_dispersion.py " + file_name)
+    #nbody(args, l, file_name, file_name, version)
+    lb_plot(file_name)
+    #os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
-def recalculate_parameter_sweep_likelihoods():
+def recalc_parameter_sweep_likelihoods():
     args = [3.95, 3.95, 0.2, 0.8, 12, 48]
     sim_time      = str(args[0])
     back_time     = str(args[1])
@@ -345,11 +489,11 @@ def recalculate_parameter_sweep_likelihoods():
         match_hists_piped(hist_correct, hist_name, '', 'ft')
         name += hist_range[2]
 
-    os.system("mv " + names[4] + ".txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv mass.txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv rad.txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv rr.txt  ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv ft.txt ~/Desktop/research/like_surface/1D_like_surface/parameter_sweeps")
+    os.system("mv " + names[4] + ".txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv mass.txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv rad.txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv rr.txt  " + path + "like_surface/1D_like_surface/parameter_sweeps")
+    #os.system("mv ft.txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
     os.chdir("like_surface")
     os.system("./one_like_script.py")
     return 1
@@ -406,15 +550,15 @@ def stabity_test():
         #os.system("rm -r nbody_test")
         #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
     
     if(stability_run == True):
         for i in range(M, N):
-            os.system("~/Desktop/research/nbody_test/bin/milkyway_nbody \
-                -f ~/Desktop/research/lua/Null.lua \
-                -o ~/Desktop/research/data_testing/sim_outputs/output_" + (ext[i]) + "gy.out \
+            os.system("" + path + "nbody_test/bin/milkyway_nbody \
+                -f " + path + "lua/Null.lua \
+                -o " + path + "data_testing/sim_outputs/output_" + (ext[i]) + "gy.out \
                 -n 8 -x -i "+ str(sim_time[i]) + " " + back_time + " " + r_l + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 
     os.chdir("data_testing")    
@@ -454,9 +598,10 @@ def old_new_binary_compare():
 # # # # # # # # # # # # # # # # # # # # # #
 def different_seed_fluctuation():
     make_compare_hists = n
-    make_correct_hists = y
+    make_correct_hists = n
     compare_only = n
-    
+    parse = n
+    plot = y
     args = [3.95, 0.98, 0.2, 0.8, 12, 48]
     v = '_160'
     l = 'seed_test.lua'
@@ -481,8 +626,53 @@ def different_seed_fluctuation():
                 hist_correct = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16_bins' + str(bins[j])
                 hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
                 match_hists(hist_correct, hist, v )
+     
+    if(parse == True):
+        g = open('stderr.txt', 'r')
+        f = open('seed_fluc_data.txt', 'w')
+        for line in g:
+            if (line.startswith("<search_likelihood>")):
+                ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
+                tt = ss[1].split('</search_likelihood>')#chooses the second of the split parts and resplits
+                f.write("%s \n" % tt[0])#writes the first of the resplit lines
                 
                 
+    if(plot == True):
+        g = open('seed_fluc_data.txt', 'r')
+        counter = 1
+        data_lines = len(seed) * len(bins)
+        section_size = len(seed)
+        sections = data_lines / section_size
+        #print(sections)
+        section_number = 0
+        temp_list = []
+        data = []
+        for line in g:
+            if(counter < section_size + 1):#saves all the data in sections of how long 
+                temp_list.append(float(line))
+                counter += 1
+            if(counter > section_size):
+                counter = 1
+                data.append(temp_list[:])
+                #print data
+                temp_list = []
+                section_number += 1
+        #print data[0]
+        
+        ylimit = -50
+        plt.title('Histogram of Light Matter Distribution After 4 Gy')
+        plt.xlim((0, 10))
+        plt.ylim((ylimit, 0))
+        labels = []
+        plt.ylabel('likelihood')
+        for i in range(0, len(bins)):
+            labels.append(str(bins[i]))
+        for i in range(0, sections):
+            plt.plot(data[i], alpha=1, label = labels[i])
+            
+        plt.legend()
+        plt.savefig('quick_plots/seed_fluctuations.png', format='png')
+        plt.show()        
 # # # # # # # # # # # # # # # # # # # # # #
 def diff_OS_test_v160():
     v = '_160'
@@ -491,7 +681,7 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757434 [1146228735]
     #MW_like = 579.736066389484677
-    #laptop_like = 
+    #laptop_like = -564.961726428886095
     hist = 'OS_test/linux_multithreaded1'
     output = hist
     nbody(args, lua, hist, output, v)
@@ -502,7 +692,7 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit:ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757546 [1146230255]
     #MW_like = -2411.196889060096055
-    #laptop_like = 
+    #laptop_like = -2407.992198395417290
     hist = 'OS_test/linux_multithreaded2'
     output = hist
     nbody(args, lua, hist, output, v)
@@ -512,7 +702,7 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757751 [1146232693]
     #MW_like = -12991.388977929243993
-    #laptop_like = 
+    #laptop_like = -13097.004861729281401
     hist = 'OS_test/linux_multithreaded3'
     output = hist
     nbody(args, lua, hist, output, v)
@@ -522,7 +712,7 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757837 [1146235164]
     #MW_like = -1103.915226218623047
-    #laptop_like = 
+    #laptop_like = -1059.128753402558232
     hist = 'OS_test/linux_multithreaded4'
     output = hist
     nbody(args, lua, hist, output, v)
@@ -532,7 +722,7 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2758001 [1146237706]
     #MW_like = -7276.429429114665254
-    #laptop_like = 
+    #laptop_like = -7253.815399924838857
     hist = 'OS_test/linux_multithreaded5'
     output = hist
     nbody(args, lua, hist, output, v)
@@ -542,13 +732,10 @@ def diff_OS_test_v160():
     #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
     #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_2758209 [1146240830]
     #MW_like = -17637.067619180670590
-    #laptop_like = 
+    #laptop_like = -17812.410820521141432
     hist = 'OS_test/linux_multithreaded6'
     output = hist
     nbody(args, lua, hist, output, v)
-    match_hists(histogram_mw_1d_v160, hist, v)
-    match_hists(histogram_mw_1d_v160, hist, v)
-    match_hists(histogram_mw_1d_v160, hist, v)
     match_hists(histogram_mw_1d_v160, hist, v)
 # # # # # # # # # # # # # # # # # # # # # #
 def diff_OS_test_v158():
@@ -723,7 +910,7 @@ def main():
         stabity_test()
     
     if(recalc_para_sweep_likes == True):
-        recalculate_parameter_sweep_likelihoods()
+        recalc_parameter_sweep_likelihoods()
     
     if(run_seed_fluctuation_test == True):
         different_seed_fluctuation()
@@ -731,6 +918,8 @@ def main():
     if(velocity_dispersion_calc == True):
         velocity_dispersion()
     
+    if(plot_lb == True):
+        lb_plot(output)
     #clean()
     
 main()
