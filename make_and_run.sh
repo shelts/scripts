@@ -2,8 +2,8 @@
 #     rm -r nbody_test
 #     mkdir nbody_test
 #     cd ~/Desktop/research/nbody_test
-    cmake  -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/
-    make -j 
+#     cmake  -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/
+#     make -j 
 
     cd ~/Desktop/research/nbody_test/bin
     
