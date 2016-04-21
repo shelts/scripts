@@ -690,7 +690,7 @@ def diff_OS_test_v160():
         #laptop_multi_static = -1591.649439867483352
         hist = 'OS_test/windows_multithreaded1'
         output = hist
-        nbody(args, lua, hist, output, v)
+        #nbody(args, lua, hist, output, v)
         match_hists(histogram_mw_1d_v160, hist, v)
         
         args = [4.99591109942796, 0.893963217080646, 1.09139516383981, 2.2505519089581, 57.769204038868, 477.39115356239]
@@ -702,7 +702,7 @@ def diff_OS_test_v160():
         #laptop_multi_static =-35.353030758426641
         hist = 'OS_test/windows_multithreaded2'
         output = hist
-        nbody(args, lua, hist, output, v)
+        #nbody(args, lua, hist, output, v)
         match_hists(histogram_mw_1d_v160, hist, v)
         
         args = [4.99518109716855, 0.894630524992357, 1.12697810375362, 2.29332302971577, 58.9627482245134, 477.75245822501]
@@ -713,9 +713,68 @@ def diff_OS_test_v160():
         #laptop_single = -32.010253463412312
         hist = 'OS_test/windows_multithreaded3'
         output = hist
+        #nbody(args, lua, hist, output, v)
+        match_hists(histogram_mw_1d_v160, hist, v)
+        
+        args = [3.59371228338975, 0.960668713401728, 0.599260189737485, 2.89204324566376, 22.6509509936559, 300.154841212772]
+        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
+        #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_3396367 [1153385353]
+        #MW_like = -143.192302468235600
+        #laptop_like_multi = -142.994280153233319
+        hist = 'OS_test/windows_multithreaded4'
+        output = hist
         nbody(args, lua, hist, output, v)
         match_hists(histogram_mw_1d_v160, hist, v)
         
+        args = [4.99437258372485, 0.891649783307308, 1.10684417920164, 2.28622114462683, 58.8750832674317, 460.143966582794]
+        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
+        #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_3400209 [1153419819]
+        #MW_like = -295.632987377041790
+        #laptop_like_multi = -308.238341155806722
+        hist = 'OS_test/windows_multithreaded5'
+        output = hist
+        nbody(args, lua, hist, output, v)
+        match_hists(histogram_mw_1d_v160, hist, v)
+        
+        args = [3.62651407569746, 0.958136076049239, 0.635878941348239, 2.889179456962, 20.1302128506159, 288.408902457954]
+        #OS: milkyway_nbody 1.60 Windows x86_64 double  , Crlibm 
+        #workunit:  ps_nbody_4_14_16_orphansim_v160_1_1453826702_3409800 [1153508410]
+        #MW_like = -28.714008474268674
+        #laptop_like_multi = -28.817376017023140
+        hist = 'OS_test/windows_multithreaded6'
+        output = hist
+        nbody(args, lua, hist, output, v)
+        match_hists(histogram_mw_1d_v160, hist, v)
+        
+        args = [5, 0.940125402763589, 1.09842030523995, 2.1362602293744, 60, 600]
+        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
+        #workunit:  ps_nbody_4_14_16_orphansim_v160_2_1453826702_3314505 [1152638824]
+        #MW_like = -3090.048639610829500
+        #laptop_like_multi = 
+        hist = 'OS_test/windows_multithreaded7'
+        output = hist
+        nbody(args, lua, hist, output, v)
+        match_hists(histogram_mw_1d_v160, hist, v)
+        
+        args = [3.61617100791001, 0.957377619356007, 0.642877878545248, 2.89266208243634, 19.7837628572825, 289.153996968709]
+        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
+        #workunit:  ps_nbody_4_14_16_orphansim_v160_1_1453826702_3404893 [1153463266]
+        #MW_like = -19.584715268589605
+        #laptop_like_multi = 
+        hist = 'OS_test/windows_multithreaded8'
+        output = hist
+        nbody(args, lua, hist, output, v)
+        match_hists(histogram_mw_1d_v160, hist, v)
+        
+        args = [3.37866157256478, 0.934105725918354, 1.29499184441929, 2.99692050296758, 43.4836358484412, 1]
+        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
+        #workunit:  ps_nbody_4_14_16_orphansim_v160_3_1453826702_3081538 [1150480556]
+        #MW_like = -133.299125231486300
+        #laptop_like_multi = 
+        hist = 'OS_test/windows_multithreaded9'
+        output = hist
+        nbody(args, lua, hist, output, v)
+        match_hists(histogram_mw_1d_v160, hist, v)
         
     if(linux == True):
         #linux
@@ -791,6 +850,9 @@ def diff_OS_test_v160():
         output = hist
         nbody(args, lua, hist, output, v)
         match_hists(histogram_mw_1d_v160, hist, v)
+        
+        
+
 # # # # # # # # # # # # # # # # # # # # # #
 def diff_OS_test_v158():
     v = ''
