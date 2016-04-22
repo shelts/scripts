@@ -105,21 +105,11 @@ def vel_disp(file_name, bodies):
 
 
 def binned_dispersion(bins, bodies, l_bins, b_bins, r_bins)
-        for i in range(0, len(bodies)):#for each body
-        for j in range(0, r_bins): #for each r bin
-            if(bodies[i].r >= r_start + j * r_bin_width and bodies[i].r < r_start + (j + 1) * r_bin_width): #if it is in the r bin
-                r_count += 1
-                for k in range(0, b_bins): #if it is in the r bin, for each b bin
-                    
-                    if(bodies[i].b >= b_start + k * b_bin_width and bodies[i].b < b_start + (k + 1) * b_bin_width): #if it is in the b bin
-                        b_count += 1
-                        for m in range(0, l_bins): #if it is in the r,b bin for each l bin
-                            
-                            if(bodies[i].l >= l_start + m * l_bin_width and bodies[i].l < l_start + (m + 1) * l_bin_width):
-                                l_count += 1
-                                print(m, l_start + m * l_bin_width, l_start + (m + 1) * l_bin_width)
-                                bins[j][k][m].append(i)
-                                
+            for j in range(0, r_bins): #for each r bin
+                    for k in range(0, b_bins): #for each b bin
+                            for m in range(0, l_bins): #for each l bin
+                                    if(bins[j][k][m][:]):
+                                        print(bins[j][k][m][:])
 
 
 #def convert_line_of_sight():
