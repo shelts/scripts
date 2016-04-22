@@ -37,6 +37,8 @@ class body:
     def disp_vel(self):
         print "velocity: ", self.vx, self.vy, self.vz
 
+
+
 def get_start_number(file_name):
     g = open(file_name, 'r')
     num = 1
@@ -75,9 +77,7 @@ def get_data(file_name):
     #print bodies[0].y
     return bodies
 
-def vel_disp(file_name):
-    bodies = []
-    bodies = get_data(file_name)
+def vel_disp(file_name, bodies):
     N = len(bodies)
     disp_vx1 = 0
     disp_vy1 = 0
@@ -103,14 +103,96 @@ def vel_disp(file_name):
     
     return disp_vx, disp_vy, disp_vz
 
+
+def binned_dispersion(bins, bodies, l_bins, b_bins, r_bins)
+        for i in range(0, len(bodies)):#for each body
+        for j in range(0, r_bins): #for each r bin
+            if(bodies[i].r >= r_start + j * r_bin_width and bodies[i].r < r_start + (j + 1) * r_bin_width): #if it is in the r bin
+                r_count += 1
+                for k in range(0, b_bins): #if it is in the r bin, for each b bin
+                    
+                    if(bodies[i].b >= b_start + k * b_bin_width and bodies[i].b < b_start + (k + 1) * b_bin_width): #if it is in the b bin
+                        b_count += 1
+                        for m in range(0, l_bins): #if it is in the r,b bin for each l bin
+                            
+                            if(bodies[i].l >= l_start + m * l_bin_width and bodies[i].l < l_start + (m + 1) * l_bin_width):
+                                l_count += 1
+                                print(m, l_start + m * l_bin_width, l_start + (m + 1) * l_bin_width)
+                                bins[j][k][m].append(i)
+                                
+
+
+#def convert_line_of_sight():
+    
+def binner_lbr(bodies, l_bins, b_bins, r_bins):
+    l_start = 0.0
+    l_end = 360.0
+    l_bin_width = (l_end - l_start) / l_bins
+    #l_bins = 4
+    #b_bins = 1
+    #r_bins = 1
+    
+    
+    b_start = -180.0
+    b_end = 180.0
+    b_bin_width = (b_end - b_start) / b_bins
+    
+    r_start = 0.0
+    r_end = 500
+    r_bin_width = (r_end - r_start) / r_bins
+    print(l_bin_width, b_bin_width, r_bin_width)
+    
+
+    r_count = 0
+    b_count = 0
+    l_count = 0
+    bins = [[[[] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
+    #print(bins)
+    t = 0
+    #for x in range(0, r_bins):
+        #for y in range(0, b_bins):
+            #for z in range(0, l_bins):
+                #bins[x][y][z] = 0
+                #t += 1
+
+    for i in range(0, len(bodies)):#for each body
+        for j in range(0, r_bins): #for each r bin
+            if(bodies[i].r >= r_start + j * r_bin_width and bodies[i].r < r_start + (j + 1) * r_bin_width): #if it is in the r bin
+                r_count += 1
+                for k in range(0, b_bins): #if it is in the r bin, for each b bin
+                    
+                    if(bodies[i].b >= b_start + k * b_bin_width and bodies[i].b < b_start + (k + 1) * b_bin_width): #if it is in the b bin
+                        b_count += 1
+                        for m in range(0, l_bins): #if it is in the r,b bin for each l bin
+                            
+                            if(bodies[i].l >= l_start + m * l_bin_width and bodies[i].l < l_start + (m + 1) * l_bin_width):
+                                l_count += 1
+                                print(m, l_start + m * l_bin_width, l_start + (m + 1) * l_bin_width)
+                                bins[j][k][m].append(i)
+                                
+    
+    #print(r_count, b_count, l_count)
+    return bins
+
+
 def main():
     name1 = str(sys.argv[1])
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
         
     print "for output: ", name1 
-    vel_disp(file_name)
-    disp_vx, disp_vy, disp_vz = vel_disp(file_name)
+    bodies = []
+    bodies = get_data(file_name)
+    disp_vx, disp_vy, disp_vz = vel_disp(file_name, bodies)
     dispersion = [disp_vx, disp_vy, disp_vz]
     print(dispersion)
+    l_bins = 4
+    b_bins = 1
+    r_bins = 1
+    
+    bins = []
+    bins = binner_lbr(bodies, l_bins, b_bins, r_bins)
+    
+    binned_dispersion(bins, bodies, l_bins, b_bins, r_bins)
+    
     
 main()

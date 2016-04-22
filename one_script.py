@@ -31,7 +31,7 @@ args = [3.96509911271539, 0.931875356807537, 0.46182892204695, 0.206712561291835
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
@@ -50,7 +50,7 @@ recalc_para_sweep_likes   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 make_a_few_hists          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_diff_OS_test          = y                 #
+run_diff_OS_test          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_binary_compare        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -58,7 +58,7 @@ run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_seed_fluctuation_test = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-velocity_dispersion_calc  = n                 #
+velocity_dispersion_calc  = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -409,11 +409,12 @@ def lb_plot(file_name):
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
     file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
+    file_name = 'test2'
     #l = 'Null.lua'
     l = 'EMD_v160_direct_fit.lua'
     #nbody(args, l, file_name, file_name, version)
-    lb_plot(file_name)
-    #os.system("./scripts/velocity_dispersion.py " + file_name)
+    #lb_plot(file_name)
+    os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
 def recalc_parameter_sweep_likelihoods():
     args = [3.95, 3.95, 0.2, 0.8, 12, 48]
@@ -750,7 +751,7 @@ def diff_OS_test_v160():
         #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
         #workunit:  ps_nbody_4_14_16_orphansim_v160_2_1453826702_3314505 [1152638824]
         #MW_like = -3090.048639610829500
-        #laptop_like_multi = 
+        #laptop_like_multi = -3067.649968787237412
         hist = 'OS_test/windows_multithreaded7'
         output = hist
         nbody(args, lua, hist, output, v)
@@ -760,7 +761,7 @@ def diff_OS_test_v160():
         #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
         #workunit:  ps_nbody_4_14_16_orphansim_v160_1_1453826702_3404893 [1153463266]
         #MW_like = -19.584715268589605
-        #laptop_like_multi = 
+        #laptop_like_multi = -20.048038924522746
         hist = 'OS_test/windows_multithreaded8'
         output = hist
         nbody(args, lua, hist, output, v)
@@ -770,7 +771,7 @@ def diff_OS_test_v160():
         #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
         #workunit:  ps_nbody_4_14_16_orphansim_v160_3_1453826702_3081538 [1150480556]
         #MW_like = -133.299125231486300
-        #laptop_like_multi = 
+        #laptop_like_multi = -133.299122418788841
         hist = 'OS_test/windows_multithreaded9'
         output = hist
         nbody(args, lua, hist, output, v)
@@ -1036,6 +1037,6 @@ def main():
     
     if(plot_lb == True):
         lb_plot(output)
-    clean()
+    #clean()
     
 main()
