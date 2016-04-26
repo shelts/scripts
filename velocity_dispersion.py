@@ -20,7 +20,7 @@ class body:
       self.r = r
       self.vx = vx
       self.vy = vy
-      self.vz =  vz
+      self.vz = vz
       body.body_count += 1
       
     def count(self):
