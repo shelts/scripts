@@ -10,8 +10,8 @@ import math
 
 
 
-file1 = 'scripts/plot_matching_hist.py'
-file2 = 'quick_plots/plot_matching_hist.py'
+file1 = '../milkywayathome_client/CMakeLists.txt'
+file2 = '../1.txt'
 
 lines1 = []
 lines2 = []
