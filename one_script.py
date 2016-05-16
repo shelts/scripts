@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
 import matplotlib.patches as mpatches
+import pxssh
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Control Panel       #
@@ -31,8 +33,8 @@ args = [3.96509911271539, 0.931875356807537, 0.46182892204695, 0.206712561291835
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
-match_histograms          = n                 #
+remake                    = y                 #
+match_histograms          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -42,6 +44,7 @@ plot_adjacent             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
+
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 # possible tests #                            #
@@ -58,9 +61,12 @@ run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_seed_fluctuation_test = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-velocity_dispersion_calc  = y                 #
+velocity_dispersion_calc  = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-
+VM_binary_pull            = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+PUSH                      = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
 histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16'
@@ -68,16 +74,18 @@ histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16
 histogram_for_nbody_run = 'test'
 
 match_hist_correct = histogram_mw_1d_v160
-match_hist_compare = histogram_for_nbody_run
+match_hist_compare = 'OS_test/windows_multithreaded5'
 plot_name = 'mw_hist'
 
 output = histogram_for_nbody_run
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
-version = '' #determines which binary is run
+#version = '_162_VM' #determines which binary is run
+version = ''
 #lua = "EMD_v160.lua"
 lua = "EMD_v160_direct_fit.lua"
+#lua = "Null.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -116,10 +124,10 @@ def standard_run():
 # # # # # # # # # #         
 def make_nbody():
         os.chdir("./")
-        #os.system("rm -r nbody_test")
-        #os.system("mkdir nbody_test")
+        os.system("rm -r nbody_test")
+        os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -137,7 +145,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 8 -x  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def nbody_custom_lua(paras, lua_file, hist, out, ver, seed, bins):#this is for lua files that have non-normal parameters
     sim_time      = str(paras[0])
@@ -675,10 +683,39 @@ def different_seed_fluctuation():
         plt.savefig('quick_plots/seed_fluctuations.png', format='png')
         plt.show()        
 # # # # # # # # # # # # # # # # # # # # # #
+def build_on_VM():
+    os.system('scp -P 2204 ubuntu@lmc.phys.rpi.edu:~/milkywayathome_client/bin/milkyway_nbody_1.62_x86_64-pc-linux-gnu__mt ./nbody_test/bin/milkyway_nbody_162_VM')
+# # # # # # # # # # # # # # # # # # # # # #
 def diff_OS_test_v160():
     v = ''
     linux = n
-    windows = y
+    windows = n
+    
+    args = [4.99437258372485, 0.891649783307308, 1.10684417920164, 2.28622114462683, 58.8750832674317, 460.143966582794]
+    #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
+    #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_3400209 [1153419819]
+    #MW_like = -295.632987377041790
+    #LMC_with_parameters directly written in lua = -295.632992528164323
+    #laptop_like_multi = -308.238341155806722
+    #laptop_after_matching_windows = -304.164914230333522
+    hist = 'OS_test/windows_multithreaded5'
+    output = hist
+    #nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
+    
+    
+    args = [3.87427734322731, 1.01387196544634, 1.29523584391164, 2.99564367318775, 26.1017521350673, 131.258621913187]
+    #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
+    #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_3302962 [1152540540]
+    #MW_like = -1591.646667079636500
+    #LMC_with_parameters directly written in lua = -1591.646645167359111
+    #laptop_like_multi = -1591.649439867483352
+    #laptop_multi_static = -1591.649439867483352
+    #laptop_after_matching_windows = -1591.646622880012274
+    hist = 'OS_test/windows_multithreaded1_0gy_null'
+    output = hist
+    #nbody(args, lua, hist, output, v)
+    match_hists(histogram_mw_1d_v160, hist, v)
     
     if(windows == True):
         #windows
@@ -686,6 +723,7 @@ def diff_OS_test_v160():
         #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
         #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_3302962 [1152540540]
         #MW_like = -1591.646667079636500
+        #LMC_with_parameters directly written in lua = -1591.646645167359111
         #laptop_like_multi = -1591.649439867483352
         #laptop_single = 
         #laptop_multi_static = -1591.649439867483352
@@ -857,8 +895,11 @@ def clean():
     os.system("rm boinc_finish_called")
     os.system("rm boinc_milkyway_nbody_1.54_x86_64-pc-linux-gnu__mt_0")
     os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
-    
+# # # # # # # # # # # # # # # # # # # # # #    
 def main():    
+    if(VM_binary_pull == True):
+        build_on_VM()
+    
     standard_run()
     
     if(make_a_few_hists == True):
@@ -885,6 +926,8 @@ def main():
     
     if(plot_lb == True):
         lb_plot(output)
+        
+        
     #clean()
     
 main()

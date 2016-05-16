@@ -7,27 +7,33 @@
 
     cd ~/Desktop/research/nbody_test/bin
     
-    time  ./milkyway_nbody \
-    -f ~/Desktop/research/lua/EMD_20k_v158_fixed_seed.lua \
-    -o output_test.out \
-    -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
-    -n 8 -u  \
-    -i 4.0 1.0 0.2 0.2 12 .2 \
-#     2>>~/Desktop/research/piped_output2.txt  \
-# #     rm ./milkyway_nbody
-#     cd $r
-#     python outputparser.py ./nbody_test/bin/output_test.out
-# #     --visualizer-args '-r -q '\
-# 
-# rm dark_matter.dat light_matter.dat
-# # ./hist_check.py
-# # 9876543
-# 
-# cd quick_plots
-# ./quick_plot.py
+#     time  ./milkyway_nbody \
+#     -f ~/Desktop/research/lua/EMD_20k_v158_fixed_seed.lua \
+#     -o output_test.out \
+#     -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
+#     -n 8 -u  \
+#     -i 4.0 1.0 0.2 0.2 12 .2 \
 
-#     FILE * file;
-#     file = fopen("new_binary.txt", "w");
-#     for(int i = 0; i < nbody; i++)
-#         fprintf(file, "%22.15f\t%22.15f\t%22.15f\t%22.15f\t%22.15f\t%22.15f\n", bodies[i].bodynode.pos.x, bodies[i].bodynode.pos.y, bodies[i].bodynode.pos.z, bodies[i].vel.x, bodies[i].vel.y, bodies[i].vel.z);
-#     fclose(file);
+    
+    
+#     valgrind --tool=callgrind callgrind_annotate --threshold=100 --tree=both callgrind.out.* ./milkyway_nbody_162j \
+#     -h  ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist \
+#     -s ~/Desktop/research/quick_plots/hists/windows_multithreaded5.hist \
+#     2>> ~/Desktop/research/piped.txt
+    
+cp ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist ./correct.hist
+cp ~/Desktop/research/quick_plots/hists/OS_test/windows_multithreaded5.hist ./compare.hist
+valgrind -v --track-origins=yes ./milkyway_nbody_162jdebug \
+-h  correct.hist \
+-s compare.hist \
+2>> ~/Desktop/research/piped1.txt
+    
+   
+#     gdb --core=COREFILE --exec=EXECFILE ./milkyway_nbody_162j \
+#     -h  ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist \
+#     -s ~/Desktop/research/quick_plots/hists/windows_multithreaded5.hist \
+#     2>> ~/Desktop/research/piped.txt
+
+# ulimit -c unlimited
+# ./milkyway_nbody_162jdebug -h  ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist -s ~/Desktop/research/quick_plots/hists/OS_test/windows_multithreaded5.hist 
+# # gdb milkyway_nbody_162jreldebug core
