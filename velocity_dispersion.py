@@ -4,12 +4,31 @@ from subprocess import call
 import math
 import sys
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Control Panel       #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+
+# # # # # # # # # # # # # # # # # # # # # # # #
+# Enter control switches                      #
+# # # # # # # # # # # # # # # # # # # # # # # #
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Engine Room         #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# # # # # # # # # # # # 
+# struct declaration  #
+# # # # # # # # # # # # 
 class body:
     'these are bodies'
     body_count = 0
 
-    def __init__(self, mtype, mass, x, y, z, l, b, r, vx, vy, vz):
+    def __init__(self, mtype, mass, x, y, z, l, b, r, vx, vy, vz, vl):
       self.mtype = mtype
       self.mass = mass
       self.x = x
@@ -21,6 +40,7 @@ class body:
       self.vx = vx
       self.vy = vy
       self.vz = vz
+      self.vl = vl
       body.body_count += 1
       
     def count(self):
@@ -37,7 +57,9 @@ class body:
     def disp_vel(self):
         print "velocity: ", self.vx, self.vy, self.vz
 
-
+# # # # # # # # # # 
+# data retrieval  #
+# # # # # # # # # #
 
 def get_start_number(file_name):
     g = open(file_name, 'r')
@@ -71,84 +93,17 @@ def get_data(file_name):
         vy = (float(ss[8]))
         vz = (float(ss[9]))
         m  = (float(ss[10]))
-        b = body(ty, m , x, y, z, l, b, r, vx, vy, vz) 
+        
+        vl = calc_line_of_sight(x, y, z, vx, vy, vz)
+        b = body(ty, m , x, y, z, l, b, r, vx, vy, vz, vl) 
         bodies.append(b)
         i += 1
     #print bodies[0].y
     return bodies
 
-def vel_disp(file_name, bodies):
-    N = len(bodies)
-    disp_vx1 = 0
-    disp_vy1 = 0
-    disp_vz1 = 0
-    
-    disp_vx2 = 0
-    disp_vy2 = 0
-    disp_vz2 = 0
-    #vx dispersion
-    for i in range(0, N):
-        disp_vx1 += bodies[i].vx * bodies[i].vx   
-        disp_vx2 += bodies[i].vx
-    
-        disp_vy1 += bodies[i].vy * bodies[i].vy
-        disp_vy2 += bodies[i].vy
-        
-        disp_vz1 += bodies[i].vz * bodies[i].vz  
-        disp_vz2 += bodies[i].vz
-
-    disp_vx = (disp_vx1 / N) - (disp_vx2 * disp_vx2 / (N * N) )
-    disp_vy = (disp_vy1 / N) - (disp_vy2 * disp_vy2 / (N * N) )
-    disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
-    
-    return disp_vx, disp_vy, disp_vz
-
-def binned_dispersion(bins, bodies, l_bins, b_bins, r_bins):
-    dispersion_per_bin = [[[[0 for xyz in range(3)] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
-    print(dispersion_per_bin)
-    disp_vx1 = 0
-    disp_vy1 = 0
-    disp_vz1 = 0
-    
-    disp_vx2 = 0
-    disp_vy2 = 0
-    disp_vz2 = 0
-    
-    '
-        this will go through each of the bins and calculate the vel dispersion in each bin.
-        it will only do the calculation if there is a list of indexes in that bin, 
-        meaning there are bodies in the bin.
-        the dispersion in each direction is stored in an array which has 3 values per bin.
-    '
-    for j in range(0, r_bins): #for each r bin
-            for k in range(0, b_bins): #for each b bin
-                    for m in range(0, l_bins): #for each l bin
-                            if(bins[j][k][m][:]):
-                                N_bodies_in_bin = (len(bins[j][k][m][:]))
-                                for index in range(0, N_bodies_in_bin):
-                                    i = bins[j][k][m][index]
-                                    disp_vx1 += bodies[i].vx * bodies[i].vx   
-                                    disp_vx2 += bodies[i].vx
-                                
-                                    disp_vy1 += bodies[i].vy * bodies[i].vy
-                                    disp_vy2 += bodies[i].vy
-                                    
-                                    disp_vz1 += bodies[i].vz * bodies[i].vz  
-                                    disp_vz2 += bodies[i].vz
-                                N = N_bodies_in_bin
-                                disp_vx = (disp_vx1 / N) - (disp_vx2 * disp_vx2 / (N * N) )
-                                disp_vy = (disp_vy1 / N) - (disp_vy2 * disp_vy2 / (N * N) )
-                                disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
-                                
-                                dispersion_per_bin[j][k][m][0] = disp_vx
-                                dispersion_per_bin[j][k][m][1] = disp_vy
-                                dispersion_per_bin[j][k][m][2] = disp_vz
-    
-    print(dispersion_per_bin)
-
-
-#def convert_line_of_sight():
-    
+# # # # # # # # # # 
+# data binning    #
+# # # # # # # # # #
 def binner_lbr(bodies, l_bins, b_bins, r_bins):
     l_start = 0.0
     l_end = 360.0
@@ -173,12 +128,13 @@ def binner_lbr(bodies, l_bins, b_bins, r_bins):
     l_count = 0
     bins = [[[[] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
     #print(bins)
-    '
-        This algorithm goes through each bin of the sky and each body. 
-        When it finds the bin the body belongs to, it stores the body index.
-        The array structure is: 
-        bins[current r bin][current b bin][current l bin][list of indexs of the bodies that are here]
-    '
+    
+    #
+        #This algorithm goes through each bin of the sky and each body. 
+        #When it finds the bin the body belongs to, it stores the body index.
+        #The array structure is: 
+        #bins[current r bin][current b bin][current l bin][list of indexs of the bodies that are here]
+    #
     
     for i in range(0, len(bodies)):#for each body
         for j in range(0, r_bins): #for each r bin
@@ -198,6 +154,126 @@ def binner_lbr(bodies, l_bins, b_bins, r_bins):
     #print(r_count, b_count, l_count)
     return bins
 
+# # # # # # # # # # 
+# calc dispersion #
+# # # # # # # # # #
+
+def binned_dispersion(bins, bodies, l_bins, b_bins, r_bins):
+    dispersion_per_bin = [[[[0 for xyzl in range(4)] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
+    #print(dispersion_per_bin)
+    disp_vx1 = 0
+    disp_vy1 = 0
+    disp_vz1 = 0
+    
+    disp_vx2 = 0
+    disp_vy2 = 0
+    disp_vz2 = 0
+    
+    disp_vl1 = 0
+    disp_vl2 = 0
+    total_number = 0
+    #
+        #this will go through each of the bins and calculate the vel dispersion in each bin.
+        #it will only do the calculation if there is a list of indexes in that bin, 
+        #meaning there are bodies in the bin.
+        #the dispersion in each direction is stored in an array which has 3 values per bin.
+    #
+    for j in range(0, r_bins): #for each r bin
+            for k in range(0, b_bins): #for each b bin
+                    for m in range(0, l_bins): #for each l bin
+                            if(bins[j][k][m][:]):
+                                N_bodies_in_bin = (len(bins[j][k][m][:]))
+                                total_number += N_bodies_in_bin
+                                disp_vx1 = 0
+                                disp_vy1 = 0
+                                disp_vz1 = 0
+                                
+                                disp_vx2 = 0
+                                disp_vy2 = 0
+                                disp_vz2 = 0
+                                
+                                disp_vl1 = 0
+                                disp_vl2 = 0
+                                    
+                                for index in range(0, N_bodies_in_bin):
+                                    #print N_bodies_in_bin
+                                    i = bins[j][k][m][index]
+                                    #print i
+                                    disp_vx1 += bodies[i].vx * bodies[i].vx   
+                                    disp_vx2 += bodies[i].vx
+                                
+                                    disp_vy1 += bodies[i].vy * bodies[i].vy
+                                    disp_vy2 += bodies[i].vy
+                                    
+                                    disp_vz1 += bodies[i].vz * bodies[i].vz  
+                                    disp_vz2 += bodies[i].vz
+                                    
+                                    disp_vl1 += bodies[i].vl * bodies[i].vl
+                                    disp_vl2 += bodies[i].vl 
+                                    #print disp_vl2, bodies[i].vl
+                                    
+                                N = N_bodies_in_bin
+                                disp_vx = (disp_vx1 / N) - (disp_vx2 * disp_vx2 / (N * N) )
+                                disp_vy = (disp_vy1 / N) - (disp_vy2 * disp_vy2 / (N * N) )
+                                disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
+                                disp_vl = (disp_vl1 / N) - (disp_vl2 * disp_vl2 / (N * N) )
+                                #print disp_vy1, disp_vy2
+                                
+                                dispersion_per_bin[j][k][m][0] = disp_vx
+                                dispersion_per_bin[j][k][m][1] = disp_vy
+                                dispersion_per_bin[j][k][m][2] = disp_vz
+                                dispersion_per_bin[j][k][m][3] = disp_vl
+                                print disp_vl
+    
+    return 0
+
+def vel_disp(file_name, bodies):
+    N = len(bodies)
+    disp_vx1 = 0
+    disp_vy1 = 0
+    disp_vz1 = 0
+    
+    disp_vx2 = 0
+    disp_vy2 = 0
+    disp_vz2 = 0
+    
+    disp_vl1 = 0
+    disp_vl2 = 0
+    #vx dispersion
+    for i in range(0, N):
+        disp_vx1 += bodies[i].vx * bodies[i].vx   
+        disp_vx2 += bodies[i].vx
+    
+        disp_vy1 += bodies[i].vy * bodies[i].vy
+        disp_vy2 += bodies[i].vy
+        
+        disp_vz1 += bodies[i].vz * bodies[i].vz  
+        disp_vz2 += bodies[i].vz
+        
+        disp_vl1 += bodies[i].vl * bodies[i].vl
+        disp_vl2 += bodies[i].vl 
+        
+    disp_vx = (disp_vx1 / N) - (disp_vx2 * disp_vx2 / (N * N) )
+    disp_vy = (disp_vy1 / N) - (disp_vy2 * disp_vy2 / (N * N) )
+    disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
+    
+    disp_vl = (disp_vl1 / N) - (disp_vl2 * disp_vl2 / (N * N) )
+    return disp_vx, disp_vy, disp_vz, disp_vl
+
+
+# # # # # # # # # # # # # # # 
+# line of sight conversion  #
+# # # # # # # # # # # # # # #
+def calc_line_of_sight(x, y, z, vx, vy, vz):
+    x += 8 #for sun centered coordinates
+    mag = (x * x + y * y + z * z) ** (0.5)
+    vl = x * vx + y * vy + z * vz
+    vl = vl / mag
+    #print vl, vx, vy, vz, x, y, z
+    return vl
+    
+
+
 
 def main():
     name1 = str(sys.argv[1])
@@ -206,18 +282,22 @@ def main():
     print "for output: ", name1 
     bodies = []
     bodies = get_data(file_name)
-    disp_vx, disp_vy, disp_vz = vel_disp(file_name, bodies)
-    dispersion = [disp_vx, disp_vy, disp_vz]
+    
+    #this calculates the total vx vy vz dispersion
+    disp_vx, disp_vy, disp_vz, disp_vl = vel_disp(file_name, bodies)
+    dispersion = [disp_vx, disp_vy, disp_vz, disp_vl]
     print(dispersion) #dispersion of the entire sky
     
     #how many bins in each direction
-    l_bins = 4
+    l_bins = 1000
     b_bins = 1
     r_bins = 1
     
     bins = []
+    #this bins the bodies by their positions
     bins = binner_lbr(bodies, l_bins, b_bins, r_bins)
     
+    #this calculates the vx vy vz vline_of_sight dispersion in each bin
     binned_dispersion(bins, bodies, l_bins, b_bins, r_bins)
     
     
