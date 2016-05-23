@@ -33,8 +33,8 @@ args = [3.96509911271539, 0.931875356807537, 0.46182892204695, 0.206712561291835
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
-match_histograms          = y                 #
+remake                    = n                 #
+match_histograms          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -42,7 +42,7 @@ plot_hists                = n                 #
 plot_overlapping          = n                 #
 plot_adjacent             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_lb                   = n                 #
+plot_lb                   = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -77,7 +77,7 @@ match_hist_correct = histogram_mw_1d_v160
 match_hist_compare = 'OS_test/windows_multithreaded5'
 plot_name = 'mw_hist'
 
-output = histogram_for_nbody_run
+output = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
@@ -119,15 +119,16 @@ def standard_run():
     if(plot_hists == True):
         plot(match_hist_correct + ".hist" , match_hist_compare + ".hist", plot_name)
     
-    if(plot_lb == True):
-        os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
+    #if(plot_lb == True):
+        #os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
+    return 0
 # # # # # # # # # #         
 def make_nbody():
         os.chdir("./")
         os.system("rm -r nbody_test")
         os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -288,8 +289,10 @@ def calculate_cm(paras, output1, output2, outs):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
 # # # # # # # # # #
 def lb_plot(file_name):
-    plot_light_and_dark = y
     plot_lbr = y
+    plot_light_and_dark = y
+    plot_dm = y
+    
     plot_xyz = n
     f = open('quick_plots/outputs/' + file_name + '.out')
     lines = []
@@ -312,8 +315,8 @@ def lb_plot(file_name):
         Y = float(tokens[2])
         Z = float(tokens[3])
         l = float(tokens[4])
-        if(l > 180.0):
-            l = l - 360.0
+        #if(l > 180.0):
+            #l = l - 360.0
         b = float(tokens[5])
         r = float(tokens[6])
         vx = float(tokens[7])
@@ -364,17 +367,34 @@ def lb_plot(file_name):
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     
     if(plot_lbr == True):
-        plt.plot(light_l, light_b, '.', markersize = 1, color = 'r', marker = 'o')
-        if(plot_light_and_dark == True):
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
-        plt.xlim((180, -180))
-        plt.ylim((-80, 80))
+        xlower = 360
+        xupper = 0.0
+        ylower = -80
+        yupper = 80
+        plt.xlim((xlower, xupper))
+        plt.ylim((ylower, yupper))
         plt.xlabel('l')
         plt.ylabel('b')
         plt.title('l vs b')
-        plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr', format='png')
-        #plt.show()
         
+        #default to just plot lm
+        plt.plot(light_l, light_b, '.', markersize = 1, color = 'r', marker = 'o')
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
+        
+        if(plot_light_and_dark == True):#plot lm and dm overlapping
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
+            
+        if(plot_dm == True):#to plot just dm
+            plt.clf()
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_dark', format='png')
+            
     if(plot_xyz == True):
         xlower = 50
         xupper = -50
@@ -929,5 +949,5 @@ def main():
         
         
     #clean()
-    
+        
 main()

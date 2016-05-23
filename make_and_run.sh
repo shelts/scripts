@@ -23,7 +23,7 @@
     
 cp ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist ./correct.hist
 cp ~/Desktop/research/quick_plots/hists/OS_test/windows_multithreaded5.hist ./compare.hist
-valgrind -v --track-origins=yes ./milkyway_nbody_162jdebug \
+valgrind -v --track-origins=yes ./milkyway_nbody_VM \
 -h  correct.hist \
 -s compare.hist \
 2>> ~/Desktop/research/piped1.txt
