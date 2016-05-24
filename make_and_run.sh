@@ -35,5 +35,5 @@ valgrind -v --track-origins=yes ./milkyway_nbody_VM \
 #     2>> ~/Desktop/research/piped.txt
 
 # ulimit -c unlimited
-# ./milkyway_nbody_162jdebug -h  ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist -s ~/Desktop/research/quick_plots/hists/OS_test/windows_multithreaded5.hist 
-# # gdb milkyway_nbody_162jreldebug core
+# ./nbody_test/bin/milkyway_nbody_vm -h  ~/Desktop/research/quick_plots/hists/hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16.hist -s ~/Desktop/research/quick_plots/hists/OS_test/windows_multithreaded5.hist 
+# # gdb bin/milkyway_nbody_VM_debug core

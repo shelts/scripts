@@ -15,24 +15,21 @@ import sys
 # Enter control switches                      #
 # # # # # # # # # # # # # # # # # # # # # # # #
 default_worst_case = -1
-
+y = True
+n = False
 
 #how many bins in each direction
-l_bins = 1000
-b_bins = 1000
+l_bins = 1
+b_bins = 1
 r_bins = 1
 
 
-l_start = 0.0
-l_end = 360.0
+l_start = -100.0
+l_end = 100.0
 l_bin_width = (l_end - l_start) / l_bins
-#l_bins = 4
-#b_bins = 1
-#r_bins = 1
 
-
-b_start = -180.0
-b_end = 180.0
+b_start = -20.0
+b_end = 20.0
 b_bin_width = (b_end - b_start) / b_bins
 
 r_start = 0.0
@@ -40,6 +37,26 @@ r_end = 500
 r_bin_width = (r_end - r_start) / r_bins
 #print(l_bin_width, b_bin_width, r_bin_width)
 
+plot_bins =  n
+
+use_whole_sky = n
+sym_l = y
+
+if(use_whole_sky == True):
+    l_start = 0.0
+    l_end = 360.0
+    if(sym_l == True):
+        l_start = -180.0
+        l_end = 180.0
+    l_bin_width = (l_end - l_start) / l_bins
+
+    b_start = -180.0
+    b_end = 180.0
+    b_bin_width = (b_end - b_start) / b_bins
+
+    r_start = 0.0
+    r_end = 500
+    r_bin_width = (r_end - r_start) / r_bins
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -114,6 +131,9 @@ def get_data(file_name):
         y  = (float(ss[2]))
         z  = (float(ss[3]))
         l  = (float(ss[4]))
+        if(sym_l ==True):
+            if(l > 180.0):
+                l = l - 360.0
         b  = (float(ss[5]))
         r  = (float(ss[6]))
         vx = (float(ss[7]))
@@ -125,7 +145,6 @@ def get_data(file_name):
         b = body(ty, m , x, y, z, l, b, r, vx, vy, vz, vl) 
         bodies.append(b)
         i += 1
-    #print bodies[0].y
     return bodies
 
 # # # # # # # # # # 
@@ -166,7 +185,6 @@ def binner_lbr(bodies):
 # # # # # # # # # # 
 # plotting code   #
 # # # # # # # # # #
-
 def plot_binned_counts(bins, disp_per_bin):
     p = 'data.txt'
     g = open(p, 'w')
@@ -175,10 +193,13 @@ def plot_binned_counts(bins, disp_per_bin):
             for k in range(0, b_bins): #for each b bin
                     for m in range(0, l_bins): #for each l bin
                         counts = (len(bins[j][k][m][:]))
-                        disp = disp_per_bin[j][k][m][3]
-                        g.write("%f\t%f\t%f\t%f\t%f\n" % (j * r_bin_width + r_start, m * l_bin_width + l_start, k * b_bin_width + b_start, counts, disp))
+                        disp_vx = disp_per_bin[j][k][m][0]
+                        disp_vy = disp_per_bin[j][k][m][1]
+                        disp_vz = disp_per_bin[j][k][m][2]
+                        disp_vl = disp_per_bin[j][k][m][3]
+                        g.write("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n" % (j * r_bin_width + r_start, m * l_bin_width + l_start, k * b_bin_width + b_start, counts, disp_vl, disp_vx, disp_vy, disp_vz))
     
-    
+    g.close()
     
     b_lower = -80
     b_upper = 80
@@ -210,10 +231,20 @@ def plot_binned_counts(bins, disp_per_bin):
     f.write("set cbrange[" + str(default_worst_case) + ":" + str(dispersion_cutoff) + "]\n")
     
     f.write("set title 'dispersions' \n")
-    f.write("set output 'dispersions.png' \n")
+    f.write("set output 'dispersions_vl.png' \n")
     f.write("plot '" + p + "' using 2:3:5 with image\n")
     
+    f.write("set output 'dispersions_vx.png' \n")
+    f.write("plot '" + p + "' using 2:3:6 with image\n")
+    
+    f.write("set output 'dispersions_vy.png' \n")
+    f.write("plot '" + p + "' using 2:3:7 with image\n")
+    
+    f.write("set output 'dispersions_vz.png' \n")
+    f.write("plot '" + p + "' using 2:3:8 with image\n")
+    f.close()
     os.system('gnuplot binned_counts_dispersions.gnuplot 2>>gnuplot_errors.txt')
+    
 # # # # # # # # # # 
 # calc dispersion #
 # # # # # # # # # #
@@ -320,22 +351,56 @@ def vel_disp(file_name, bodies):
     disp_vl = (disp_vl1 / N) - (disp_vl2 * disp_vl2 / (N * N) )
     return disp_vx, disp_vy, disp_vz, disp_vl
 
-def calc_mass_per_bin(disp_per_bin):
+
+# # # # # # # # # # #
+# mass calculations #
+# # # # # # # # # # #
+def calc_half_light_radius(bodies):
+    total_mass = 0
+    total_dark_mass = 0
+    total_light_mass = 0
+
+    for i in range(0, body.body_count):
+        total_mass += bodies[i].mass
+        if(bodies[i].mtype == 1):
+            total_dark_mass += bodies[i].mass
+        if(bodies[i].mtype == 0):
+            total_light_mass += bodies[i].mass
+            
+            
+    
+    print total_mass, total_light_mass, total_dark_mass
+    
+    return half_light_radius
+def calc_actual_mass_in_bin(bins, bodies):#calculates the total mass
+    total_mass = 0
+    total_count = 0
+    for j in range(0, r_bins): #for each r bin
+            for k in range(0, b_bins): #for each b bin
+                    for m in range(0, l_bins): #for each l bin
+                        N_bodies_in_bin = (len(bins[j][k][m][:]))
+                        total_count += N_bodies_in_bin
+                        
+                        for index in range(0, N_bodies_in_bin):
+                            i = bins[j][k][m][index]
+                            total_mass += bodies[i].mass
+                            
+    print 'correct mass:', total_mass, '\nbody count:', total_count
+    return total_mass
+
+def calc_mass_per_bin(disp_per_bin, half_light_radius):#for when looking at core (1 bin)
     mass_per_bin = [[[[0 for xyzl in range(1)] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
-    half_light_radius = 1.0 #place holder until I figure out how to calculate this.
+    half_light_radius = 5.0 #place holder until I figure out how to calculate this.
     
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
                     for m in range(0, l_bins): #for each l bin
                         if(disp_per_bin[j][k][m][3] != default_worst_case):#make sure the line of sight velocity was calculated (there were bodies in the bin)
-                            sigma_sq = disp_per_bin[j][k][m][3] ** 2
-                            mass = 3.0 * sigma_sq / half_light_radius
+                            sigma = disp_per_bin[j][k][m][3]
+                            mass = 3.0 * sigma * sigma / half_light_radius
                             mass_per_bin[j][k][m][0] = mass
-                            #print mass
-                                
-                                
-                                
-                                
+                            #print 'mass from dispersion:', mass, '\ndispersion:', sigma
+    return mass_per_bin
 # # # # # # # # # # # # # # # 
 # line of sight conversion  #
 # # # # # # # # # # # # # # #
@@ -348,10 +413,14 @@ def calc_line_of_sight(x, y, z, vx, vy, vz):
     return vl
     
 def main():
-    name1 = str(sys.argv[1])
+    if(len(sys.argv) > 1):
+        name1 = str(sys.argv[1])
+    else: 
+        name1 = 'velocity_dispersion_test_Null_lbr_xyz_0gy'
+        #name1 = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
-        
     print "for output: ", name1 
+    
     bodies = []
     bodies = get_data(file_name)
     
@@ -360,8 +429,8 @@ def main():
     dispersion = [disp_vx, disp_vy, disp_vz, disp_vl]
     #print(dispersion) #dispersion of the entire sky
     
-    bins = []
     #this bins the bodies by their positions
+    bins = []
     bins = binner_lbr(bodies)
     
     #this calculates the vx vy vz vline_of_sight dispersion in each bin
@@ -369,8 +438,11 @@ def main():
     dispersion_per_bin = binned_dispersion(bins, bodies)
     
     mass_per_bin = []
-    mass_per_bin = calc_mass_per_bin(dispersion_per_bin)
+    half_light_radius = calc_half_light_radius(bodies)
+    mass_per_bin = calc_mass_per_bin(dispersion_per_bin, half_light_radius)
     
+    calc_actual_mass_in_bin(bins, bodies)
     
-    plot_binned_counts(bins, dispersion_per_bin)
+    if(plot_bins == True):
+        plot_binned_counts(bins, dispersion_per_bin)
 main()

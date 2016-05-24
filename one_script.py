@@ -25,16 +25,15 @@ import pxssh
 y = True
 n = False
 #args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [0.0000000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [3.95, 0.98, 0.2, 0.8, 12, 48] #for hist with dark matter
-args = [3.96509911271539, 0.931875356807537, 0.46182892204695, 0.206712561291835, 13.1087647177516, 69.9587140449245]
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
-match_histograms          = n                 #
+remake                    = y                 #
+match_histograms          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -42,7 +41,7 @@ plot_hists                = n                 #
 plot_overlapping          = n                 #
 plot_adjacent             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_lb                   = y                 #
+plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -77,15 +76,15 @@ match_hist_correct = histogram_mw_1d_v160
 match_hist_compare = 'OS_test/windows_multithreaded5'
 plot_name = 'mw_hist'
 
-output = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
+output = 'velocity_dispersion_test_Null_lbr_xyz_0gy'
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #version = '_162_VM' #determines which binary is run
 version = ''
 #lua = "EMD_v160.lua"
-lua = "EMD_v160_direct_fit.lua"
-#lua = "Null.lua"
+#lua = "EMD_v160.lua"
+lua = "Null.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -125,10 +124,10 @@ def standard_run():
 # # # # # # # # # #         
 def make_nbody():
         os.chdir("./")
-        os.system("rm -r nbody_test")
-        os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")
+        #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
