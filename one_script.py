@@ -62,10 +62,6 @@ run_seed_fluctuation_test = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_dispersion_calc  = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-VM_binary_pull            = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-PUSH                      = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
 histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16'
@@ -124,8 +120,8 @@ def standard_run():
 # # # # # # # # # #         
 def make_nbody():
         os.chdir("./")
-        #os.system("rm -r nbody_test")
-        #os.system("mkdir nbody_test")
+        os.system("rm -r nbody_test")
+        os.system("mkdir nbody_test")
         os.chdir("nbody_test")
         os.system("cmake -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
@@ -147,22 +143,6 @@ def nbody(paras, lua_file, hist, out, ver):
         -o " + path + "quick_plots/outputs/" + out + ".out \
         -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
-def nbody_custom_lua(paras, lua_file, hist, out, ver, seed, bins):#this is for lua files that have non-normal parameters
-    sim_time      = str(paras[0])
-    back_time     = str(paras[1])
-    r0            = str(paras[2])
-    light_r_ratio = str(paras[3])
-    mass_l        = str(paras[4])
-    mass_ratio    = str(paras[5])
-        #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
-    
-    print('running nbody')
-    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
-        -f " + path + "lua/" + lua_file + " \
-        -z " + path + "quick_plots/hists/" + hist + ".hist \
-        -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 8 -x -e " + seed + " -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " " + bins)
-# # # # # # # # # #       
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
     #using call here instead so the format of using it is on record
@@ -172,12 +152,7 @@ def match_hists(hist1, hist2, ver):
     print hist1, "\n", hist2
     print "\n"
 # # # # # # # # # #       
-def match_hists_piped(hist1, hist2, ver, pipe_name):
-    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver  
-                + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
-                + " -s " + path + "quick_plots/hists/" + hist2 + '.hist'
-                + "  2>>'" + pipe_name + ".txt' ")
-# # # # # # # # # #  
+ 
 def plot(hist1, hist2, name):
     ylimit = 0.4
     xlower = 50
@@ -443,89 +418,7 @@ def velocity_dispersion():
     #lb_plot(file_name)
     os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
-def recalc_parameter_sweep_likelihoods():
-    args = [3.95, 3.95, 0.2, 0.8, 12, 48]
-    sim_time      = str(args[0])
-    back_time     = str(args[1])
-    rl            = str(args[2])
-    rd            = str(args[3])
-    mass_l        = str(args[4])
-    mass_d        = str(args[5])
-    names   = ['ft', 'rad', 'rr', 'mass', 'mr_50bins']
-    folder = "parameter_sweep_hists/"
-    
-    hist_range = [2., 1200.0, 23.0]
-    hist_correct = folder + names[4] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
-    name = hist_range[0]
-    os.system("rm " + names[4] + ".txt")
-    while(name <= hist_range[1]):
-        mass_d = str(name)
-        hist_name = folder + names[4] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
-        match_hists_piped(hist_correct, hist_name, '', names[4])
-        name += hist_range[2]
-    mass_d = str(args[5])
-    
-    hist_range = [8.0, 16.0, 0.25]
-    hist_correct = folder + names[3] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
-    name = hist_range[0]
-    os.system("rm mass.txt")
-    while(name <= hist_range[1]):
-        mass_l = str(name)
-        hist_name = folder + names[3] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
-        match_hists_piped(hist_correct, hist_name, '', 'mass')
-        name += hist_range[2]
-    mass_l = str(args[4])
-    
-    hist_range = [0.7, 0.9, 0.01]
-    hist_correct = folder + names[2] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
-    name = hist_range[0]
-    os.system("rm rr.txt")
-    while(name <= hist_range[1]):
-        rd = str(name)
-        hist_name = folder + names[2] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
-        match_hists_piped(hist_correct, hist_name, '', 'rr')
-        name += hist_range[2]
-    rd = str(args[3])
-    
-    
-    hist_range = [0.1, 0.3, 0.01]
-    hist_correct = folder + names[1] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
-    name = hist_range[0]
-    os.system("rm rad.txt")
-    while(name <= hist_range[1]):
-        rl = str(name)
-        hist_name = folder + names[1] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
-        match_hists_piped(hist_correct, hist_name, '', 'rad')
-        name += hist_range[2]
-    rl = str(args[2])    
-        
-    args = [3.95, 0.98, 0.2, 0.8, 12, 48]
-    sim_time      = str(args[0])
-    back_time     = str(args[1])
-    rl            = str(args[2])
-    rd            = str(args[3])
-    mass_l        = str(args[4])
-    mass_d        = str(args[5])
-    
-    hist_range = [3.85, 4.3, 0.025]
-    hist_correct = folder + names[0] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + "_correct"
-    name = hist_range[0]
-    os.system("rm ft.txt")
-    while(name <= hist_range[1]):
-        sim_time = str(name)
-        hist_name = folder + names[0] + "_hists/arg_" + sim_time + "_" + back_time + "_" + rl + "_" + rd + "_" + mass_l + "_" + mass_d + ""
-        match_hists_piped(hist_correct, hist_name, '', 'ft')
-        name += hist_range[2]
 
-    os.system("mv " + names[4] + ".txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv mass.txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv rad.txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv rr.txt  " + path + "like_surface/1D_like_surface/parameter_sweeps")
-    #os.system("mv ft.txt " + path + "like_surface/1D_like_surface/parameter_sweeps")
-    os.chdir("like_surface")
-    os.system("./one_like_script.py")
-    return 1
-# # # # # # # # # # # # # # # # # # # # # #
 def make_some_hists():
     ver = ''
     para = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #hist2 correct
@@ -592,323 +485,6 @@ def stabity_test():
     os.chdir("data_testing")    
     os.system("./stability_test.py " + back_time + " " + r_l + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
 # # # # # # # # # # # # # # # # # # # # # #
-def old_new_binary_compare():
-    binary_run_nbody = n
-    binary_match_histograms = n
-    binary_plot_hists = n
-    binary_calc_chi_sq = n
-    
-    versions = ['_154', '_158']
-    time  = "1"
-    binary_outputs = [with_lua_correction_on_old_binary + time + "gy.out", with_correction_on_new_binary + time + "gy.out"]
-    binary_hists   = [with_lua_correction_on_old_binary + time + "gy.hist", with_correction_on_new_binary + time + "gy.hist"]
-    folder = "/home/sidd/Desktop/research/outputs/"
-    binary_lua = "EMD_20k_1_54_fixed_seed_cm_correction.lua"
-    
-    if(binary_run_nbody == True):
-        nbody(args, binary_lua, binary_hists[0], binary_outputs[0], versions[0], 0)
-        nbody(args, binary_lua, binary_hists[1], binary_outputs[1], versions[1], 1)
-    
-    if(binary_match_histograms == True):
-        match_hists(binary_hists[0], binary_hists[0], versions[0]) #match old hist on the old binary
-        match_hists(binary_hists[1], binary_hists[1], versions[0]) #match new hist on the old binary
-        
-        match_hists(binary_hists[0], binary_hists[0], versions[1]) #match old hist on the new binary
-        match_hists(binary_hists[1], binary_hists[1], versions[1]) #match old hist on the new binary
-        
-    if(binary_plot_hists == True):
-        plot(hists[0], hists[1])
-        
-    #os.system("mv " + names[0] + " " + names[1] + " quick_plots")
-    
-    if(binary_calc_chi_sq == True):
-        os.system("./scripts/old_new_binary_chi_sq.py " + folder + outputs[0] + " " + folder + outputs[1] + " " + "output")
-# # # # # # # # # # # # # # # # # # # # # #
-def different_seed_fluctuation():
-    make_compare_hists = n
-    make_correct_hists = n
-    compare_only = n
-    parse = n
-    plot = y
-    args = [3.95, 0.98, 0.2, 0.8, 12, 48]
-    v = '_160'
-    l = 'seed_test.lua'
-    seed = [435833, 8376425, 34857265, 3462946, 8974526, 87625496, 76235986, 136725897, 39685235, 51699263]
-    bins = [100, 200, 300, 400]
-    if(make_correct_hists == True):
-        for j in range(1, len(bins)):
-            seed_default = '34086709' #this is the seed it was originally created with
-            hist = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16_bins' + str(bins[j])
-            nbody_custom_lua(args, l, hist, hist, v, seed_default, str(bins[j]))
-    
-    if(make_compare_hists == True):
-        for j in range(0, len(bins)):
-            for i in range(0, len(seed)):
-                hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
-                nbody_custom_lua(args, l, hist, hist, v, str(seed[i]), str(bins[j]))
-                match_hists(histogram_mw_1d_v160, hist, v )
-                
-    if(compare_only == True):
-        for j in range(0, len(bins)):
-            for i in range(0, len(seed)):
-                hist_correct = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16_bins' + str(bins[j])
-                hist = 'seed_test/seed' + str(seed[i]) + '_bins' + str(bins[j])  
-                match_hists(hist_correct, hist, v )
-     
-    if(parse == True):
-        g = open('stderr.txt', 'r')
-        f = open('seed_fluc_data.txt', 'w')
-        for line in g:
-            if (line.startswith("<search_likelihood>")):
-                ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
-                tt = ss[1].split('</search_likelihood>')#chooses the second of the split parts and resplits
-                f.write("%s \n" % tt[0])#writes the first of the resplit lines
-                
-                
-    if(plot == True):
-        g = open('seed_fluc_data.txt', 'r')
-        counter = 1
-        data_lines = len(seed) * len(bins)
-        section_size = len(seed)
-        sections = data_lines / section_size
-        #print(sections)
-        section_number = 0
-        temp_list = []
-        data = []
-        for line in g:
-            if(counter < section_size + 1):#saves all the data in sections of how long 
-                temp_list.append(float(line))
-                counter += 1
-            if(counter > section_size):
-                counter = 1
-                data.append(temp_list[:])
-                #print data
-                temp_list = []
-                section_number += 1
-        #print data[0]
-        
-        ylimit = -50
-        plt.title('Histogram of Light Matter Distribution After 4 Gy')
-        plt.xlim((0, 10))
-        plt.ylim((ylimit, 0))
-        labels = []
-        plt.ylabel('likelihood')
-        for i in range(0, len(bins)):
-            labels.append(str(bins[i]))
-        for i in range(0, sections):
-            plt.plot(data[i], alpha=1, label = labels[i])
-            
-        plt.legend()
-        plt.savefig('quick_plots/seed_fluctuations.png', format='png')
-        plt.show()        
-# # # # # # # # # # # # # # # # # # # # # #
-def build_on_VM():
-    os.system('scp -P 2204 ubuntu@lmc.phys.rpi.edu:~/milkywayathome_client/bin/milkyway_nbody_1.62_x86_64-pc-linux-gnu__mt ./nbody_test/bin/milkyway_nbody_162_VM')
-# # # # # # # # # # # # # # # # # # # # # #
-def diff_OS_test_v160():
-    v = ''
-    linux = n
-    windows = n
-    
-    args = [4.99437258372485, 0.891649783307308, 1.10684417920164, 2.28622114462683, 58.8750832674317, 460.143966582794]
-    #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
-    #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_3400209 [1153419819]
-    #MW_like = -295.632987377041790
-    #LMC_with_parameters directly written in lua = -295.632992528164323
-    #laptop_like_multi = -308.238341155806722
-    #laptop_after_matching_windows = -304.164914230333522
-    hist = 'OS_test/windows_multithreaded5'
-    output = hist
-    #nbody(args, lua, hist, output, v)
-    match_hists(histogram_mw_1d_v160, hist, v)
-    
-    
-    args = [3.87427734322731, 1.01387196544634, 1.29523584391164, 2.99564367318775, 26.1017521350673, 131.258621913187]
-    #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
-    #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_3302962 [1152540540]
-    #MW_like = -1591.646667079636500
-    #LMC_with_parameters directly written in lua = -1591.646645167359111
-    #laptop_like_multi = -1591.649439867483352
-    #laptop_multi_static = -1591.649439867483352
-    #laptop_after_matching_windows = -1591.646622880012274
-    hist = 'OS_test/windows_multithreaded1_0gy_null'
-    output = hist
-    #nbody(args, lua, hist, output, v)
-    match_hists(histogram_mw_1d_v160, hist, v)
-    
-    if(windows == True):
-        #windows
-        args = [3.87427734322731, 1.01387196544634, 1.29523584391164, 2.99564367318775, 26.1017521350673, 131.258621913187]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
-        #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_3302962 [1152540540]
-        #MW_like = -1591.646667079636500
-        #LMC_with_parameters directly written in lua = -1591.646645167359111
-        #laptop_like_multi = -1591.649439867483352
-        #laptop_single = 
-        #laptop_multi_static = -1591.649439867483352
-        hist = 'OS_test/windows_multithreaded1'
-        output = hist
-        #nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [4.99591109942796, 0.893963217080646, 1.09139516383981, 2.2505519089581, 57.769204038868, 477.39115356239]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
-        #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_3187656 [1151509194]
-        #MW_like = -35.961996959483578
-        #laptop_like_multi = -35.353030758426641
-        #laptop_single = 
-        #laptop_multi_static =-35.353030758426641
-        hist = 'OS_test/windows_multithreaded2'
-        output = hist
-        #nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [4.99518109716855, 0.894630524992357, 1.12697810375362, 2.29332302971577, 58.9627482245134, 477.75245822501]
-        #OS:  milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
-        #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_3302452 [1152536278]
-        #MW_like = -32.820805876368382
-        #laptop_like_multi = -32.010253463412312
-        #laptop_single = -32.010253463412312
-        hist = 'OS_test/windows_multithreaded3'
-        output = hist
-        #nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.59371228338975, 0.960668713401728, 0.599260189737485, 2.89204324566376, 22.6509509936559, 300.154841212772]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
-        #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_3396367 [1153385353]
-        #MW_like = -143.192302468235600
-        #laptop_like_multi = -142.994280153233319
-        hist = 'OS_test/windows_multithreaded4'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [4.99437258372485, 0.891649783307308, 1.10684417920164, 2.28622114462683, 58.8750832674317, 460.143966582794]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
-        #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_3400209 [1153419819]
-        #MW_like = -295.632987377041790
-        #laptop_like_multi = -308.238341155806722
-        hist = 'OS_test/windows_multithreaded5'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.62651407569746, 0.958136076049239, 0.635878941348239, 2.889179456962, 20.1302128506159, 288.408902457954]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  , Crlibm 
-        #workunit:  ps_nbody_4_14_16_orphansim_v160_1_1453826702_3409800 [1153508410]
-        #MW_like = -28.714008474268674
-        #laptop_like_multi = -28.817376017023140
-        hist = 'OS_test/windows_multithreaded6'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [5, 0.940125402763589, 1.09842030523995, 2.1362602293744, 60, 600]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm
-        #workunit:  ps_nbody_4_14_16_orphansim_v160_2_1453826702_3314505 [1152638824]
-        #MW_like = -3090.048639610829500
-        #laptop_like_multi = -3067.649968787237412
-        hist = 'OS_test/windows_multithreaded7'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.61617100791001, 0.957377619356007, 0.642877878545248, 2.89266208243634, 19.7837628572825, 289.153996968709]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
-        #workunit:  ps_nbody_4_14_16_orphansim_v160_1_1453826702_3404893 [1153463266]
-        #MW_like = -19.584715268589605
-        #laptop_like_multi = -20.048038924522746
-        hist = 'OS_test/windows_multithreaded8'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.37866157256478, 0.934105725918354, 1.29499184441929, 2.99692050296758, 43.4836358484412, 1]
-        #OS: milkyway_nbody 1.60 Windows x86_64 double  OpenMP, Crlibm 
-        #workunit:  ps_nbody_4_14_16_orphansim_v160_3_1453826702_3081538 [1150480556]
-        #MW_like = -133.299125231486300
-        #laptop_like_multi = -133.299122418788841
-        hist = 'OS_test/windows_multithreaded9'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-    if(linux == True):
-        #linux
-        args = [3.70778452511877, 1.01667175907642, 0.254742649011314, 0.143711601383984, 11.3450273240451, 574.759386941092]
-        #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
-        #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757434 [1146228735]
-        #MW_like = 579.736066389484677
-        #laptop_like_multi = -564.961726428886095
-        #laptop_single = 
-        #laptop_multi_static =-564.961726428886095
-        hist = 'OS_test/linux_multithreaded1'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        
-        args = [4.27052977262065, 0.898590506706387, 1.13573807105422, 1.05763955467846, 4.26117976009846, 505.117312682793]
-        #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
-        #workunit:ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757546 [1146230255]
-        #MW_like = -2411.196889060096055
-        #laptop_like_multi = -2407.992198395417290
-        #laptop_single = 
-        #laptop_multi_static =-2407.992198395417290
-        hist = 'OS_test/linux_multithreaded2'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [4.28939779102802, 1.1479856419377, 0.81844124076888, 1.40610990077257, 42.8358124603983, 493.859601157717]
-        #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
-        #workunit: ps_nbody_4_14_16_orphansim_v160_2_1453826702_2757751 [1146232693]
-        #MW_like = -12991.388977929243993
-        #laptop_like_multi = -13097.004861729281401
-        #laptop_single = 
-        #laptop_multi_static =-13097.004861729281401
-        hist = 'OS_test/linux_multithreaded3'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.90124507574365, 0.940801729913801, 0.864376512635499, 0.365644396073185, 54.3746401073877, 376.632761744782]
-        #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
-        #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2757837 [1146235164]
-        #MW_like = -1103.915226218623047
-        #laptop_like_multi = -1059.128753402558232
-        #laptop_single = 
-        #laptop_multi_static =-1059.128753402558232
-        hist = 'OS_test/linux_multithreaded4'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.15275016007945, 1.01077198171988, 0.518699688930064, 1.16948326204438, 45.0927923207637, 224.0722140742]
-        #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
-        #workunit: ps_nbody_4_14_16_orphansim_v160_1_1453826702_2758001 [1146237706]
-        #MW_like = -7276.429429114665254
-        #laptop_like_multi = -7253.815399924838857
-        #laptop_single = 
-        #laptop_multi_static =-7253.815399924838857
-        hist = 'OS_test/linux_multithreaded5'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-        
-        args = [3.47986795054749, 1.13666507601738, 0.755570971686393, 1.23453689094167, 50.398002382135, 426.925432941876]
-        #OS: milkyway_nbody 1.60 Linux x86_64 double  OpenMP
-        #workunit: ps_nbody_4_14_16_orphansim_v160_3_1453826702_2758209 [1146240830]
-        #MW_like = -17637.067619180670590
-        #laptop_like_multi = -17812.410820521141432
-        #laptop_single = 
-        #laptop_multi_static =-17812.410820521141432
-        hist = 'OS_test/linux_multithreaded6'
-        output = hist
-        nbody(args, lua, hist, output, v)
-        match_hists(histogram_mw_1d_v160, hist, v)
-# # # # # # # # # # # # # # # # # # # # # #
 
 def clean():
     os.system("rm boinc_finish_called")
@@ -916,29 +492,26 @@ def clean():
     os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():    
-    if(VM_binary_pull == True):
-        build_on_VM()
-    
     standard_run()
     
     if(make_a_few_hists == True):
         make_some_hists()
     
-    if(run_binary_compare == True):
-        old_new_binary_compare()
+    #if(run_binary_compare == True):
+        #old_new_binary_compare()
         
-    if(run_diff_OS_test == True):
-        diff_OS_test_v160()
+    #if(run_diff_OS_test == True):
+        #diff_OS_test_v160()
         #diff_OS_test_v158()
     
     if(run_stability_test == True):
         stabity_test()
     
-    if(recalc_para_sweep_likes == True):
-        recalc_parameter_sweep_likelihoods()
+    #if(recalc_para_sweep_likes == True):
+        #recalc_parameter_sweep_likelihoods()
     
-    if(run_seed_fluctuation_test == True):
-        different_seed_fluctuation()
+    #if(run_seed_fluctuation_test == True):
+        #different_seed_fluctuation()
     
     if(velocity_dispersion_calc == True):
         velocity_dispersion()
@@ -947,6 +520,6 @@ def main():
         lb_plot(output)
         
         
-    #clean()
+    clean()
         
 main()
