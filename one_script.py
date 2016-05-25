@@ -25,14 +25,15 @@ import pxssh
 y = True
 n = False
 #args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [3.95, 0.98, 0.2, 0.8, 12, 48] #for hist with dark matter
+args = [3.87427734322731, 1.01387196544634, 1.29523584391164, 2.99564367318775, 26.1017521350673, 131.258621913187]
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = y                 #
+run_nbody                 = y                 #
+remake                    = n                 #
 match_histograms          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
@@ -64,30 +65,31 @@ velocity_dispersion_calc  = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
-histogram_mw_1d_v160 = 'hist_v160_ft3p95_rt0p98_rl0p2_rd0p8_ml12_md48p0__4_14_16'
+histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_25_16'
+
 #    histograms for runs #
 histogram_for_nbody_run = 'test'
 
-match_hist_correct = histogram_mw_1d_v160
-match_hist_compare = 'OS_test/windows_multithreaded5'
+match_hist_correct = histogram_mw_1d_v162
+match_hist_compare = histogram_for_nbody_run
 plot_name = 'mw_hist'
 
-output = 'velocity_dispersion_test_Null_lbr_xyz_0gy'
+output = histogram_for_nbody_run
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #version = '_162_VM' #determines which binary is run
-version = ''
+version = '_fornax'
 #lua = "EMD_v160.lua"
-#lua = "EMD_v160.lua"
-lua = "Null.lua"
+lua = "EMD_v162.lua"
+#lua = "Null.lua"
 
 outs = 2 #for the cm calculation function
 
 #I am tired of constantly adapting it for the servers
 lmc_dir = '~/research/'
 sid_dir = '~/Desktop/research/'
-path = sid_dir
+path = lmc_dir
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Engine Room         #
