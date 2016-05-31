@@ -372,6 +372,7 @@ def calc_half_light_radius(bodies):
     print total_mass, total_light_mass, total_dark_mass
     
     return half_light_radius
+
 def calc_actual_mass_in_bin(bins, bodies):#calculates the total mass
     total_mass = 0
     total_count = 0

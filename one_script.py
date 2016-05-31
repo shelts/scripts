@@ -10,12 +10,10 @@
 import os
 import subprocess
 from subprocess import call
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
 import matplotlib.patches as mpatches
-import pxssh
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
@@ -24,17 +22,15 @@ import pxssh
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-#args = [3.945, 0.9862, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [3.95, 0.98, 0.2, 0.8, 12, 48] #for hist with dark matter
-args = [3.87427734322731, 1.01387196544634, 1.29523584391164, 2.99564367318775, 26.1017521350673, 131.258621913187]
-
+#args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = y                 #
-remake                    = n                 #
-match_histograms          = y                 #
+remake                    = y                 #
+match_histograms          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -44,31 +40,31 @@ plot_adjacent             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-
+get_fornax_binary_now = n
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 # possible tests #                            #
 # # # # # # # # # # # # # # # # # # # # # # # #
-recalc_para_sweep_likes   = n                 #
+velocity_dispersion_calc  = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 make_a_few_hists          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_diff_OS_test          = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-run_binary_compare        = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
 run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_seed_fluctuation_test = n                 #
+#recalc_para_sweep_likes   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-velocity_dispersion_calc  = n                 #
+#run_diff_OS_test          = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#run_seed_fluctuation_test = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#run_binary_compare        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
-histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_25_16'
+histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_31_16'
 
 #    histograms for runs #
-histogram_for_nbody_run = 'test'
+histogram_for_nbody_run = histogram_mw_1d_v162
 
 match_hist_correct = histogram_mw_1d_v162
 match_hist_compare = histogram_for_nbody_run
@@ -79,7 +75,7 @@ output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #version = '_162_VM' #determines which binary is run
-version = '_fornax'
+version = ''
 #lua = "EMD_v160.lua"
 lua = "EMD_v162.lua"
 #lua = "Null.lua"
@@ -89,7 +85,8 @@ outs = 2 #for the cm calculation function
 #I am tired of constantly adapting it for the servers
 lmc_dir = '~/research/'
 sid_dir = '~/Desktop/research/'
-path = lmc_dir
+sgr_dir = '/Users/master/sidd_research/'
+path = sid_dir
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Engine Room         #
@@ -122,10 +119,11 @@ def standard_run():
 # # # # # # # # # #         
 def make_nbody():
         os.chdir("./")
+        #-DCMAKE_C_COMPILER=/usr/bin/cc 
         os.system("rm -r nbody_test")
         os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -487,13 +485,20 @@ def stabity_test():
     os.chdir("data_testing")    
     os.system("./stability_test.py " + back_time + " " + r_l + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
 # # # # # # # # # # # # # # # # # # # # # #
+def get_fornax_binary():
+    os.system('scp $fornax:~/research/nbody_test/bin/milkyway_nbody ./nbody_test/bin/milkyway_nbody_fornax')
+
 
 def clean():
     os.system("rm boinc_finish_called")
     os.system("rm boinc_milkyway_nbody_1.54_x86_64-pc-linux-gnu__mt_0")
     os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
 # # # # # # # # # # # # # # # # # # # # # #    
-def main():    
+def main():
+
+    if(get_fornax_binary_now == True):
+        get_fornax_binary()
+        
     standard_run()
     
     if(make_a_few_hists == True):
