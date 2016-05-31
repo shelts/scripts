@@ -28,8 +28,8 @@ args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = y                 #
+run_nbody                 = y                 #
+remake                    = n                 #
 match_histograms          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
@@ -64,7 +64,7 @@ run_stability_test        = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_31_16'
 
 #    histograms for runs #
-histogram_for_nbody_run = 'test_fornax'
+histogram_for_nbody_run = 'test_fornax_m'
 
 match_hist_correct = histogram_mw_1d_v162
 match_hist_compare = histogram_for_nbody_run
@@ -75,7 +75,7 @@ output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #version = '_162_VM' #determines which binary is run
-version = ''
+version = '_1.62_x86_64-pc-linux-gnu__mt'
 #lua = "EMD_v160.lua"
 lua = "EMD_v162.lua"
 #lua = "Null.lua"
@@ -141,7 +141,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+         -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -495,7 +495,6 @@ def clean():
     os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():
-
     if(get_fornax_binary_now == True):
         get_fornax_binary()
         
