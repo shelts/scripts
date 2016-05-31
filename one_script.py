@@ -22,15 +22,15 @@ import matplotlib.patches as mpatches
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
+args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
+run_nbody                 = n                 #
 remake                    = y                 #
-match_histograms          = n                 #
+match_histograms          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -40,7 +40,7 @@ plot_adjacent             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-get_fornax_binary_now = n
+get_fornax_binary_now     = n
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 # possible tests #                            #
@@ -64,7 +64,7 @@ run_stability_test        = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_31_16'
 
 #    histograms for runs #
-histogram_for_nbody_run = histogram_mw_1d_v162
+histogram_for_nbody_run = 'test_fornax'
 
 match_hist_correct = histogram_mw_1d_v162
 match_hist_compare = histogram_for_nbody_run
@@ -120,8 +120,8 @@ def standard_run():
 def make_nbody():
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        os.system("rm -r nbody_test")
-        os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")
+        #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
