@@ -45,7 +45,7 @@ plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 get_fornax_binary_now     = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = n                 #
+charles                   = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -159,7 +159,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+         -n 12 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -357,6 +357,7 @@ def lb_plot(file_name):
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     
     if(plot_lbr == True):
+        plt.figure(figsize=(20, 20))
         xlower = -180.0
         xupper = 180.0
         ylower = -80
@@ -366,12 +367,16 @@ def lb_plot(file_name):
         plt.xlabel('l')
         plt.ylabel('b')
         plt.title('l vs b')
-        plt.figure(figsize=(20, 20))
         #default to just plot lm
         plt.plot(light_l, light_b, '.', markersize = 1, color = 'k', alpha=1.0, marker = '.')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
         
         if(plot_light_and_dark == True):#plot lm and dm overlapping
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
             plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
         
@@ -398,6 +403,11 @@ def lb_plot(file_name):
                 orb_vy.append(orbVy)
                 orb_vz.append(orbVz)
                 
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
             plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
           
@@ -414,8 +424,13 @@ def lb_plot(file_name):
                 #print(orbpl, orbpb)
                 orbp_l.append(orbpl)
                 orbp_b.append(orbpb) 
-            plt.plot(orbp_l, orbp_b, '.', markersize = 3, color = 'g', alpha= 1.0, marker = 'o')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit_orbitpoints', format='png')
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(orbp_l, orbp_b, '.', markersize = 3, color = 'm', alpha= 1.0, marker = 'o')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
         
         if(plot_dm == True):#to plot just dm
             plt.clf()
@@ -471,7 +486,7 @@ def lb_plot(file_name):
 def for_charles():
     ver = ''
     #doesn't matter the parameters, I hard coded them in the lua
-    output = 'ft1gy_bt1gy_massl2.04_massd40.89_rl0.05_rd0.3'
+    output = 'ft2gy_bt2gy_massl2.04_massd40.89_rl0.025_rd0.3'
     #output = 'test'
     nbody(args, lua, output, output, ver)
     os.system("mv reverse_orbit.out quick_plots/outputs/")
