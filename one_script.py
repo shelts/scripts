@@ -430,10 +430,12 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(orbp_l, orbp_b, '.', markersize = 3, color = 'm', alpha= 1.0, marker = 'o')
+            plt.show()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
         
         if(plot_dm == True):#to plot just dm
             plt.clf()
+            plt.figure(figsize=(20, 20))
             plt.xlim((xlower, xupper))
             plt.ylim((ylower, yupper))
             plt.xlabel('l')
@@ -484,12 +486,16 @@ def lb_plot(file_name):
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
 def for_charles():
+    get_from_lmc = n
     ver = ''
     #doesn't matter the parameters, I hard coded them in the lua
     output = 'ft2gy_bt2gy_massl2.04_massd40.89_rl0.025_rd0.3'
     #output = 'test'
-    nbody(args, lua, output, output, ver)
-    os.system("mv reverse_orbit.out quick_plots/outputs/")
+    #nbody(args, lua, output, output, ver)
+    #os.system("mv reverse_orbit.out quick_plots/outputs/")
+    if(get_from_lmc == True):
+        os.system("scp $lmc:~/research/quick_plots/outputs/reverse_orbit.out quick_plots/outputs")
+        os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs")
     lb_plot(output)
 
 def velocity_dispersion():
@@ -579,12 +585,12 @@ def clean():
     #os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():
-    if(charles == True):
-        for_charles()
     if(get_fornax_binary_now == True):
         get_fornax_binary()
         
     standard_run()
+    if(charles == True):
+        for_charles()
     
     if(make_a_few_hists == True):
         make_some_hists()
