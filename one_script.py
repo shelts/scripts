@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import math
 import matplotlib.patches as mpatches
-
+import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Control Panel       #
@@ -22,15 +22,18 @@ import matplotlib.patches as mpatches
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
+#args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
+
+
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
+run_nbody                 = n                 #
 remake                    = n                 #
-match_histograms          = y                 #
+match_histograms          = n                 #
+run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -40,7 +43,10 @@ plot_adjacent             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-get_fornax_binary_now     = n
+get_fornax_binary_now     = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+charles                   = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 # possible tests #                            #
@@ -50,32 +56,41 @@ velocity_dispersion_calc  = n                 #
 make_a_few_hists          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_stability_test        = n                 #
+
 # # # # # # # # # # # # # # # # # # # # # # # #
-#recalc_para_sweep_likes   = n                 #
+# deprecated tests #                          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-#run_diff_OS_test          = n                 #
+#recalc_para_sweep_likes   = n                #
 # # # # # # # # # # # # # # # # # # # # # # # #
-#run_seed_fluctuation_test = n                 #
+#run_diff_OS_test          = n                #
 # # # # # # # # # # # # # # # # # # # # # # # #
-#run_binary_compare        = n                 #
+#run_seed_fluctuation_test = n                #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#run_binary_compare        = n                #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_31_16'
 
 #    histograms for runs #
-histogram_for_nbody_run = 'test_fornax_m'
+multi = 'test_mt'
+singl = 'test_st'
 
-match_hist_correct = histogram_mw_1d_v162
-match_hist_compare = histogram_for_nbody_run
-plot_name = 'mw_hist'
+histogram_for_nbody_run = multi
+correct_hist = "test_correct"
 
-output = histogram_for_nbody_run
+
+match_hist_correct = correct_hist
+match_hist_compare = multi
+plot_name = 'massl2.04_massd40.89_rl0.05_rd0.3'
+
+output = plot_name
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #version = '_162_VM' #determines which binary is run
-version = '_1.62_x86_64-pc-linux-gnu__mt'
+#version = '_1.62_x86_64-pc-linux-gnu__mt'
+version  = ''
 #lua = "EMD_v160.lua"
 lua = "EMD_v162.lua"
 #lua = "Null.lua"
@@ -103,6 +118,9 @@ def standard_run():
     if(run_nbody == True):
         nbody(args, lua, histogram_for_nbody_run, output, version)
     
+    if(run_and_compare == True):
+        compare_after_run(args, lua, correct_hist, histogram_for_nbody_run, output, version)
+    
     if(match_histograms == True):
         match_hists(match_hist_correct, match_hist_compare, version)
         
@@ -123,7 +141,7 @@ def make_nbody():
         #os.system("rm -r nbody_test")
         #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -141,7 +159,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+         -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -151,6 +169,23 @@ def match_hists(hist1, hist2, ver):
           + " -s " + path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
     print hist1, "\n", hist2
     print "\n"
+
+def compare_after_run(paras, lua_file, correct, hist, out, ver):
+    sim_time      = str(paras[0])
+    back_time     = str(paras[1])
+    r0            = str(paras[2])
+    light_r_ratio = str(paras[3])
+    mass_l        = str(paras[4])
+    mass_ratio    = str(paras[5])
+        #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
+    print('running nbody')
+    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+        -f " + path + "lua/" + lua_file + " \
+        -h " + path + "quick_plots/hists/" + hist + ".hist \
+        -z " + path + "quick_plots/hists/" + hist + ".hist \
+        -o " + path + "quick_plots/outputs/" + out + ".out \
+        -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+
 # # # # # # # # # #       
  
 def plot(hist1, hist2, name):
@@ -266,8 +301,9 @@ def lb_plot(file_name):
     plot_lbr = y
     plot_light_and_dark = y
     plot_dm = y
-    
     plot_xyz = n
+    plot_orbit = y
+    plot_orbit_points = y
     f = open('quick_plots/outputs/' + file_name + '.out')
     lines = []
     lines = f.readlines()
@@ -282,15 +318,14 @@ def lb_plot(file_name):
     dark_vx , dark_vy , dark_vz = ([] for i in range(3))
 
     for line in lines:
-
         tokens = line.split(', ')
         isDark = int(tokens[0])
         X = float(tokens[1])
         Y = float(tokens[2])
         Z = float(tokens[3])
         l = float(tokens[4])
-        #if(l > 180.0):
-            #l = l - 360.0
+        if(l > 180.0):
+            l = l - 360.0
         b = float(tokens[5])
         r = float(tokens[6])
         vx = float(tokens[7])
@@ -317,32 +352,13 @@ def lb_plot(file_name):
             dark_vy.append(vy)
             dark_vz.append(vz)    
     print(len(light_l))
-    light_x = np.array(light_x)
-    light_y = np.array(light_y)
-    light_z = np.array(light_z)
-    light_l = np.array(light_l)
-    light_b = np.array(light_b)
-    light_r = np.array(light_r)
-    light_vx = np.array(light_vx)
-    light_vy = np.array(light_vy)
-    light_vz = np.array(light_vz)
-    
-    dark_x = np.array(dark_x)
-    dark_y = np.array(dark_y)
-    dark_z = np.array(dark_z)
-    dark_l = np.array(dark_l)
-    dark_b = np.array(dark_b)
-    dark_r = np.array(dark_r)
-    dark_vx = np.array(dark_vx)
-    dark_vy = np.array(dark_vy)
-    dark_vz = np.array(dark_vz)
     
     fig = plt.figure()
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     
     if(plot_lbr == True):
-        xlower = 360
-        xupper = 0.0
+        xlower = -180.0
+        xupper = 180.0
         ylower = -80
         yupper = 80
         plt.xlim((xlower, xupper))
@@ -350,15 +366,57 @@ def lb_plot(file_name):
         plt.xlabel('l')
         plt.ylabel('b')
         plt.title('l vs b')
-        
+        plt.figure(figsize=(20, 20))
         #default to just plot lm
-        plt.plot(light_l, light_b, '.', markersize = 1, color = 'r', marker = 'o')
+        plt.plot(light_l, light_b, '.', markersize = 1, color = 'k', alpha=1.0, marker = '.')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
         
         if(plot_light_and_dark == True):#plot lm and dm overlapping
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
-            
+        
+        if(plot_orbit == True):
+            f = open('quick_plots/outputs/reverse_orbit.out')
+            lines = []
+            lines = f.readlines()
+            orb_l , orb_b , orb_r = ([] for i in range(3))
+            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
+            for line in lines:
+                tokens = line.split('\t')
+                orbX = float(tokens[0])
+                if(orbX > 180.0):
+                    orbX = orbX - 360.0
+                orbY = float(tokens[1])
+                orbZ = float(tokens[2])
+                orbVx = float(tokens[3])
+                orbVy = float(tokens[4])
+                orbVz = float(tokens[5])
+                orb_l.append(orbX)
+                orb_b.append(orbY)
+                orb_r.append(orbZ)
+                orb_vx.append(orbVx)
+                orb_vy.append(orbVy)
+                orb_vz.append(orbVz)
+                
+            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
+          
+        if(plot_orbit_points == True):
+            f = open('quick_plots/outputs/Hermus_pm2_13stars.csv')
+            lines = []
+            lines = f.readlines()
+            lines = lines[1:len(lines)]
+            orbp_l , orbp_b , orbp_r = ([] for i in range(3))
+            for line in lines:
+                tokens = line.split(',')
+                orbpl = float(tokens[2])
+                orbpb = float(tokens[3])
+                #print(orbpl, orbpb)
+                orbp_l.append(orbpl)
+                orbp_b.append(orbpb) 
+            plt.plot(orbp_l, orbp_b, '.', markersize = 3, color = 'g', alpha= 1.0, marker = 'o')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit_orbitpoints', format='png')
+        
         if(plot_dm == True):#to plot just dm
             plt.clf()
             plt.xlim((xlower, xupper))
@@ -405,13 +463,24 @@ def lb_plot(file_name):
         plt.title('z vs y')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_xyz', format='png')
         
+
+        
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
+def for_charles():
+    ver = ''
+    #doesn't matter the parameters, I hard coded them in the lua
+    output = 'ft1gy_bt1gy_massl2.04_massd40.89_rl0.05_rd0.3'
+    #output = 'test'
+    nbody(args, lua, output, output, ver)
+    os.system("mv reverse_orbit.out quick_plots/outputs/")
+    lb_plot(output)
+
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
     file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
-    file_name = 'test2'
+    file_name = 'nbody1'
     #l = 'Null.lua'
     l = 'EMD_v160_direct_fit.lua'
     #nbody(args, l, file_name, file_name, version)
@@ -490,11 +559,13 @@ def get_fornax_binary():
 
 
 def clean():
-    os.system("rm boinc_finish_called")
-    os.system("rm boinc_milkyway_nbody_1.54_x86_64-pc-linux-gnu__mt_0")
-    os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
+    os.system("rm boinc_*")
+    #os.system("rm boinc_milkyway_nbody_1.54_x86_64-pc-linux-gnu__mt_0")
+    #os.system("rm boinc_milkyway_nbody_1.58_x86_64-pc-linux-gnu__mt_0")
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():
+    if(charles == True):
+        for_charles()
     if(get_fornax_binary_now == True):
         get_fornax_binary()
         

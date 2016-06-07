@@ -10,8 +10,8 @@ import math
 
 
 
-file1 = '../milkywayathome_client/CMakeLists.txt'
-file2 = '../CMakeLists.txt'
+file1 = '../1.txt'
+file2 = '../2.txt'
 
 lines1 = []
 lines2 = []

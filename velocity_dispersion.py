@@ -19,17 +19,17 @@ y = True
 n = False
 
 #how many bins in each direction
-l_bins = 1
+l_bins = 100
 b_bins = 1
 r_bins = 1
 
 
-l_start = -100.0
-l_end = 100.0
+l_start = 17.0
+l_end = 70.0
 l_bin_width = (l_end - l_start) / l_bins
 
-b_start = -20.0
-b_end = 20.0
+b_start = -180.0
+b_end = 180.0
 b_bin_width = (b_end - b_start) / b_bins
 
 r_start = 0.0
@@ -40,7 +40,7 @@ r_bin_width = (r_end - r_start) / r_bins
 plot_bins =  n
 
 use_whole_sky = n
-sym_l = y
+sym_l = n
 
 if(use_whole_sky == True):
     l_start = 0.0
@@ -131,7 +131,7 @@ def get_data(file_name):
         y  = (float(ss[2]))
         z  = (float(ss[3]))
         l  = (float(ss[4]))
-        if(sym_l ==True):
+        if(sym_l == True):
             if(l > 180.0):
                 l = l - 360.0
         b  = (float(ss[5]))
@@ -197,7 +197,10 @@ def plot_binned_counts(bins, disp_per_bin):
                         disp_vy = disp_per_bin[j][k][m][1]
                         disp_vz = disp_per_bin[j][k][m][2]
                         disp_vl = disp_per_bin[j][k][m][3]
-                        g.write("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n" % (j * r_bin_width + r_start, m * l_bin_width + l_start, k * b_bin_width + b_start, counts, disp_vl, disp_vx, disp_vy, disp_vz))
+                        r_cur = j * r_bin_width + r_start
+                        l_cur = m * l_bin_width + l_start
+                        b_cur = k * b_bin_width + b_start
+                        g.write("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n" % (r_cur, l_cur, b_cur , counts, disp_vl, disp_vx, disp_vy, disp_vz))
     
     g.close()
     
@@ -314,7 +317,7 @@ def binned_dispersion(bins, bodies):
                                 dispersion_per_bin[j][k][m][1] = disp_vy
                                 dispersion_per_bin[j][k][m][2] = disp_vz
                                 dispersion_per_bin[j][k][m][3] = disp_vl
-                                #print disp_vl, N_bodies_in_bin
+                                print disp_vl, N_bodies_in_bin
     
     return dispersion_per_bin
 
@@ -355,23 +358,23 @@ def vel_disp(file_name, bodies):
 # # # # # # # # # # #
 # mass calculations #
 # # # # # # # # # # #
-def calc_half_light_radius(bodies):
-    total_mass = 0
-    total_dark_mass = 0
-    total_light_mass = 0
+#def calc_half_light_radius(bodies):
+    #total_mass = 0
+    #total_dark_mass = 0
+    #total_light_mass = 0
 
-    for i in range(0, body.body_count):
-        total_mass += bodies[i].mass
-        if(bodies[i].mtype == 1):
-            total_dark_mass += bodies[i].mass
-        if(bodies[i].mtype == 0):
-            total_light_mass += bodies[i].mass
+    #for i in range(0, body.body_count):
+        #total_mass += bodies[i].mass
+        #if(bodies[i].mtype == 1):
+            #total_dark_mass += bodies[i].mass
+        #if(bodies[i].mtype == 0):
+            #total_light_mass += bodies[i].mass
             
             
     
-    print total_mass, total_light_mass, total_dark_mass
+    #print total_mass, total_light_mass, total_dark_mass
     
-    return half_light_radius
+    #return half_light_radius
 
 def calc_actual_mass_in_bin(bins, bodies):#calculates the total mass
     total_mass = 0
@@ -391,7 +394,7 @@ def calc_actual_mass_in_bin(bins, bodies):#calculates the total mass
 
 def calc_mass_per_bin(disp_per_bin, half_light_radius):#for when looking at core (1 bin)
     mass_per_bin = [[[[0 for xyzl in range(1)] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
-    half_light_radius = 5.0 #place holder until I figure out how to calculate this.
+    #half_light_radius = .5 #place holder until I figure out how to calculate this.
     
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
@@ -419,6 +422,7 @@ def main():
     else: 
         name1 = 'velocity_dispersion_test_Null_lbr_xyz_0gy'
         #name1 = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
+        name1 = 'ft2gy_bt2gy_rl.05kpc_rd.25kpc_ml_md'
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
     print "for output: ", name1 
     
@@ -428,7 +432,7 @@ def main():
     #this calculates the total vx vy vz dispersion
     disp_vx, disp_vy, disp_vz, disp_vl = vel_disp(file_name, bodies)
     dispersion = [disp_vx, disp_vy, disp_vz, disp_vl]
-    #print(dispersion) #dispersion of the entire sky
+    print(dispersion) #dispersion of the entire sky
     
     #this bins the bodies by their positions
     bins = []
@@ -439,7 +443,8 @@ def main():
     dispersion_per_bin = binned_dispersion(bins, bodies)
     
     mass_per_bin = []
-    half_light_radius = calc_half_light_radius(bodies)
+    #half_light_radius = calc_half_light_radius(bodies)
+    half_light_radius = 0.5
     mass_per_bin = calc_mass_per_bin(dispersion_per_bin, half_light_radius)
     
     calc_actual_mass_in_bin(bins, bodies)
