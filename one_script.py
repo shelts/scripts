@@ -22,9 +22,9 @@ import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
+args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
 
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -32,8 +32,8 @@ args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = n                 #
-match_histograms          = n                 #
-run_and_compare           = n                 #
+match_histograms          = y                 #
+run_and_compare           = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -45,7 +45,7 @@ plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 get_fornax_binary_now     = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = y                 #
+charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -81,8 +81,8 @@ correct_hist = "test_correct"
 
 
 match_hist_correct = correct_hist
-match_hist_compare = multi
-plot_name = 'massl2.04_massd40.89_rl0.05_rd0.3'
+match_hist_compare = histogram_for_nbody_run
+plot_name = histogram_for_nbody_run
 
 output = plot_name
 output1 = match_hist_correct + ".out"
@@ -141,7 +141,7 @@ def make_nbody():
         #os.system("rm -r nbody_test")
         #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -181,7 +181,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
     print('running nbody')
     os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
         -f " + path + "lua/" + lua_file + " \
-        -h " + path + "quick_plots/hists/" + hist + ".hist \
+        -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
         -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
@@ -298,12 +298,14 @@ def calculate_cm(paras, output1, output2, outs):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
 # # # # # # # # # #
 def lb_plot(file_name):
+    print file_name
     plot_lbr = y
     plot_light_and_dark = y
     plot_dm = y
     plot_xyz = n
     plot_orbit = y
     plot_orbit_points = y
+    plot_poly_points = y
     f = open('quick_plots/outputs/' + file_name + '.out')
     lines = []
     lines = f.readlines()
@@ -409,10 +411,40 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
+            
+            f = open('quick_plots/outputs/forward_orbit.out')
+            lines = []
+            lines = f.readlines()
+            orb_l , orb_b , orb_r = ([] for i in range(3))
+            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
+            for line in lines:
+                tokens = line.split('\t')
+                orbX = float(tokens[0])
+                if(orbX > 180.0):
+                    orbX = orbX - 360.0
+                orbY = float(tokens[1])
+                orbZ = float(tokens[2])
+                orbVx = float(tokens[3])
+                orbVy = float(tokens[4])
+                orbVz = float(tokens[5])
+                orb_l.append(orbX)
+                orb_b.append(orbY)
+                orb_r.append(orbZ)
+                orb_vx.append(orbVx)
+                orb_vy.append(orbVy)
+                orb_vz.append(orbVz)
+                
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'c', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
-          
+            
         if(plot_orbit_points == True):
-            f = open('quick_plots/outputs/Hermus_pm2_13stars.csv')
+            f = open('quick_plots/outputs/charles/Hermus_pm2_13stars.csv')
             lines = []
             lines = f.readlines()
             lines = lines[1:len(lines)]
@@ -430,8 +462,33 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(orbp_l, orbp_b, '.', markersize = 3, color = 'm', alpha= 1.0, marker = 'o')
-            plt.show()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
+            
+            
+        if(plot_poly_points == True):
+            f = open('quick_plots/outputs/charles/polynomial_fit.csv')
+            lines = []
+            lines = f.readlines()
+            lines = lines[1:len(lines)]
+            orbpoly_l , orbpoly_b = ([] for i in range(2))
+            for line in lines:
+                tokens = line.split(',')
+                tokens[3] = tokens[3].strip()
+                #print tokens
+                orbpl = float(tokens[2])
+                orbpb = float(tokens[3])
+                #print(orbpl, orbpb)
+                orbpoly_l.append(orbpl)
+                orbpoly_b.append(orbpb) 
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(orbpoly_l, orbpoly_b, '.', markersize = 3, color = 'g', alpha= 1.0, marker = 'o')
+            plt.show()
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + 'with_poly', format='png')
+            
         
         if(plot_dm == True):#to plot just dm
             plt.clf()
@@ -490,9 +547,11 @@ def for_charles():
     ver = ''
     #doesn't matter the parameters, I hard coded them in the lua
     output = 'ft2gy_bt2gy_massl2.04_massd40.89_rl0.025_rd0.3'
+    #output = 'ft1gy_bt1gy_massl2.04_massd40.89_rl0.025_rd0.3'
     #output = 'test'
     #nbody(args, lua, output, output, ver)
-    #os.system("mv reverse_orbit.out quick_plots/outputs/")
+    os.system("mv reverse_orbit.out quick_plots/outputs/")
+    os.system("mv forward_orbit.out quick_plots/outputs/")
     if(get_from_lmc == True):
         os.system("scp $lmc:~/research/quick_plots/outputs/reverse_orbit.out quick_plots/outputs")
         os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs")
