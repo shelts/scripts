@@ -22,18 +22,20 @@ import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
-
+#args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
+#args = [2.0, 0.98, 0.2, 0.2, 13, 0.2] #for hist with dark matter
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = n                 #
-match_histograms          = y                 #
-run_and_compare           = y                 #
+match_histograms          = n                 #
+run_and_compare           = n                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+charles                   = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -45,8 +47,6 @@ plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 get_fornax_binary_now     = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 # possible tests #                            #
@@ -56,31 +56,20 @@ velocity_dispersion_calc  = n                 #
 make_a_few_hists          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_stability_test        = n                 #
-
-# # # # # # # # # # # # # # # # # # # # # # # #
-# deprecated tests #                          #
-# # # # # # # # # # # # # # # # # # # # # # # #
-#recalc_para_sweep_likes   = n                #
-# # # # # # # # # # # # # # # # # # # # # # # #
-#run_diff_OS_test          = n                #
-# # # # # # # # # # # # # # # # # # # # # # # #
-#run_seed_fluctuation_test = n                #
-# # # # # # # # # # # # # # # # # # # # # # # #
-#run_binary_compare        = n                #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
-histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__5_31_16'
+histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
 multi = 'test_mt'
 singl = 'test_st'
 
+correct_hist = multi
 histogram_for_nbody_run = multi
-correct_hist = "test_correct"
 
 
-match_hist_correct = correct_hist
+match_hist_correct = multi
 match_hist_compare = histogram_for_nbody_run
 plot_name = histogram_for_nbody_run
 
@@ -88,11 +77,9 @@ output = plot_name
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
-#version = '_162_VM' #determines which binary is run
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-#lua = "EMD_v160.lua"
-lua = "EMD_v162.lua"
+lua = "charles_EMD_v162.lua"
 #lua = "Null.lua"
 
 outs = 2 #for the cm calculation function
@@ -141,7 +128,7 @@ def make_nbody():
         #os.system("rm -r nbody_test")
         #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=OFF -DNBODY_STATIC=OFF -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_GL=ON -DNBODY_STATIC=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
@@ -159,7 +146,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+         -n 12 -b  -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -184,7 +171,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 10 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 
 # # # # # # # # # #       
  
@@ -370,7 +357,7 @@ def lb_plot(file_name):
         plt.ylabel('b')
         plt.title('l vs b')
         #default to just plot lm
-        plt.plot(light_l, light_b, '.', markersize = 1, color = 'k', alpha=1.0, marker = '.')
+        plt.plot(light_l, light_b, '.', markersize = 1, color = 'c', alpha=1.0, marker = '.')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
         
         if(plot_light_and_dark == True):#plot lm and dm overlapping
@@ -379,7 +366,7 @@ def lb_plot(file_name):
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', alpha=1.0, marker = '.')
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'm', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
         
         if(plot_orbit == True):
@@ -536,26 +523,26 @@ def lb_plot(file_name):
         plt.ylabel('y')
         plt.title('z vs y')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_xyz', format='png')
-        
-
-        
+    return 0
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
 def for_charles():
     get_from_lmc = n
+    list_of_runs = n
     ver = ''
-    #doesn't matter the parameters, I hard coded them in the lua
-    output = 'ft2gy_bt2gy_massl2.04_massd40.89_rl0.025_rd0.3'
-    #output = 'ft1gy_bt1gy_massl2.04_massd40.89_rl0.025_rd0.3'
-    #output = 'test'
-    #nbody(args, lua, output, output, ver)
-    os.system("mv reverse_orbit.out quick_plots/outputs/")
-    os.system("mv forward_orbit.out quick_plots/outputs/")
+    args = [2.0, 2.0, 0.01, 0.125, 1e5 , 5e6]
+    #output = 'ft2gy_bt2gy_massl.45_massd22.5_rl0.01_rd0.125_nfw'
+    output = 'test'
+    nbody(args, lua, output, output, ver)
+    #os.system("mv reverse_orbit.out quick_plots/outputs/")
+    #os.system("mv forward_orbit.out quick_plots/outputs/")
     if(get_from_lmc == True):
-        os.system("scp $lmc:~/research/quick_plots/outputs/reverse_orbit.out quick_plots/outputs")
         os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs")
     lb_plot(output)
+    
+    #if(list_of_runs == True):
+        #args = [2.0, 2.0, 1e5 / 222288.47, 
 
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
@@ -563,7 +550,7 @@ def velocity_dispersion():
     file_name = 'nbody1'
     #l = 'Null.lua'
     l = 'EMD_v160_direct_fit.lua'
-    #nbody(args, l, file_name, file_name, version)
+    nbody(args, l, file_name, file_name, version)
     #lb_plot(file_name)
     os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
@@ -680,3 +667,16 @@ def main():
     clean()
         
 main()
+
+
+# # # # # # # # # # # # # # # # # # # # # # # #
+# deprecated tests #                          #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#recalc_para_sweep_likes   = n                #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#run_diff_OS_test          = n                #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#run_seed_fluctuation_test = n                #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#run_binary_compare        = n                #
+# # # # # # # # # # # # # # # # # # # # # # # #
