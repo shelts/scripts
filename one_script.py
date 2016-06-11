@@ -79,7 +79,6 @@ output2 = match_hist_correct + ".out"
 
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-lua = "charles_EMD_v162.lua"
 #lua = "Null.lua"
 
 outs = 2 #for the cm calculation function
@@ -530,6 +529,7 @@ def lb_plot(file_name):
 def for_charles():
     get_from_lmc = n
     list_of_runs = n
+    lua_file = "charles_EMD_v162.lua"
     ver = ''
     args = [2.0, 2.0, 0.01, 0.125, 1e5 , 5e6]
     #output = 'ft2gy_bt2gy_massl.45_massd22.5_rl0.01_rd0.125_nfw'
@@ -541,8 +541,9 @@ def for_charles():
         os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs")
     lb_plot(output)
     
-    #if(list_of_runs == True):
-        #args = [2.0, 2.0, 1e5 / 222288.47, 
+    if(list_of_runs == True):
+        args = [2.0, 2.0, 0.01, 0.125, 1e5 , 5e6]
+        
 
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
