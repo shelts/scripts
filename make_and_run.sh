@@ -7,12 +7,12 @@
 
     cd ~/Desktop/research/nbody_test/bin
     
-#     time  ./milkyway_nbody \
-#     -f ~/Desktop/research/lua/EMD_20k_v158_fixed_seed.lua \
-#     -o output_test.out \
-#     -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
-#     -n 8 -u  \
-#     -i 4.0 1.0 0.2 0.2 12 .2 \
+    time  ./milkyway_nbody \
+    -f ~/Desktop/research/lua/single_plum_EMD_20k_isotropic_1_54.lua \
+    -o output_test.out \
+    -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
+    -n 8 -u  \
+    -i 4.0 1.0 0.2 12 \
 
     
     
