@@ -145,7 +145,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b  -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+         -n 12 -b   -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -292,7 +292,7 @@ def lb_plot(file_name):
     plot_orbit = y
     plot_orbit_points = y
     plot_poly_points = y
-    plot_old_orbit   = y
+    plot_old_orbit   = n
     
     f = open(path_charles + file_name + '.out')
     lines = []
@@ -410,7 +410,7 @@ def lb_plot(file_name):
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
+            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'lime', alpha=1.0, marker = '.')
             #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
             
             f = open(path_charles + 'forward_orbit.out')
@@ -504,6 +504,66 @@ def lb_plot(file_name):
             plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'indianred', alpha=1.0, marker = '.')
             #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
 
+
+            f = open(path_charles + 'reverse_orbit_oldoldorbit.out')
+            lines = []
+            lines = f.readlines()
+            orb_l , orb_b , orb_r = ([] for i in range(3))
+            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
+            for line in lines:
+                tokens = line.split('\t')
+                orbX = float(tokens[0])
+                if(orbX > 180.0):
+                    orbX = orbX - 360.0
+                orbY = float(tokens[1])
+                orbZ = float(tokens[2])
+                orbVx = float(tokens[3])
+                orbVy = float(tokens[4])
+                orbVz = float(tokens[5])
+                orb_l.append(orbX)
+                orb_b.append(orbY)
+                orb_r.append(orbZ)
+                orb_vx.append(orbVx)
+                orb_vy.append(orbVy)
+                orb_vz.append(orbVz)
+                
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'darkred', alpha=1.0, marker = '.')
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
+            
+            f = open(path_charles + 'forward_orbit_oldoldorbit.out')
+            lines = []
+            lines = f.readlines()
+            orb_l , orb_b , orb_r = ([] for i in range(3))
+            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
+            for line in lines:
+                tokens = line.split('\t')
+                orbX = float(tokens[0])
+                if(orbX > 180.0):
+                    orbX = orbX - 360.0
+                orbY = float(tokens[1])
+                orbZ = float(tokens[2])
+                orbVx = float(tokens[3])
+                orbVy = float(tokens[4])
+                orbVz = float(tokens[5])
+                orb_l.append(orbX)
+                orb_b.append(orbY)
+                orb_r.append(orbZ)
+                orb_vx.append(orbVx)
+                orb_vy.append(orbVy)
+                orb_vz.append(orbVz)
+                
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'indianred', alpha=1.0, marker = '.')
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
         
         # # # # # # # # # #    
         if(plot_orbit_points == True):
@@ -549,6 +609,7 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(orbpoly_l, orbpoly_b, '.', markersize = 3, color = 'g', alpha= 1.0, marker = 'o')
+            #os.system("mpg123  rasengan.mp3 ")
             plt.show()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + 'with_poly', format='png')
             
@@ -651,20 +712,43 @@ def mass_enc(file_name, rscale):
     print 'total dwarf mass: ', total_mass_d * 222288.47
     return mass_enc_d, mass_enc_l
 
+#def random_selector(file_name):
+    #path_charles = 'quick_plots/outputs/charles/'
+    #f = open(path_charles + file_name + '.out')
+    #lines = []
+    #lines = f.readlines()
+    
+    #num = 1
+    #for line in lines:
+        #if (line.startswith("# ignore")):
+            #break
+        #else:
+            #num += 1
+    #print num
+    #lines = lines[num:len(lines)]
+    #counterl = 0
+    #counterd = 0
+    #for line in lines:
+        #if(line.startswith("</bodies>")):
+            #break
+        
+        
+
 def for_charles():
-    plot_output  = y
-    run          = n
+    plot_output  = n
+    run          = y
     move_ro_fo   = n
-    get_from_lmc = y
+    get_from_lmc = n
+    get_from_tel = n
     list_of_runs = n
     
     #settings#
     lua_file = "charles_EMD_v162.lua"
     ver = ''
-    ft = 0.0001  #gyr
-    bt = 0.0001   #gyr
+    ft = 2.02 #gyr
+    bt = 2.0   #gyr
     rl = 0.01  #kpc
-    rd = 0.125 #kpc
+    rd = 0.250 #kpc
     ml = 1e5   #solar
     md = 5e6   #solar
     
@@ -672,9 +756,11 @@ def for_charles():
     
     #output = 'ft2gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125'
     #output = 'ft2.04gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125_neworbit'
-    output = 'ft2.02gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125_neworbit'
+    output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_neworbit'
     #output = 'ft1.04gy_bt1gy_massl1e5_massd5e6_rl0.01_rd0.125'
-    #output = 'output_0gy_massl1e5_massd5e6_rl0.01_rd0.125'
+    #output = 'output_0gy_null_massl1e5_massd1e6_rl0.01_rd0.175'
+    #output = 'ft2.02gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.250'
+    output = 'ft2.02gy_bt2gy_massl2.5e6_massd2.5e6_rl0.250_rd0.250'
     
     if(run == True):
         nbody(args, lua_file, output, output, ver)
@@ -687,14 +773,16 @@ def for_charles():
     if(get_from_lmc == True):
         os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs/charles/")
         
-    
+    if(get_from_tel == True):
+        os.system("scp $teletraan:~/research/quick_plots/outputs/charles/" + output + ".out quick_plots/outputs/charles/")
+        
     if(list_of_runs == True):
         args = [2.0, 2.0, 0.01, 0.125, 1e5 , 5e6]
     
     #mass_enc_d, mass_enc_l = mass_enc(output, rl)
     #print 'mass of dwarf enclosed with globular scale r = ', mass_enc_d * 222288.47
     #print 'mass of globular enclosed with globular scale r = ', mass_enc_l * 222288.47
-    if(plot_output == True):    
+    if(plot_output == True):
         lb_plot(output)
     return 0
 # # # # # # # # # # # # # # # # # # # # # #
