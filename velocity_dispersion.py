@@ -19,28 +19,28 @@ y = True
 n = False
 
 #how many bins in each direction
-l_bins = 100
+l_bins = 1
 b_bins = 1
 r_bins = 1
 
 
-l_start = 17.0
-l_end = 70.0
+l_start = 70
+l_end = 69
 l_bin_width = (l_end - l_start) / l_bins
 
-b_start = -180.0
-b_end = 180.0
+b_start = 43.0
+b_end = 45.0
 b_bin_width = (b_end - b_start) / b_bins
 
 r_start = 0.0
-r_end = 500
+r_end = 1000
 r_bin_width = (r_end - r_start) / r_bins
 #print(l_bin_width, b_bin_width, r_bin_width)
 
 plot_bins =  n
 
 use_whole_sky = n
-sym_l = n
+sym_l = y
 
 if(use_whole_sky == True):
     l_start = 0.0
@@ -179,7 +179,7 @@ def binner_lbr(bodies):
                                 bins[j][k][m].append(i)
                                 
     
-    #print(r_count, b_count, l_count)
+    print(r_count, b_count, l_count)
     return bins
 
 # # # # # # # # # # 
@@ -422,7 +422,8 @@ def main():
     else: 
         name1 = 'velocity_dispersion_test_Null_lbr_xyz_0gy'
         #name1 = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
-        name1 = 'ft2gy_bt2gy_rl.05kpc_rd.25kpc_ml_md'
+        name1 = 'charles/ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper'
+
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
     print "for output: ", name1 
     
@@ -432,7 +433,7 @@ def main():
     #this calculates the total vx vy vz dispersion
     disp_vx, disp_vy, disp_vz, disp_vl = vel_disp(file_name, bodies)
     dispersion = [disp_vx, disp_vy, disp_vz, disp_vl]
-    print(dispersion) #dispersion of the entire sky
+    #print(dispersion) #dispersion of the entire sky
     
     #this bins the bodies by their positions
     bins = []

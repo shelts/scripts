@@ -145,7 +145,8 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b   -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+         -n 12 -b   -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
+         2>> piped_out2.out")
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -368,7 +369,7 @@ def lb_plot(file_name):
         plt.ylabel('b')
         plt.title('l vs b')
         #default to just plot lm
-        plt.plot(light_l, light_b, '.', markersize = 1, color = 'c', alpha=1.0, marker = '.')
+        plt.plot(light_l, light_b, '.', markersize = 1.5, color = 'c', alpha=1.0, marker = '.')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
         
         # # # # # # # # # #
@@ -378,7 +379,7 @@ def lb_plot(file_name):
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'purple', alpha=1.0, marker = '.')
+            plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
         
         # # # # # # # # # #
@@ -712,8 +713,8 @@ def mass_enc(file_name, rscale):
     print 'total dwarf mass: ', total_mass_d * 222288.47
     return mass_enc_d, mass_enc_l
 
-#def random_selector(file_name):
-    #path_charles = 'quick_plots/outputs/charles/'
+def random_selector(file_name):
+    path_charles = 'quick_plots/outputs/charles/'
     #f = open(path_charles + file_name + '.out')
     #lines = []
     #lines = f.readlines()
@@ -731,12 +732,11 @@ def mass_enc(file_name, rscale):
     #for line in lines:
         #if(line.startswith("</bodies>")):
             #break
-        
-        
+    return 0   
 
 def for_charles():
-    plot_output  = n
-    run          = y
+    plot_output  = y
+    run          = n
     move_ro_fo   = n
     get_from_lmc = n
     get_from_tel = n
@@ -745,27 +745,34 @@ def for_charles():
     #settings#
     lua_file = "charles_EMD_v162.lua"
     ver = ''
-    ft = 2.02 #gyr
-    bt = 2.0   #gyr
-    rl = 0.01  #kpc
-    rd = 0.250 #kpc
-    ml = 1e5   #solar
-    md = 5e6   #solar
+    ft = 0.00001 #gyr
+    bt = 0.00001   #gyr
+    rl = 0.175  #kpc
+    rd = 0.175 #kpc
+    ml = 5e4   #solar
+    md = 1e6   #solar
     
     args = [ft, bt, rl, rd, ml, md]
     
     #output = 'ft2gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125'
     #output = 'ft2.04gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125_neworbit'
-    output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_neworbit'
+    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_neworbit'
     #output = 'ft1.04gy_bt1gy_massl1e5_massd5e6_rl0.01_rd0.125'
     #output = 'output_0gy_null_massl1e5_massd1e6_rl0.01_rd0.175'
     #output = 'ft2.02gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.250'
-    output = 'ft2.02gy_bt2gy_massl2.5e6_massd2.5e6_rl0.250_rd0.250'
+    #output = 'ft2.02gy_bt2gy_massl2.5e6_massd2.5e6_rl0.250_rd0.250'
+    #output = 'ft2.02gy_bt2gy_mass5e6_r0.250_single_plum'
+    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper_unsqreps'
+    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper'
+    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper_2_with_updated_orbit_paras'
+    #output = 'ft4.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175'
+    output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175'
+    
     
     if(run == True):
         nbody(args, lua_file, output, output, ver)
         os.system("mv quick_plots/outputs/" + output + ".out quick_plots/outputs/charles/")
-    
+        
     if(move_ro_fo == True):
         os.system("mv reverse_orbit.out quick_plots/outputs/charles/")
         os.system("mv forward_orbit.out quick_plots/outputs/charles/")
