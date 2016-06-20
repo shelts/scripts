@@ -3,7 +3,7 @@ import os
 import time
 from subprocess import call
 import sys
-import pxssh
+from pexpect import pxssh
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
