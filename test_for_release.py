@@ -211,7 +211,7 @@ def run_on_others():
         s.logout()
         s = pxssh.pxssh()
     
-    os.system("nohup ./testing_for_release.sh"
+    os.system("nohup ./testing_for_release.sh")
     
 def main():
     if(build == True):
@@ -230,4 +230,6 @@ def main():
         
     if(run_everywhere = True):
         run_on_others()
+        
+        
 main()
