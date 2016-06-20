@@ -228,7 +228,7 @@ def main():
     if(send_to_others == True):
         send()
         
-    if(run_everywhere = True):
+    if(run_everywhere == True):
         run_on_others()
         
         
