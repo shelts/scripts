@@ -15,9 +15,11 @@ n = False
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-build                     = n                 #
+build                     = y                 #
 create_hist               = n                 #
-write_shell               = y                 #
+write_shell               = n                 #
+send_to_others            = n                 #
+run_everywhere            = n
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 args_correct = [3.945, 0.98, 0.2, 0.2, 12, 0.2]

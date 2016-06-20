@@ -31,11 +31,11 @@ args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = y                 #
+charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -712,27 +712,6 @@ def mass_enc(file_name, rscale):
     print 'total dwarf mass: ', total_mass_d * 222288.47
     return mass_enc_d, mass_enc_l
 
-def random_selector(file_name):
-    path_charles = 'quick_plots/outputs/charles/'
-    #f = open(path_charles + file_name + '.out')
-    #lines = []
-    #lines = f.readlines()
-    
-    #num = 1
-    #for line in lines:
-        #if (line.startswith("# ignore")):
-            #break
-        #else:
-            #num += 1
-    #print num
-    #lines = lines[num:len(lines)]
-    #counterl = 0
-    #counterd = 0
-    #for line in lines:
-        #if(line.startswith("</bodies>")):
-            #break
-    return 0   
-
 def for_charles():
     plot_output  = y
     run          = n
@@ -766,7 +745,7 @@ def for_charles():
     #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper_2_with_updated_orbit_paras'
     #output = 'ft4.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175'
     output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175'
-    
+    #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175_for_paper'
     
     if(run == True):
         nbody(args, lua_file, output, output, ver)
