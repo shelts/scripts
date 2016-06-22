@@ -146,7 +146,6 @@ def write_shell_run_script(script_name):
         
     f.close()
 
-
 def send():
     lmc = 'shelts@lmc.phys.rpi.edu'
     tel = 'shelts@teletraan-i.phys.rpi.edu'
@@ -168,7 +167,6 @@ def send():
     os.system("scp " + path + "testing_for_release.sh" + "  " + lmc + ":~/research/")
     os.system("scp " + path + "testing_for_release.sh" + "  " + tel + ":~/research/")
     os.system("scp " + path + "testing_for_release.sh" + "  " + cos + ":~/research/")
-    
     
 def run_on_others():
     s = pxssh.pxssh()
