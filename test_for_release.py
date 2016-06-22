@@ -115,6 +115,13 @@ def write_shell_run_script(script_name):
     
     
     f.write("#SINGLE THREADED\n")
+    sim_time      = str(args_correct[0])
+    back_time     = str(args_correct[1])
+    r0            = str(args_correct[2])
+    light_r_ratio = str(args_correct[3])
+    mass_l        = str(args_correct[4])
+    mass_ratio    = str(args_correct[5])   
+    
     f.write("./milkyway_nbody" + version_st + " ")
     f.write("-f " + path + "lua/" + lua + " ")
     f.write("-h " + path + "quick_plots/hists/" + hist_correct + ".hist ")

@@ -35,7 +35,7 @@ remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = n                 #
+charles                   = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -713,18 +713,18 @@ def mass_enc(file_name, rscale):
     return mass_enc_d, mass_enc_l
 
 def for_charles():
-    plot_output  = y
+    plot_output  = n
     run          = n
     move_ro_fo   = n
     get_from_lmc = n
     get_from_tel = n
-    list_of_runs = n
+    list_of_runs = y
     
     #settings#
     lua_file = "charles_EMD_v162.lua"
     ver = ''
-    ft = 0.00001 #gyr
-    bt = 0.00001   #gyr
+    ft = 2.02 #gyr
+    bt = 2.0   #gyr
     rl = 0.175  #kpc
     rd = 0.175 #kpc
     ml = 5e4   #solar
@@ -762,11 +762,26 @@ def for_charles():
         os.system("scp $teletraan:~/research/quick_plots/outputs/charles/" + output + ".out quick_plots/outputs/charles/")
         
     if(list_of_runs == True):
-        args = [2.0, 2.0, 0.01, 0.125, 1e5 , 5e6]
-    
-    #mass_enc_d, mass_enc_l = mass_enc(output, rl)
-    #print 'mass of dwarf enclosed with globular scale r = ', mass_enc_d * 222288.47
-    #print 'mass of globular enclosed with globular scale r = ', mass_enc_l * 222288.47
+        ft = 2.02 #gyr
+        bt = 2.0   #gyr
+        rl = 0.175  #kpc
+        rd = 0.175 #kpc
+        ml = 5e4   #solar
+        md = 1e6   #solar
+        args = [ft, bt, rl, rd, ml, md]
+        output = 'charles/ft2.02gy_bt2gy_massl1e6_massd1e6_rl0.175_rd0.175_both_dwarf'
+        nbody(args, lua_file, output, output, ver)
+        
+        ft = 2.02 #gyr
+        bt = 2.0   #gyr
+        rl = 0.01  #kpc
+        rd = 0.01 #kpc
+        ml = 5e4   #solar
+        md = 5e4   #solar
+        args = [ft, bt, rl, rd, ml, md]
+        output = 'charles/ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular'
+        nbody(args, lua_file, output, output, ver)
+        
     if(plot_output == True):
         lb_plot(output)
     return 0
