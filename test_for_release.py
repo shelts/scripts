@@ -160,9 +160,9 @@ def send():
     os.system("scp " + path + "nbody_test/bin/milkyway_nbody" + version_mt + "  " + cos + ":~/research/nbody_test/bin/")
     os.system("scp " + path + "nbody_test/bin/milkyway_nbody" + version_st + "  " + cos + ":~/research/nbody_test/bin/")
     
-    os.system("scp " + path + "quick_plots/hists/" + hist_correct + "  " + lmc + ":~/research/quick_plots/hists/")
-    os.system("scp " + path + "quick_plots/hists/" + hist_correct + "  " + tel + ":~/research/quick_plots/hists/")
-    os.system("scp " + path + "quick_plots/hists/" + hist_correct + "  " + cos + ":~/research/quick_plots/hists/")
+    os.system("scp " + path + "quick_plots/hists/" + hist_correct + ".hist  " + lmc + ":~/research/quick_plots/hists/")
+    os.system("scp " + path + "quick_plots/hists/" + hist_correct + ".hist  " + tel + ":~/research/quick_plots/hists/")
+    os.system("scp " + path + "quick_plots/hists/" + hist_correct + ".hist  " + cos + ":~/research/quick_plots/hists/")
     
     os.system("scp " + path + "testing_for_release.sh" + "  " + lmc + ":~/research/")
     os.system("scp " + path + "testing_for_release.sh" + "  " + tel + ":~/research/")
