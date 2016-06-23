@@ -31,7 +31,7 @@ args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -286,7 +286,7 @@ def lb_plot(file_name):
     path = 'quick_plots/outputs/'
     print file_name
     plot_lbr = y
-    plot_light_and_dark = y
+    plot_light_and_dark = n
     plot_dm = y
     plot_xyz = n
     plot_orbit = y
@@ -351,7 +351,8 @@ def lb_plot(file_name):
             dark_vx.append(vx)
             dark_vy.append(vy)
             dark_vz.append(vz)    
-    print(len(light_l))
+    #print(len(light_l))
+    #print(len(dark_l))
     
     fig = plt.figure()
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
@@ -369,8 +370,8 @@ def lb_plot(file_name):
         plt.title('l vs b')
         #default to just plot lm
         plt.plot(light_l, light_b, '.', markersize = 1.5, color = 'c', alpha=1.0, marker = '.')
-        plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
-        
+        #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
+        print("plotting:", len(light_l), " points")
         # # # # # # # # # #
         if(plot_light_and_dark == True):#plot lm and dm overlapping
             plt.xlim((xlower, xupper))
@@ -379,8 +380,8 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
-        
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
+            print("plotting:", len(light_l) + len(dark_l), " points")
         # # # # # # # # # #
         if(plot_orbit == True):
             f = open(path_charles + 'reverse_orbit.out')
@@ -441,7 +442,7 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'g', alpha=1.0, marker = '.')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
 
         if(plot_old_orbit == True):
             f = open(path_charles + 'reverse_orbit_oldorbit.out')
@@ -585,7 +586,7 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(orbp_l, orbp_b, '.', markersize = 3, color = 'm', alpha= 1.0, marker = 'o')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
             
         # # # # # # # # # #    
         if(plot_poly_points == True):
@@ -607,11 +608,11 @@ def lb_plot(file_name):
             plt.ylim((ylower, yupper))
             plt.xlabel('l')
             plt.ylabel('b')
-            plt.title('l vs b')
+            plt.title('l vs b ' + file_name)
             plt.plot(orbpoly_l, orbpoly_b, '.', markersize = 3, color = 'g', alpha= 1.0, marker = 'o')
             #os.system("mpg123  rasengan.mp3 ")
             plt.show()
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + 'with_poly', format='png')
+            #plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + 'with_poly', format='png')
             
         # # # # # # # # # #
         if(plot_dm == True):#to plot just dm
@@ -714,19 +715,19 @@ def mass_enc(file_name, rscale):
 
 def for_charles():
     plot_output  = n
-    run          = n
+    run          = y
     move_ro_fo   = n
     get_from_lmc = n
     get_from_tel = n
-    list_of_runs = y
+    list_of_runs = n
     
     #settings#
     lua_file = "charles_EMD_v162.lua"
     ver = ''
     ft = 2.02 #gyr
     bt = 2.0   #gyr
-    rl = 0.175  #kpc
-    rd = 0.175 #kpc
+    rl = 0.01  #kpc
+    rd = 0.01 #kpc
     ml = 5e4   #solar
     md = 1e6   #solar
     
@@ -744,8 +745,15 @@ def for_charles():
     #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper'
     #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper_2_with_updated_orbit_paras'
     #output = 'ft4.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175'
-    output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175'
+    #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175'
+    
+    
     #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175_for_paper'
+    #output = 'charles/ft2.02gy_bt2gy_mass1e6_r0.175_single_dwarf'
+    #output = 'ft2.02gy_bt2gy_mass5e4_r0.01_single_globular'
+    #output = 'ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular'
+    #output = 'ft2.02gy_bt2gy_massl1e6_massd1e6_rl0.175_rd0.175_both_dwarf'
+    output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.01'
     
     if(run == True):
         nbody(args, lua_file, output, output, ver)
@@ -769,7 +777,7 @@ def for_charles():
         ml = 5e4   #solar
         md = 1e6   #solar
         args = [ft, bt, rl, rd, ml, md]
-        output = 'charles/ft2.02gy_bt2gy_massl1e6_massd1e6_rl0.175_rd0.175_both_dwarf'
+        output = 'charles/ft2.02gy_bt2gy_mass1e6_r0.175_single_dwarf'
         nbody(args, lua_file, output, output, ver)
         
         ft = 2.02 #gyr
@@ -779,7 +787,7 @@ def for_charles():
         ml = 5e4   #solar
         md = 5e4   #solar
         args = [ft, bt, rl, rd, ml, md]
-        output = 'charles/ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular'
+        output = 'charles/ft2.02gy_bt2gy_mass5e4_r0.01_sinle_globular'
         nbody(args, lua_file, output, output, ver)
         
     if(plot_output == True):

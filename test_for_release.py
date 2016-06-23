@@ -19,7 +19,7 @@ build                     = y                 #
 create_hist               = n                 #
 write_shell               = n                 #
 send_to_others            = n                 #
-run_everywhere            = n
+run_everywhere            = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 args_correct = [3.945, 0.98, 0.2, 0.2, 12, 0.2]
