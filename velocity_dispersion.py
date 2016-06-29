@@ -19,25 +19,25 @@ y = True
 n = False
 
 #how many bins in each direction
-l_bins = 1
+l_bins = 100
 b_bins = 1
 r_bins = 1
 
 
-l_start = 70
-l_end = 69
-l_bin_width = (l_end - l_start) / l_bins
+l_start = -150
+l_end = 150
+l_bin_width = abs(l_end - l_start) / l_bins
 
-b_start = 43.0
-b_end = 45.0
-b_bin_width = (b_end - b_start) / b_bins
+b_start = -100.0
+b_end = 100.0
+b_bin_width = abs(b_end - b_start) / b_bins
 
 r_start = 0.0
 r_end = 1000
 r_bin_width = (r_end - r_start) / r_bins
 #print(l_bin_width, b_bin_width, r_bin_width)
 
-plot_bins =  n
+plot_bins =  y
 
 use_whole_sky = n
 sym_l = y
@@ -185,10 +185,12 @@ def binner_lbr(bodies):
 # # # # # # # # # # 
 # plotting code   #
 # # # # # # # # # #
-def plot_binned_counts(bins, disp_per_bin):
-    p = 'data.txt'
+
+def plot_binned_counts(bins, disp_per_bin, name):
+    plot_from_here = n
+    p = name + '_vel_disp.hist'
     g = open(p, 'w')
-    
+    g.write("#r_cur\tl_cur\tb_cur\tcounts\tdisp_vl\tdisp_vx\tdisp_vy\tdisp_vz\n")
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
                     for m in range(0, l_bins): #for each l bin
@@ -200,58 +202,57 @@ def plot_binned_counts(bins, disp_per_bin):
                         r_cur = j * r_bin_width + r_start
                         l_cur = m * l_bin_width + l_start
                         b_cur = k * b_bin_width + b_start
-                        g.write("%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n" % (r_cur, l_cur, b_cur , counts, disp_vl, disp_vx, disp_vy, disp_vz))
+                        g.write("%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f\n" % (r_cur, l_cur, b_cur , counts, disp_vl, disp_vx, disp_vy, disp_vz))
     
     g.close()
-    
-    b_lower = -80
-    b_upper = 80
-    dispersion_cutoff = 50
-    count_cutoff = 100
-    f = open('binned_counts_dispersions.gnuplot', 'w')
-    f.write("reset\n")
-    f.write("set terminal png\n")
-    f.write("set key off\n")
-    f.write("set ylabel 'b'\n")
-    f.write("set xlabel 'l'\n")
-    
-    f.write("set xrange[" + str(l_end) + ":" + str(l_start) + "]\n")
-    f.write("set yrange[" + str(b_lower) + ":" + str(b_upper) + "]\n")
-    f.write("set cbrange[0:" + str(count_cutoff) + "]\n")
-    
-    f.write("set title 'counts' \n")
-    f.write("set output 'counts.png' \n")
-    f.write("plot '" + p + "' using 2:3:4 with image\n")
-    f.write("# # # # # # # # # # # # # # #\n")
-    f.write("reset\n")
-    f.write("set terminal png\n")
-    f.write("set key off\n")
-    f.write("set ylabel 'b'\n")
-    f.write("set xlabel 'l'\n")
-    
-    f.write("set xrange[" + str(l_end) + ":" + str(l_start) + "]\n")
-    f.write("set yrange[" + str(b_lower) + ":" + str(b_upper) + "]\n")
-    f.write("set cbrange[" + str(default_worst_case) + ":" + str(dispersion_cutoff) + "]\n")
-    
-    f.write("set title 'dispersions' \n")
-    f.write("set output 'dispersions_vl.png' \n")
-    f.write("plot '" + p + "' using 2:3:5 with image\n")
-    
-    f.write("set output 'dispersions_vx.png' \n")
-    f.write("plot '" + p + "' using 2:3:6 with image\n")
-    
-    f.write("set output 'dispersions_vy.png' \n")
-    f.write("plot '" + p + "' using 2:3:7 with image\n")
-    
-    f.write("set output 'dispersions_vz.png' \n")
-    f.write("plot '" + p + "' using 2:3:8 with image\n")
-    f.close()
-    os.system('gnuplot binned_counts_dispersions.gnuplot 2>>gnuplot_errors.txt')
+    if(plot_from_here == True):
+        b_lower = -80
+        b_upper = 80
+        dispersion_cutoff = 50
+        count_cutoff = 100
+        f = open('binned_counts_dispersions.gnuplot', 'w')
+        f.write("reset\n")
+        f.write("set terminal png\n")
+        f.write("set key off\n")
+        f.write("set ylabel 'b'\n")
+        f.write("set xlabel 'l'\n")
+        
+        f.write("set xrange[" + str(l_end) + ":" + str(l_start) + "]\n")
+        f.write("set yrange[" + str(b_lower) + ":" + str(b_upper) + "]\n")
+        f.write("set cbrange[0:" + str(count_cutoff) + "]\n")
+        
+        f.write("set title 'counts' \n")
+        f.write("set output 'counts.png' \n")
+        f.write("plot '" + p + "' using 2:3:4 with image\n")
+        f.write("# # # # # # # # # # # # # # #\n")
+        f.write("reset\n")
+        f.write("set terminal png\n")
+        f.write("set key off\n")
+        f.write("set ylabel 'b'\n")
+        f.write("set xlabel 'l'\n")
+        
+        f.write("set xrange[" + str(l_end) + ":" + str(l_start) + "]\n")
+        f.write("set yrange[" + str(b_lower) + ":" + str(b_upper) + "]\n")
+        f.write("set cbrange[" + str(default_worst_case) + ":" + str(dispersion_cutoff) + "]\n")
+        
+        f.write("set title 'dispersions' \n")
+        f.write("set output 'dispersions_vl.png' \n")
+        f.write("plot '" + p + "' using 2:3:5 with image\n")
+        
+        f.write("set output 'dispersions_vx.png' \n")
+        f.write("plot '" + p + "' using 2:3:6 with image\n")
+        
+        f.write("set output 'dispersions_vy.png' \n")
+        f.write("plot '" + p + "' using 2:3:7 with image\n")
+        
+        f.write("set output 'dispersions_vz.png' \n")
+        f.write("plot '" + p + "' using 2:3:8 with image\n")
+        f.close()
+        os.system('gnuplot binned_counts_dispersions.gnuplot 2>>gnuplot_errors.txt')
     
 # # # # # # # # # # 
 # calc dispersion #
 # # # # # # # # # #
-
 def binned_dispersion(bins, bodies):
     dispersion_per_bin = [[[[default_worst_case for xyzl in range(4)] for z in range(l_bins)]  for y in range(b_bins)] for x in range(r_bins)] 
     #print(dispersion_per_bin)
@@ -317,7 +318,7 @@ def binned_dispersion(bins, bodies):
                                 dispersion_per_bin[j][k][m][1] = disp_vy
                                 dispersion_per_bin[j][k][m][2] = disp_vz
                                 dispersion_per_bin[j][k][m][3] = disp_vl
-                                print disp_vl, N_bodies_in_bin
+                                #print disp_vl, N_bodies_in_bin
     
     return dispersion_per_bin
 
@@ -353,29 +354,9 @@ def vel_disp(file_name, bodies):
     
     disp_vl = (disp_vl1 / N) - (disp_vl2 * disp_vl2 / (N * N) )
     return disp_vx, disp_vy, disp_vz, disp_vl
-
-
 # # # # # # # # # # #
 # mass calculations #
 # # # # # # # # # # #
-#def calc_half_light_radius(bodies):
-    #total_mass = 0
-    #total_dark_mass = 0
-    #total_light_mass = 0
-
-    #for i in range(0, body.body_count):
-        #total_mass += bodies[i].mass
-        #if(bodies[i].mtype == 1):
-            #total_dark_mass += bodies[i].mass
-        #if(bodies[i].mtype == 0):
-            #total_light_mass += bodies[i].mass
-            
-            
-    
-    #print total_mass, total_light_mass, total_dark_mass
-    
-    #return half_light_radius
-
 def calc_actual_mass_in_bin(bins, bodies):#calculates the total mass
     total_mass = 0
     total_count = 0
@@ -443,13 +424,12 @@ def main():
     dispersion_per_bin = []
     dispersion_per_bin = binned_dispersion(bins, bodies)
     
-    mass_per_bin = []
-    #half_light_radius = calc_half_light_radius(bodies)
-    half_light_radius = 0.5
-    mass_per_bin = calc_mass_per_bin(dispersion_per_bin, half_light_radius)
+    #mass_per_bin = []
+    #half_light_radius = 0.5
+    #mass_per_bin = calc_mass_per_bin(dispersion_per_bin, half_light_radius)
     
-    calc_actual_mass_in_bin(bins, bodies)
+    #calc_actual_mass_in_bin(bins, bodies)
     
     if(plot_bins == True):
-        plot_binned_counts(bins, dispersion_per_bin)
+        plot_binned_counts(bins, dispersion_per_bin, name1)
 main()

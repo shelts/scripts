@@ -35,13 +35,13 @@ remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = y                 #
+charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
-plot_overlapping          = n                 #
-plot_adjacent             = n                 #
+plot_overlapping          = y                 #
+plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_lb                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -62,15 +62,15 @@ run_stability_test        = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
-multi = 'test_mt'
+test = 'test'
 singl = 'test_st'
 
-correct_hist = multi
-histogram_for_nbody_run = multi
+correct_hist = test
+histogram_for_nbody_run = test
 
 
-match_hist_correct = multi
-match_hist_compare = histogram_for_nbody_run
+match_hist_correct = test
+match_hist_compare = test
 plot_name = histogram_for_nbody_run
 
 output = plot_name
@@ -80,7 +80,6 @@ output2 = match_hist_correct + ".out"
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
 #lua = "Null.lua"
-
 outs = 2 #for the cm calculation function
 
 #I am tired of constantly adapting it for the servers
@@ -100,7 +99,8 @@ path = sid_dir
 def standard_run():
     if(remake == True):
         make_nbody()
-    
+        
+    multiple_plot()
     if(run_nbody == True):
         nbody(args, lua, histogram_for_nbody_run, output, version)
     
@@ -145,7 +145,7 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b   -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+         -n 12 -b -u  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -174,8 +174,8 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
 # # # # # # # # # #       
 def plot(hist1, hist2, name):
     ylimit = 0.4
-    xlower = 50
-    xupper = -75
+    xlower = 180 
+    xupper = -180
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
@@ -267,6 +267,174 @@ def plot(hist1, hist2, name):
         plt.savefig(save_folder_adj + name + '.png', format='png')
         #plt.show()
         return 1
+
+def get_l_vel_disp_count_data(hist_name, run_dispersion):
+    if(run_dispersion == True):
+        os.system("./scripts/velocity_dispersion.py " + hist_name)
+        hist_name = hist_name + "_vel_disp.hist"
+        os.system("mv ./" + hist_name + " quick_plots/hists/")
+    else:
+        hist_name = hist_name + "_vel_disp.hist"
+        
+    folder = 'quick_plots/hists/'
+    
+    lines = []
+    lines = open(folder + hist_name).readlines();
+    starting_line = 0
+    for line in lines:
+        starting_line += 1
+        if (line.startswith("#")):
+            break 
+        
+    lines = lines[starting_line:len(lines)]
+    l = []
+    n = []
+    for line in lines:
+        tokens = line.split(',\t');
+        if tokens: #tests to make sure tokens is not empty
+            lda = float(tokens[1])
+            cts = float(tokens[4])
+            l.append(lda)
+            n.append(cts)
+            
+    return l, n
+    
+def get_l_count_data_from_hist(hist_name):
+    folder = 'quick_plots/hists/'
+    lines = []
+    lines = open(folder + hist_name).readlines();
+    starting_line = 0
+    for line in lines:
+        starting_line += 1
+        if (line.startswith("betaBins")):
+            break 
+    lines = lines[starting_line:len(lines)]
+    l = []
+    n = []
+    for line in lines:
+        if (line.startswith("</histogram>")):
+            continue
+        tokens = line.split();
+        if tokens: #tests to make sure tokens is not empty
+            lda = float(tokens[1])
+            cts = float(tokens[3])
+            l.append(lda)
+            n.append(cts)
+            
+    return l, n
+
+def multiple_plot():
+    run_disp = y
+    
+    
+    ylimit = 0.4
+    xlower = 180 
+    xupper = -180
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    ylimit2 = 3000
+    ylimit3 = 20000
+    name = 'multi_test'
+    save_folder = 'quick_plots/comp_hist_plots/'
+    hists = ['ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular',
+             'ft2.02gy_bt2gy_mass5e4_r0.01_single_globular',
+             'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.01',
+             'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175']
+    
+    #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
+    for i in range(1, len(hists) + 1):
+        print "plot histogram " + str(i) + ": ", hists[i - 1]
+
+    # # # # # 1 # # # # #
+    l1    = []; n1    = []
+    l1_vd = []; n1_vd = []
+    l1, n1        = get_l_count_data_from_hist(hists[0] + ".hist" )
+    l1_vd, n1_vd  = get_l_vel_disp_count_data(hists[0], run_disp  )
+    
+    plt.figure(figsize=(20,10))
+    plt.subplot(421)
+    plt.title('Histogram 2.02 Gy')
+    #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+    plt.bar(l1, n1, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label= 'both_glob')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
+    plt.ylabel('counts')
+    
+    plt.subplot(422)
+    plt.title('Vel Disp 2.02 Gy')
+    plt.bar(l1_vd, n1_vd, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label= 'both_glob')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit2))
+    plt.ylabel('counts')
+    
+    # # # # # 2 # # # # # 
+    l2 = []; n2 = []
+    l2, n2 = get_l_count_data_from_hist(hists[1] + ".hist")
+    l2_vd, n2_vd  = get_l_vel_disp_count_data(hists[1], run_disp  )
+   
+    plt.subplot(423)
+    plt.bar(l2, n2, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label= 'single_glob')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
+    plt.ylabel('counts')
+    
+    plt.subplot(424)
+    plt.bar(l2_vd, n2_vd, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label= 'single_glob')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit2))
+    plt.ylabel('counts')
+   
+    # # # # # 3 # # # # # 
+    l3 = []; n3 = []
+    l3, n3 = get_l_count_data_from_hist(hists[2] + ".hist")      
+    l3_vd, n3_vd  = get_l_vel_disp_count_data(hists[2], run_disp  )        
+            
+    plt.subplot(425)
+    plt.bar(l3, n3, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label= 'mass fol light')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
+    plt.ylabel('counts')
+    
+    plt.subplot(426)
+    plt.bar(l3_vd, n3_vd, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label= 'mass fol light')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit3))
+    plt.ylabel('counts')
+    
+    # # # # # 4 # # # # # 
+    l4 = []; n4 = []
+    l4, n4 = get_l_count_data_from_hist(hists[3] + ".hist")
+    l4_vd, n4_vd  = get_l_vel_disp_count_data(hists[3], run_disp  )
+    
+    plt.subplot(427)
+    plt.bar(l4, n4, width = w_adjacent, color='k')
+    plt.legend(handles=[mpatches.Patch(color='k', label='dark envel')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
+    plt.xlabel('l')
+    plt.ylabel('counts')
+    
+    plt.subplot(428)
+    plt.bar(l4_vd, n4_vd, width = w_adjacent, color='b')
+    plt.legend(handles=[mpatches.Patch(color='b', label='dark envel')])
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit3))
+    plt.ylabel('counts')
+    
+    
+    plt.savefig(save_folder + name + '.png', format='png')
+    #plt.show()
+    
+    
+    
+    
+    return 1
 # # # # # # # # # #       
 def calculate_cm(paras, output1, output2, outs):
     sim_time      = str(paras[0])
@@ -715,7 +883,8 @@ def mass_enc(file_name, rscale):
 
 def for_charles():
     plot_output  = n
-    run          = y
+    plot_hists   = y
+    run          = n
     move_ro_fo   = n
     get_from_lmc = n
     get_from_tel = n
@@ -733,19 +902,6 @@ def for_charles():
     
     args = [ft, bt, rl, rd, ml, md]
     
-    #output = 'ft2gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125'
-    #output = 'ft2.04gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.125_neworbit'
-    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_neworbit'
-    #output = 'ft1.04gy_bt1gy_massl1e5_massd5e6_rl0.01_rd0.125'
-    #output = 'output_0gy_null_massl1e5_massd1e6_rl0.01_rd0.175'
-    #output = 'ft2.02gy_bt2gy_massl1e5_massd5e6_rl0.01_rd0.250'
-    #output = 'ft2.02gy_bt2gy_massl2.5e6_massd2.5e6_rl0.250_rd0.250'
-    #output = 'ft2.02gy_bt2gy_mass5e6_r0.250_single_plum'
-    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper_unsqreps'
-    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper'
-    #output = 'ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper_2_with_updated_orbit_paras'
-    #output = 'ft4.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175'
-    #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175'
     
     
     #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175_for_paper'
@@ -792,6 +948,13 @@ def for_charles():
         
     if(plot_output == True):
         lb_plot(output)
+        
+    if(plot_hists == True):
+        output1 = 'ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular'
+        output2 = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.01'
+        hist1 = 'charles/' + output1 + '.hist'
+        hist2 = 'charles/' + output2 + '.hist'
+        plot(hist1, hist2, 'test')
     return 0
 # # # # # # # # # # # # # # # # # # # # # #
 def velocity_dispersion():
