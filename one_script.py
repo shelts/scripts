@@ -1051,7 +1051,7 @@ def velocity_dispersion():
 # # # # # # # # # # # # # # # # # # # # # #
 def make_some_hists():
     ver = ''
-    lua_file = solar_input_EMD_v162
+    lua_file = 'solar_input_EMD_v162.lua'
     
     ft = 2.02 #gyr
     bt = 2.0   #gyr
