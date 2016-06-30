@@ -109,7 +109,7 @@ def get_start_number(file_name):
     g = open(file_name, 'r')
     num = 1
     for line in g:
-        if (line.startswith("# ignore")):
+        if (line.startswith("#")):
             break
         else:
             num += 1
@@ -147,6 +147,40 @@ def get_data(file_name):
         i += 1
     return bodies
 
+def get_data_nemo(file_name):
+    num = get_start_number(file_name)
+    lines = []
+    lines = open(file_name).readlines() 
+    lines = lines[num:len(lines)]
+    i = 0
+    bodies = []
+    pi = 4.0 * math.atan(1)
+    print pi
+    for line in lines:
+        ss = line.split(',')
+        ty = 0
+        m  = 1.0
+        x  = (float(ss[0]))
+        y  = (float(ss[1]))
+        z  = (float(ss[2]))
+        vx = (float(ss[3]))
+        vy = (float(ss[4]))
+        vz = (float(ss[5]))
+        
+        xsolar = x + 8.0
+        l = math.atan2(y , xsolar) * 180.0 / pi
+        b = math.atan2(z , (xsolar * xsolar + y * y) ** 0.5) * 180.0 / pi
+        
+        r = (xsolar * xsolar + y * y + z * z) ** 0.5
+        if(sym_l == True):
+            if(l > 180.0):
+                l = l - 360.0
+        
+        vl = calc_line_of_sight(x, y, z, vx, vy, vz)
+        b = body(ty, m , x, y, z, l, b, r, vx, vy, vz, vl) 
+        bodies.append(b)
+        i += 1
+    return bodies
 # # # # # # # # # # 
 # data binning    #
 # # # # # # # # # #
@@ -186,10 +220,11 @@ def binner_lbr(bodies):
 # plotting code   #
 # # # # # # # # # #
 
-def plot_binned_counts(bins, disp_per_bin, name):
+def plot_binned_counts(bins, disp_per_bin, name, N):
     plot_from_here = n
     p = name + '_vel_disp.hist'
     g = open(p, 'w')
+    norm_check = 0.0
     g.write("#r_cur\tl_cur\tb_cur\tcounts\tdisp_vl\tdisp_vx\tdisp_vy\tdisp_vz\n")
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
@@ -202,8 +237,9 @@ def plot_binned_counts(bins, disp_per_bin, name):
                         r_cur = j * r_bin_width + r_start
                         l_cur = m * l_bin_width + l_start
                         b_cur = k * b_bin_width + b_start
-                        g.write("%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f\n" % (r_cur, l_cur, b_cur , counts, disp_vl, disp_vx, disp_vy, disp_vz))
-    
+                        norm_check += counts / N
+                        g.write("%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f\n" % (r_cur, l_cur, b_cur , counts / N, disp_vl, disp_vx, disp_vy, disp_vz))
+    #print norm_check
     g.close()
     if(plot_from_here == True):
         b_lower = -80
@@ -294,6 +330,7 @@ def binned_dispersion(bins, bodies):
                                     #print N_bodies_in_bin
                                     i = bins[j][k][m][index]
                                     #print i
+                                    #print bodies[i].vl 
                                     disp_vx1 += bodies[i].vx * bodies[i].vx   
                                     disp_vx2 += bodies[i].vx
                                 
@@ -305,20 +342,20 @@ def binned_dispersion(bins, bodies):
                                     
                                     disp_vl1 += bodies[i].vl * bodies[i].vl
                                     disp_vl2 += bodies[i].vl 
-                                    #print disp_vl2, bodies[i].vl
                                     
                                 N = N_bodies_in_bin
+                                #print disp_vl1 / N
                                 disp_vx = (disp_vx1 / N) - (disp_vx2 * disp_vx2 / (N * N) )
                                 disp_vy = (disp_vy1 / N) - (disp_vy2 * disp_vy2 / (N * N) )
                                 disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
                                 disp_vl = (disp_vl1 / N) - (disp_vl2 * disp_vl2 / (N * N) )
                                 #print disp_vy1, disp_vy2
                                 
-                                dispersion_per_bin[j][k][m][0] = disp_vx
-                                dispersion_per_bin[j][k][m][1] = disp_vy
-                                dispersion_per_bin[j][k][m][2] = disp_vz
-                                dispersion_per_bin[j][k][m][3] = disp_vl
-                                #print disp_vl, N_bodies_in_bin
+                                dispersion_per_bin[j][k][m][0] = disp_vx ** 0.5
+                                dispersion_per_bin[j][k][m][1] = disp_vy ** 0.5
+                                dispersion_per_bin[j][k][m][2] = disp_vz ** 0.5
+                                dispersion_per_bin[j][k][m][3] = disp_vl ** 0.5
+                                #print disp_vl, N, (disp_vl1), (disp_vl2 )
     
     return dispersion_per_bin
 
@@ -357,6 +394,7 @@ def vel_disp(file_name, bodies):
 # # # # # # # # # # #
 # mass calculations #
 # # # # # # # # # # #
+
 def calc_actual_mass_in_bin(bins, bodies):#calculates the total mass
     total_mass = 0
     total_count = 0
@@ -398,19 +436,20 @@ def calc_line_of_sight(x, y, z, vx, vy, vz):
     return vl
     
 def main():
-    if(len(sys.argv) > 1):
-        name1 = str(sys.argv[1])
-    else: 
-        name1 = 'velocity_dispersion_test_Null_lbr_xyz_0gy'
-        #name1 = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
-        name1 = 'charles/ft2.02gy_bt2gy_massl1e5_massd1e6_rl0.01_rd0.175_forpaper'
+    name1 = str(sys.argv[1])
+    output_type = sys.argv[2]
+    assert output_type in ["mw", "nemo"], "ERROR: list output type: mw or nemo"
 
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
     print "for output: ", name1 
     
     bodies = []
-    bodies = get_data(file_name)
+    if(output_type == 'mw'):
+        bodies = get_data(file_name)
+    if(output_type == 'nemo'):
+        bodies = get_data_nemo(file_name)
     
+    N = float(body.body_count)
     #this calculates the total vx vy vz dispersion
     disp_vx, disp_vy, disp_vz, disp_vl = vel_disp(file_name, bodies)
     dispersion = [disp_vx, disp_vy, disp_vz, disp_vl]
@@ -431,5 +470,5 @@ def main():
     #calc_actual_mass_in_bin(bins, bodies)
     
     if(plot_bins == True):
-        plot_binned_counts(bins, dispersion_per_bin, name1)
+        plot_binned_counts(bins, dispersion_per_bin, name1, N)
 main()
