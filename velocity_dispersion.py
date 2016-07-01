@@ -1,7 +1,7 @@
 #! /usr/bin/python
 import os
 from subprocess import call
-import math
+import math as mt
 import sys
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -104,6 +104,39 @@ class body:
 # # # # # # # # # # 
 # data retrieval  #
 # # # # # # # # # #
+def convert_lb_lambda_beta(l, b):
+    phi   = 128.79
+    theta = 54.39
+    psi   = 90.70
+    pi    = mt.pi
+    l = mt.radians(l)
+    b = mt.radians(b)
+    phi = mt.radians(phi)
+    theta = mt.radians(theta)
+    psi = mt.radians(psi)
+    
+    inp = [mt.cos(b) * mt.cos(l), mt.cos(b) * mt.sin(l), mt.sin(b)]
+    #row 1 of transform matrix
+    m1 = [mt.cos(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.sin(psi),
+          mt.cos(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.sin(psi),
+          mt.sin(psi) * mt.sin(theta)]
+    #row 2 of transform matrix
+    m2 = [-mt.sin(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.cos(psi),
+          -mt.sin(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.cos(psi),
+           mt.cos(psi) * mt.sin(theta)]
+    #row 3 of transform matrix
+    m3 = [mt.sin(theta) * mt.sin(phi), -mt.sin(theta) * mt.cos(phi), mt.cos(theta)]
+    
+    
+    sol = [m1[0] * inp[0] + m1[1] * inp[1] + m1[2] * inp[2],
+           m2[0] * inp[0] + m2[1] * inp[1] + m2[2] * inp[2],
+           m3[0] * inp[0] + m3[1] * inp[1] + m3[2] * inp[2]]
+    
+    bet = mt.asin(sol[2])
+    lam = mt.atan2(sol[1], sol[0])
+    bet = mt.degrees(bet)
+    lam = mt.degrees(lam)
+    return lam, bet
 
 def get_start_number(file_name):
     g = open(file_name, 'r')
@@ -117,7 +150,7 @@ def get_start_number(file_name):
     
     return num
 
-def get_data(file_name):
+def get_data(file_name, coors):
     num = get_start_number(file_name)
     lines = []
     lines = open(file_name).readlines() 
@@ -135,6 +168,9 @@ def get_data(file_name):
             if(l > 180.0):
                 l = l - 360.0
         b  = (float(ss[5]))
+        
+        if(coors == 'lambda_beta'):
+            l, b = convert_lb_lambda_beta(l,b)
         r  = (float(ss[6]))
         vx = (float(ss[7]))
         vy = (float(ss[8]))
@@ -147,15 +183,14 @@ def get_data(file_name):
         i += 1
     return bodies
 
-def get_data_nemo(file_name):
+def get_data_nemo(file_name, coors):
     num = get_start_number(file_name)
     lines = []
     lines = open(file_name).readlines() 
     lines = lines[num:len(lines)]
     i = 0
     bodies = []
-    pi = 4.0 * math.atan(1)
-    print pi
+    pi = mt.pi
     for line in lines:
         ss = line.split(',')
         ty = 0
@@ -168,9 +203,12 @@ def get_data_nemo(file_name):
         vz = (float(ss[5]))
         
         xsolar = x + 8.0
-        l = math.atan2(y , xsolar) * 180.0 / pi
-        b = math.atan2(z , (xsolar * xsolar + y * y) ** 0.5) * 180.0 / pi
+        l = mt.atan2(y , xsolar) * 180.0 / pi
+        b = mt.atan2(z , (xsolar * xsolar + y * y) ** 0.5) * 180.0 / pi
         
+        if(coors == 'lambda_beta'):
+            l, b = convert_lb_lambda_beta(l,b)
+            
         r = (xsolar * xsolar + y * y + z * z) ** 0.5
         if(sym_l == True):
             if(l > 180.0):
@@ -220,16 +258,21 @@ def binner_lbr(bodies):
 # plotting code   #
 # # # # # # # # # #
 
-def plot_binned_counts(bins, disp_per_bin, name, N):
+def plot_binned_counts(bins, disp_per_bin, name, N, bodies):
     plot_from_here = n
     p = name + '_vel_disp.hist'
     g = open(p, 'w')
     norm_check = 0.0
+    counts = 0.0
     g.write("#r_cur\tl_cur\tb_cur\tcounts\tdisp_vl\tdisp_vx\tdisp_vy\tdisp_vz\n")
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
                     for m in range(0, l_bins): #for each l bin
-                        counts = (len(bins[j][k][m][:]))
+                        #i = (len(bins[j][k][m][:]))
+                        for i in range(0, (len(bins[j][k][m][:]))):
+                            ind = bins[j][k][m][i]
+                            if(bodies[ind].mtype == 0):
+                                counts += 1
                         disp_vx = disp_per_bin[j][k][m][0]
                         disp_vy = disp_per_bin[j][k][m][1]
                         disp_vz = disp_per_bin[j][k][m][2]
@@ -237,9 +280,9 @@ def plot_binned_counts(bins, disp_per_bin, name, N):
                         r_cur = j * r_bin_width + r_start
                         l_cur = m * l_bin_width + l_start
                         b_cur = k * b_bin_width + b_start
-                        norm_check += counts / N
+                        norm_check += counts / N 
                         g.write("%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f\n" % (r_cur, l_cur, b_cur , counts / N, disp_vl, disp_vx, disp_vy, disp_vz))
-    #print norm_check
+    print norm_check
     g.close()
     if(plot_from_here == True):
         b_lower = -80
@@ -438,16 +481,17 @@ def calc_line_of_sight(x, y, z, vx, vy, vz):
 def main():
     name1 = str(sys.argv[1])
     output_type = sys.argv[2]
+    coors = sys.argv[3]
     assert output_type in ["mw", "nemo"], "ERROR: list output type: mw or nemo"
-
+    assert coors in ['lb', 'lambda_beta'], "ERROR: need coordinates: lb or lambda_beta"
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
     print "for output: ", name1 
     
     bodies = []
     if(output_type == 'mw'):
-        bodies = get_data(file_name)
+        bodies = get_data(file_name, coors)
     if(output_type == 'nemo'):
-        bodies = get_data_nemo(file_name)
+        bodies = get_data_nemo(file_name, coors)
     
     N = float(body.body_count)
     #this calculates the total vx vy vz dispersion
@@ -470,5 +514,5 @@ def main():
     #calc_actual_mass_in_bin(bins, bodies)
     
     if(plot_bins == True):
-        plot_binned_counts(bins, dispersion_per_bin, name1, N)
+        plot_binned_counts(bins, dispersion_per_bin, name1, N, bodies)
 main()

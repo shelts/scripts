@@ -12,7 +12,7 @@ import subprocess
 from subprocess import call
 import matplotlib.pyplot as plt
 from matplotlib import cm
-import math
+import math as mt
 import matplotlib.patches as mpatches
 import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -31,10 +31,10 @@ args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
-plot_multiple             = n                 #
+plot_multiple             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -54,7 +54,7 @@ get_fornax_binary_now     = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_dispersion_calc  = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-make_a_few_hists          = y                 #
+make_a_few_hists          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -271,9 +271,9 @@ def plot(hist1, hist2, name):
         #plt.show()
         return 1
 
-def l_vel_disp_count_data(hist_name, run_dispersion, output_type):
+def l_vel_disp_count_data(hist_name, run_dispersion, output_type, coors):
     if(run_dispersion == True):
-        os.system("./scripts/velocity_dispersion.py " + hist_name + " " + output_type)
+        os.system("./scripts/velocity_dispersion.py " + hist_name + " " + output_type + " " + coors)
         hist_name = hist_name + "_vel_disp.hist"
         os.system("mv ./" + hist_name + " quick_plots/hists/")
     else:
@@ -296,15 +296,16 @@ def l_vel_disp_count_data(hist_name, run_dispersion, output_type):
         tokens = line.split(',\t');
         if tokens: #tests to make sure tokens is not empty
             lda = float(tokens[1])
+            bda = float(tokens[2])
             cts = float(tokens[4])
             l.append(lda)
             n.append(cts)
             
     return l, n
 
-def l_counts_from_output_data(hist_name, run_dispersion, output_type):
+def l_counts_from_output_data(hist_name, run_dispersion, output_type, coors):
     if(run_dispersion == True):
-        os.system("./scripts/velocity_dispersion.py " + hist_name + " " + output_type)
+        os.system("./scripts/velocity_dispersion.py " + hist_name + " " + output_type + " " + coors)
         hist_name = hist_name + "_vel_disp.hist"
         os.system("mv ./" + hist_name + " quick_plots/hists/")
     else:
@@ -327,6 +328,7 @@ def l_counts_from_output_data(hist_name, run_dispersion, output_type):
         tokens = line.split(',\t');
         if tokens: #tests to make sure tokens is not empty
             lda = float(tokens[1])
+            bda = float(tokens[2])
             cts = float(tokens[3])
             l.append(lda)
             n.append(cts)
@@ -358,7 +360,7 @@ def l_count_data_from_hist(hist_name):
     return l, n
 
 def multiple_plot():
-    run_disp = n
+    run_disp = y
     rows = 6
     columns = 2
     
@@ -367,9 +369,15 @@ def multiple_plot():
     xupper = -180
     w_overlap = 2.5
     w_adjacent = 1.5
-    ylimit2 = 100
-    ylimit3 = 100
-    name = 'multi_test'
+    ylimit2 = 0.4
+    ylimit3 = 0.4
+    name = 'output_vs_hist_lambda_beta'
+    #name = 'output_vs_hist_l_b'
+    #name = 'output_hist_and_vel_disp_lambda_beta'
+    #name = 'output_hist_and_vel_disp_lb'
+    coors = 'lambda_beta'
+    #coors = 'lb'
+    
     save_folder = 'quick_plots/comp_hist_plots/'
     hists = ['ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular',
              'ft2.02gy_bt2gy_mass5e4_r0.01_single_globular',
@@ -386,12 +394,12 @@ def multiple_plot():
     l1    = []; n1    = []
     l1_vd = []; n1_vd = []
     #l1, n1        = l_count_data_from_hist(hists[0] + ".hist" )
-    l1, n1        = l_counts_from_output_data(hists[0], run_disp, 'mw'  )
-    l1_vd, n1_vd  = l_vel_disp_count_data(hists[0], run_disp, 'mw'  )
-    
+    l1, n1        = l_counts_from_output_data(hists[0], run_disp, 'mw' , coors )
+    #l1_vd, n1_vd  = l_vel_disp_count_data(hists[0], run_disp, 'mw' , coors )
+    l1_vd, n1_vd        = l_count_data_from_hist(hists[0] + ".hist" )
     plt.figure(figsize=(20,10))
     plt.subplot(rows, columns, 1)
-    plt.title('Histogram 2.02 Gy')
+    plt.title('plotted from output, lambda,beta 2.02 Gy')
     #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
     plt.bar(l1, n1, width = w_adjacent, color='b')
     plt.legend(handles=[mpatches.Patch(color='b', label= 'both_glob')])
@@ -400,7 +408,7 @@ def multiple_plot():
     plt.ylabel('counts')
     
     plt.subplot(rows, columns, 2)
-    plt.title('Vel Disp 2.02 Gy')
+    plt.title('plotted from hist 2.02 Gy')
     plt.bar(l1_vd, n1_vd, width = w_adjacent, color='b')
     plt.legend(handles=[mpatches.Patch(color='b', label= 'both_glob')])
     plt.xlim((xlower, xupper))
@@ -411,9 +419,10 @@ def multiple_plot():
     l2 = []; n2 = []
     l2_vd = []; n2_vd = []
     #l2, n2 = l_count_data_from_hist(hists[1] + ".hist")
-    l2, n2        = l_counts_from_output_data(hists[1], run_disp, 'mw'  )
-    l2_vd, n2_vd  = l_vel_disp_count_data(hists[1], run_disp, 'mw'  )
-   
+    l2, n2        = l_counts_from_output_data(hists[1], run_disp, 'mw' , coors )
+    #l2_vd, n2_vd  = l_vel_disp_count_data(hists[1], run_disp, 'mw' , coors )
+    l2_vd, n2_vd = l_count_data_from_hist(hists[1] + ".hist")
+    
     plt.subplot(rows, columns, 3)
     plt.bar(l2, n2, width = w_adjacent, color='b')
     plt.legend(handles=[mpatches.Patch(color='b', label= 'single_glob')])
@@ -432,9 +441,10 @@ def multiple_plot():
     l3 = []; n3 = []
     l3_vd = []; n3_vd = []
     #l3, n3 = l_count_data_from_hist(hists[2] + ".hist")   
-    l3, n3        = l_counts_from_output_data(hists[2], run_disp, 'mw'  )
-    l3_vd, n3_vd  = l_vel_disp_count_data(hists[2], run_disp, 'mw'  )        
-            
+    l3, n3        = l_counts_from_output_data(hists[2], run_disp, 'mw' , coors )
+    #l3_vd, n3_vd  = l_vel_disp_count_data(hists[2], run_disp, 'mw' , coors )        
+    l3_vd, n3_vd = l_count_data_from_hist(hists[2] + ".hist")   
+    
     plt.subplot(rows, columns, 5)
     plt.bar(l3, n3, width = w_adjacent, color='b')
     plt.legend(handles=[mpatches.Patch(color='b', label= 'mass fol light')])
@@ -453,8 +463,9 @@ def multiple_plot():
     l4 = []; n4 = []
     l4_vd = []; n4_vd = []
     #l4, n4 = l_count_data_from_hist(hists[3] + ".hist")
-    l4, n4        = l_counts_from_output_data(hists[3], run_disp, 'mw'  )
-    l4_vd, n4_vd  = l_vel_disp_count_data(hists[3], run_disp, 'mw'  )
+    l4, n4        = l_counts_from_output_data(hists[3], run_disp, 'mw' , coors )
+    #l4_vd, n4_vd  = l_vel_disp_count_data(hists[3], run_disp, 'mw' , coors )
+    l4_vd, n4_vd = l_count_data_from_hist(hists[3] + ".hist")
     
     plt.subplot(rows, columns, 7)
     plt.bar(l4, n4, width = w_adjacent, color='k')
@@ -474,8 +485,8 @@ def multiple_plot():
     # # # # # 5 # # # # # 
     l5 = []; n5 = []
     l5_vd = []; n5_vd = []
-    l5, n5        = l_counts_from_output_data(hists[4], run_disp, 'nemo'  )
-    l5_vd, n5_vd  = l_vel_disp_count_data(hists[4], run_disp, 'nemo'  )
+    l5, n5        = l_counts_from_output_data(hists[4], run_disp, 'nemo' , coors )
+    l5_vd, n5_vd  = l_vel_disp_count_data(hists[4], run_disp, 'nemo' , coors )
     
     plt.subplot(rows, columns, 9)
     plt.bar(l5, n5, width = w_adjacent, color='k')
@@ -495,8 +506,8 @@ def multiple_plot():
     # # # # # 6 # # # # # 
     l6 = []; n6 = []
     l6_vd = []; n6_vd = []
-    l6, n6        = l_counts_from_output_data(hists[5], run_disp, 'nemo'  )
-    l6_vd, n6_vd  = l_vel_disp_count_data(hists[5], run_disp, 'nemo'  )
+    l6, n6        = l_counts_from_output_data(hists[5], run_disp, 'nemo' , coors )
+    l6_vd, n6_vd  = l_vel_disp_count_data(hists[5], run_disp, 'nemo' , coors )
     
     plt.subplot(rows, columns, 11)
     plt.bar(l6, n6, width = w_adjacent, color='k')
