@@ -150,7 +150,7 @@ def get_start_number(file_name):
     
     return num
 
-def get_data(file_name, coors):
+def get_data(file_name, coors, which_matter):
     num = get_start_number(file_name)
     lines = []
     lines = open(file_name).readlines() 
@@ -160,6 +160,12 @@ def get_data(file_name, coors):
     for line in lines:
         ss = line.split(',')
         ty = (float(ss[0]))
+        if(which_matter == 'light'):
+            if(ty == 1):
+                continue
+        if(which_matter == 'dark'):
+            if(ty == 0):
+                continue
         x  = (float(ss[1]))
         y  = (float(ss[2]))
         z  = (float(ss[3]))
@@ -178,6 +184,7 @@ def get_data(file_name, coors):
         m  = (float(ss[10]))
         
         vl = calc_line_of_sight(x, y, z, vx, vy, vz)
+        
         b = body(ty, m , x, y, z, l, b, r, vx, vy, vz, vl) 
         bodies.append(b)
         i += 1
@@ -268,21 +275,22 @@ def plot_binned_counts(bins, disp_per_bin, name, N, bodies):
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
                     for m in range(0, l_bins): #for each l bin
-                        #i = (len(bins[j][k][m][:]))
-                        for i in range(0, (len(bins[j][k][m][:]))):
-                            ind = bins[j][k][m][i]
-                            if(bodies[ind].mtype == 0):
-                                counts += 1
+                        counts = (len(bins[j][k][m][:]))
+                        #counts = 0.0
+                        #for i in range(0, (len(bins[j][k][m][:]))):
+                            #ind = bins[j][k][m][i]
+                                #counts += 1
                         disp_vx = disp_per_bin[j][k][m][0]
                         disp_vy = disp_per_bin[j][k][m][1]
                         disp_vz = disp_per_bin[j][k][m][2]
                         disp_vl = disp_per_bin[j][k][m][3]
+
                         r_cur = j * r_bin_width + r_start
                         l_cur = m * l_bin_width + l_start
                         b_cur = k * b_bin_width + b_start
-                        norm_check += counts / N 
-                        g.write("%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f\n" % (r_cur, l_cur, b_cur , counts / N, disp_vl, disp_vx, disp_vy, disp_vz))
-    print norm_check
+                        norm_check += counts / (N)
+                        g.write("%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f,\t%f\n" % (r_cur, l_cur, b_cur , counts , disp_vl, disp_vx, disp_vy, disp_vz))
+    #print norm_check
     g.close()
     if(plot_from_here == True):
         b_lower = -80
@@ -352,6 +360,8 @@ def binned_dispersion(bins, bodies):
         #meaning there are bodies in the bin.
         #the dispersion in each direction is stored in an array which has 3 values per bin.
     #
+    
+   
     for j in range(0, r_bins): #for each r bin
             for k in range(0, b_bins): #for each b bin
                     for m in range(0, l_bins): #for each l bin
@@ -368,7 +378,7 @@ def binned_dispersion(bins, bodies):
                                 
                                 disp_vl1 = 0
                                 disp_vl2 = 0
-                                    
+                                vls = []    
                                 for index in range(0, N_bodies_in_bin):
                                     #print N_bodies_in_bin
                                     i = bins[j][k][m][index]
@@ -386,12 +396,33 @@ def binned_dispersion(bins, bodies):
                                     disp_vl1 += bodies[i].vl * bodies[i].vl
                                     disp_vl2 += bodies[i].vl 
                                     
-                                N = N_bodies_in_bin
-                                #print disp_vl1 / N
-                                disp_vx = (disp_vx1 / N) - (disp_vx2 * disp_vx2 / (N * N) )
-                                disp_vy = (disp_vy1 / N) - (disp_vy2 * disp_vy2 / (N * N) )
-                                disp_vz = (disp_vz1 / N) - (disp_vz2 * disp_vz2 / (N * N) )
-                                disp_vl = (disp_vl1 / N) - (disp_vl2 * disp_vl2 / (N * N) )
+                                    vls.append(bodies[i].vl)
+                                    
+                                vl_max = max(vls)
+                                vl_min = min(vls)
+                                N  = N_bodies_in_bin
+                                Nl = N_bodies_in_bin
+                                N_ratio  = 1.0
+                                Nl_ratio = 1.0
+                                Nnew = N
+                                Nlnew = N
+                                # this is meant to eliminate the worst outliers #
+                                if(N_bodies_in_bin > 4):
+                                    disp_vl1 = disp_vl1 - vl_max * vl_max - vl_min * vl_min
+                                    disp_vl2 = disp_vl2 - vl_max - vl_min
+                                    Nl = N_bodies_in_bin - 2.0
+                                    
+                                    N_ratio  = N / (N - 1.0)
+                                    Nl_ratio = Nl / (Nl - 1.0)
+                                    Nlnew = Nl - 1
+                                    Nnew = N - 1
+                                else:
+                                    disp_vl1 = 0.0
+                                    disp_vl2 = 0.0
+                                disp_vx = (disp_vx1 / Nnew) - N_ratio * (disp_vx2 * disp_vx2 / (N * N) )
+                                disp_vy = (disp_vy1 / Nnew) - N_ratio * (disp_vy2 * disp_vy2 / (N * N) )
+                                disp_vz = (disp_vz1 / Nnew) - N_ratio * (disp_vz2 * disp_vz2 / (N * N) )
+                                disp_vl = (disp_vl1 / Nlnew) - Nl_ratio * (disp_vl2 * disp_vl2 / (Nl * Nl) )
                                 #print disp_vy1, disp_vy2
                                 
                                 dispersion_per_bin[j][k][m][0] = disp_vx ** 0.5
@@ -482,14 +513,16 @@ def main():
     name1 = str(sys.argv[1])
     output_type = sys.argv[2]
     coors = sys.argv[3]
+    which_matter = sys.argv[4]
     assert output_type in ["mw", "nemo"], "ERROR: list output type: mw or nemo"
     assert coors in ['lb', 'lambda_beta'], "ERROR: need coordinates: lb or lambda_beta"
+    assert which_matter in ['light', 'dark', 'both'], "ERROR: select which matter to use: light, dark or both"
     file_name = '/home/sidd/Desktop/research/quick_plots/outputs/' + name1 + '.out'
     print "for output: ", name1 
     
     bodies = []
     if(output_type == 'mw'):
-        bodies = get_data(file_name, coors)
+        bodies = get_data(file_name, coors, which_matter)
     if(output_type == 'nemo'):
         bodies = get_data_nemo(file_name, coors)
     
