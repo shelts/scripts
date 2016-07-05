@@ -412,16 +412,27 @@ def binned_dispersion(bins, bodies):
                                     disp_vl2 = disp_vl2 - vl_max - vl_min
                                     Nl = N_bodies_in_bin - 2.0
                                     
-                                    N_ratio  = N / (N - 1.0)
                                     Nl_ratio = Nl / (Nl - 1.0)
                                     Nlnew = Nl - 1
+                                    
+                                    N_ratio  = N / (N - 1.0)
                                     Nnew = N - 1
                                 else:
                                     disp_vl1 = 0.0
                                     disp_vl2 = 0.0
+                                    
+                                    disp_vx1 = 0.0
+                                    disp_vy1 = 0.0
+                                    disp_vz1 = 0.0
+                                
+                                    disp_vx2 = 0.0
+                                    disp_vy2 = 0.0
+                                    disp_vz2 = 0.0
+                                    
                                 disp_vx = (disp_vx1 / Nnew) - N_ratio * (disp_vx2 * disp_vx2 / (N * N) )
                                 disp_vy = (disp_vy1 / Nnew) - N_ratio * (disp_vy2 * disp_vy2 / (N * N) )
                                 disp_vz = (disp_vz1 / Nnew) - N_ratio * (disp_vz2 * disp_vz2 / (N * N) )
+                                
                                 disp_vl = (disp_vl1 / Nlnew) - Nl_ratio * (disp_vl2 * disp_vl2 / (Nl * Nl) )
                                 #print disp_vy1, disp_vy2
                                 

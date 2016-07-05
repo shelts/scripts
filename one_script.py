@@ -363,7 +363,7 @@ def multiple_plot():
     run_disp = y
     coors = 'lambda_beta'
     #coors = 'lb'
-    which_matter = 'both'
+    which_matter = 'light'
     save_folder = 'quick_plots/comp_hist_plots/'
     
     rows = 3
@@ -374,14 +374,14 @@ def multiple_plot():
     xupper = -180
     w_overlap = 2.5
     w_adjacent = 1.5
-    ylimit2 = 15
-    ylimit3 = 15
+    ylimit2 = 30
+    ylimit3 = 30
 
-    name = 'output_vs_vel_disp_' + coors + "_orphan_both"
+    name = 'output_vs_vel_disp_' + coors + "_orphan_" + which_matter
     hists = ['ft3.945gy_bt4.02gy_massl6.0_massd6.0_rl0.2_rd0.2_both_globular_orphan',
              'ft2.02gy_bt2gy_mass5e4_r0.01_single_globular',
-             'ft3.945gy_bt4.02gy_massl12.0_massd48.0_rl0.2_rd0.2_orphan',
-             'ft3.945gy_bt4.02gy_massl12_massd48_rl0.2_rd0.8_orphan',
+             'ft3.945gy_bt4.02gy_massl12.0_massd78.1_rl0.2_rd0.2_orphan',
+             'ft3.945gy_bt4.02gy_massl12_massd1039.21_rl0.2_rd0.8_orphan',
              'hermus.1e5.10pc.orb31.2.1.nbody',
              'hermus.1.05e6.10pc.1.nbody']
     
