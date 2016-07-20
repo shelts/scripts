@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import math as mt
 import matplotlib.patches as mpatches
+from matplotlib.patches import Rectangle
 import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
@@ -22,8 +23,8 @@ import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
 #args = [2.0, 0.98, 0.2, 0.2, 13, 0.2] #for hist with dark matter
 
@@ -31,10 +32,10 @@ args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
-plot_multiple             = y                 #
+plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -58,12 +59,15 @@ make_a_few_hists          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
+run_mixeddward_test       = y                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
 
 #    Histogram names     #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
-test = 'test'
+test = 'mixeddwarf_initial'
+#test = 'regular_initial'
 singl = 'test_st'
 
 correct_hist = test
@@ -80,7 +84,8 @@ output2 = match_hist_correct + ".out"
 
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-#lua = "Null.lua"
+lua = "mixeddwarf.lua"
+#lua = "EMD_v162.lua"
 outs = 2 #for the cm calculation function
 
 #I am tired of constantly adapting it for the servers
@@ -148,7 +153,8 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b -u  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+         -n 12 -b -u  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
+         2>> " + out + "_piped.out")
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -360,7 +366,7 @@ def l_count_data_from_hist(hist_name):
     return l, n
 
 def multiple_plot():
-    run_disp = y
+    run_disp = n
     coors = 'lambda_beta'
     #coors = 'lb'
     which_matter = 'light'
@@ -398,23 +404,28 @@ def multiple_plot():
     l1_vd, n1_vd  = l_vel_disp_count_data(hists[0], n, 'mw' , coors, which_matter  )
     #l1_vd, n1_vd        = l_count_data_from_hist(hists[0] + ".hist" )
     
+    leg1 = Rectangle((0, 0), 0, 0, alpha=0.0)
     plt.figure(figsize=(20,10))
+    plt.rc('xtick', labelsize=20) 
+    plt.rc('ytick', labelsize=20) 
     plt.subplot(rows, columns, 1)
-    plt.title('hist from output, ' + coors + ' 3.945 Gy')
+    #plt.title('Position Histogram After 3.945 Gy')
     #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
     plt.bar(l1, n1, width = w_adjacent, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label= 'both_glob')])
+    plt.legend([leg1], ['Stars Only'], handlelength=0, frameon=False, framealpha=0)
+    #plt.legend(handles=[mpatches.Patch(color='b', label= 'Stars Only',handlelength=0)])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
-    plt.ylabel('counts')
+    plt.ylabel('counts', fontsize=20)
     
     plt.subplot(rows, columns, 2)
-    plt.title('Vel Dispersion 3.945 Gy')
+    #plt.title('Velocity Dispersion After 3.945 Gy')
     plt.bar(l1_vd, n1_vd, width = w_adjacent, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label= 'both_glob')])
+    plt.legend([leg1], ['Stars Only'], handlelength=0, framealpha=0)
+    #plt.legend(handles=[mpatches.Patch(color='b', label= 'Stars Only')])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit2))
-    plt.ylabel('$\sigma$')
+    plt.ylabel('$\sigma$', fontsize=20)
     
     ## # # # # 2 # # # # # 
     #l2 = []; n2 = []
@@ -448,17 +459,19 @@ def multiple_plot():
     
     plt.subplot(rows, columns, 3)
     plt.bar(l3, n3, width = w_adjacent, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label= 'mass fol light')])
+    plt.legend([leg1], ['Mass Follows Light'], handlelength=0, framealpha=0)
+    #plt.legend(handles=[mpatches.Patch(color='b', label= 'Mass Follows Light')])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
-    plt.ylabel('counts')
+    plt.ylabel('counts', fontsize=20)
     
     plt.subplot(rows, columns, 4)
     plt.bar(l3_vd, n3_vd, width = w_adjacent, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label= 'mass fol light')])
+    plt.legend([leg1], ['Mass Follows Light'], handlelength=0, framealpha=0)
+    #plt.legend(handles=[mpatches.Patch(color='b', label= 'Mass Follows Light')])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit3))
-    plt.ylabel('$\sigma$')
+    plt.ylabel('$\sigma$', fontsize=20)
     
     # # # # # 4 # # # # # 
     l4 = []; n4 = []
@@ -469,19 +482,22 @@ def multiple_plot():
     #l4_vd, n4_vd = l_count_data_from_hist(hists[3] + ".hist")
     
     plt.subplot(rows, columns, 5)
-    plt.bar(l4, n4, width = w_adjacent, color='k')
-    plt.legend(handles=[mpatches.Patch(color='k', label='dark envel')])
+    plt.bar(l4, n4, width = w_adjacent, color='b')
+    plt.legend([leg1], ['Extended Dark Matter Halo'], handlelength=0, framealpha=0)
+    #plt.legend(handles=[mpatches.Patch(color='b', label='Extended Dark Matter Halo')])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
     #plt.xlabel('l')
-    plt.ylabel('counts')
+    plt.ylabel('counts', fontsize=20)
+    plt.xlabel('$\Lambda$', fontsize=20)
     
     plt.subplot(rows, columns, 6)
     plt.bar(l4_vd, n4_vd, width = w_adjacent, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label='dark envel')])
+    plt.legend([leg1], ['         Extended Dark Matter Halo'], handlelength=0, framealpha=0, loc= 9)
+    #plt.legend(handles=[mpatches.Patch(color='b', label='Extended Dark Matter Halo')])
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit3))
-    plt.ylabel('$\sigma$')
+    plt.ylabel('$\sigma$', fontsize=20)
     
     # # # # # 5 # # # # # 
     #l5 = []; n5 = []
@@ -523,8 +539,8 @@ def multiple_plot():
     #plt.legend(handles=[mpatches.Patch(color='b', label='nemo mass fol light')])
     #plt.xlim((xlower, xupper))
     #plt.ylim((0.0, ylimit3))
-    #plt.xlabel('$\Lambda$')
-    #plt.ylabel('$\sigma$')
+    plt.xlabel('$\Lambda$', fontsize=20)
+    plt.ylabel('$\sigma$', fontsize=20)
     
     
     
@@ -1308,6 +1324,25 @@ def make_some_hists():
     args = [ft, bt, rl, rd, ml, md]
     output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175_orphan'
     nbody(args, lua_file, output, output, ver)
+
+def test_mixed_dwarf():
+    ver = ''
+    ft = 0.0001 #gyr
+    bt = 1   #gyr
+    rl = 0.2  #kpc
+    rr = 0.5 #kpc
+    ml = 30   #solar
+    mr = 0.5   #solar
+    args = [ft, bt, rl, rr, ml, mr]
+    
+    lua_file = 'EMD_v162.lua'
+    output = 'regular_initial'
+    nbody(args, lua_file, output, output, ver)
+    
+    
+    lua_file = 'mixeddwarf.lua'
+    output = 'mixeddwarf_initial_null'
+    nbody(args, lua_file, output, output, ver)
     
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
@@ -1356,6 +1391,10 @@ def main():
         get_fornax_binary()
         
     standard_run()
+    
+    if(run_mixeddward_test == True):
+        test_mixed_dwarf()
+        
     if(charles == True):
         for_charles()
     
