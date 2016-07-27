@@ -153,8 +153,9 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b -u  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
-         2>> " + out + "_piped.out")
+         -n 12 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+    #+ " \
+         #2>> " + out + "_piped.out")
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -179,7 +180,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 10 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 10 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #       
 def plot(hist1, hist2, name):
     ylimit = 0.4
@@ -1292,16 +1293,18 @@ def velocity_dispersion():
     os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
 def make_some_hists():
-    ver = ''
+    ver = '_1.62_x86_64-pc-linux-gnu__mt'
     lua_file = 'EMD_v162.lua'
-    
+    correct = 'hist_v162_2k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__7_11_16.hist'
     #<search_application> milkyway_nbody 1.62 Linux x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 2 max threads on a system with 2 processors
     #<search_likelihood>-45.559888597156039</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_3_1469198227_1029424 [1242496120]
     args = [3.38468265837367, 0.932809474941883, 0.285845146950099, 0.802764317180111, 75.809710006821, 0.71339836837145]
     output = 'run_repeat1'
-    nbody(args, lua_file, output, output, ver)
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
+    
     
     #<search_application> milkyway_nbody 1.62 Linux x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 2 max threads on a system with 2 processors
@@ -1309,7 +1312,8 @@ def make_some_hists():
     #ps_nbody_7_11_16_v162_2k_3_1469198227_1029436 [1242496136]
     args = [3.40477146164275, 0.933249596186167, 0.28055031420881, 0.803174954167425, 76.0588526765571, 0.715246598291644]
     output = 'run_repeat2'
-    nbody(args, lua_file, output, output, ver)
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     #<search_application> milkyway_nbody 1.62 Windows x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 4 max threads on a system with 4 processors
@@ -1317,32 +1321,34 @@ def make_some_hists():
     #ps_nbody_7_11_16_v162_2k_2_1469198227_1168003 [1243371687]
     args = [4.55622029632142, 0.965911726233733, 0.127909000121722, 0.551996149673243, 26.7301677840129, 0.938633263458105]
     output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     #<search_application> milkyway_nbody 1.62 Windows x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 8 max threads on a system with 8 processors
     #<search_likelihood>-24.641653385544913</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_1_1469198227_1133413 [1243155337]
     args = [3.63274998232373, 0.948946780783617, 0.199979761844336, 0.655142348838728, 50.0837160622969, 0.798874109875458]
-    output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
+    output = 'run_repeat4'
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     #<search_application> milkyway_nbody 1.62 Linux x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 2 max threads on a system with 2 processors
     #<search_likelihood>-26.789024580271860</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_1_1469198227_1159283 [1243315365]
     args = [3.63225416878697, 0.948833805475879, 0.20050453615679, 0.655124953667283, 50.1804745012106, 0.798112676383111]
-    output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
-    
+    output = 'run_repeat5'
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     #<search_application> milkyway_nbody 1.62 Windows x86_64 double  , Crlibm </search_application>
     #<search_likelihood>-15.822067017181460</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_2_1469198227_1117387 [1243054305]
     args = [4.6623310971251, 0.96717149700841, 0.139714626009468, 0.777847696455749, 24.7765935891616, 0.95]
-    output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
-    
+    output = 'run_repeat6'
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     
     #<search_application> milkyway_nbody 1.62 Darwin x86_64 double  OpenMP, Crlibm </search_application>
@@ -1350,25 +1356,28 @@ def make_some_hists():
     #<search_likelihood>-17.965056839613375</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_2_1468333094_504958 [1226262896]
     args = [4.61863938139443, 0.966232352436906, 0.137698670818373, 0.707689456651744, 26.2578345474132, 0.938588805402324]
-    output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
+    output = 'run_repeat7'
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     #<search_application> milkyway_nbody 1.62 Darwin x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 8 max threads on a system with 8 processors
     #<search_likelihood>-21.799457176655853</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_3_1469198227_1122481 [1243085764]
     args = [3.4057931126852, 0.933112520635968, 0.28281917841086, 0.804270346211434, 75.9073026530298, 0.71476315082219]
-    output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
+    output = 'run_repeat8'
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
     
     #<search_application> milkyway_nbody 1.62 Darwin x86_64 double  OpenMP, Crlibm </search_application>
     #Using OpenMP 4 max threads on a system with 4 processors
     #<search_likelihood>-18.167581379220053</search_likelihood>
     #ps_nbody_7_11_16_v162_2k_3_1469198227_1141845 [1243204025]
     args = [3.40374881598597, 0.932995970998994, 0.283776750505688, 0.804446363133715, 75.9121529340563, 0.714150034261106]
-    output = 'run_repeat3'
-    nbody(args, lua_file, output, output, ver)
-
+    output = 'run_repeat9'
+    compare_after_run(args, lua_file, correct, output, output, ver)
+    match_hists(correct, output, ver)
+    
 def test_mixed_dwarf():
     ver = ''
     ft = 0.0001 #gyr
