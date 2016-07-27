@@ -153,9 +153,8 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
-    #+ " \
-         #2>> " + out + "_piped.out")
+         -n 12 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
+         2>> " + out + "_piped.out")
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -1383,14 +1382,14 @@ def test_mixed_dwarf():
     ft = 0.0001 #gyr
     bt = 1   #gyr
     rl = 0.2  #kpc
-    rr = 0.5 #kpc
-    ml = 30   #solar
-    mr = 0.5   #solar
+    rr = 0.2 #kpc
+    ml = 12   #solar
+    mr = 0.2   #solar
     args = [ft, bt, rl, rr, ml, mr]
     
     lua_file = 'EMD_v162.lua'
     output = 'regular_initial'
-    #nbody(args, lua_file, output, output, ver)
+    nbody(args, lua_file, output, output, ver)
     
     
     lua_file = 'mixeddwarf.lua'
