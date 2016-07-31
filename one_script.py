@@ -1389,7 +1389,7 @@ def test_mixed_dwarf():
     
     lua_file = 'EMD_v162.lua'
     output = 'regular_initial'
-    nbody(args, lua_file, output, output, ver)
+    #nbody(args, lua_file, output, output, ver)
     
     
     lua_file = 'mixeddwarf.lua'
