@@ -1,4 +1,5 @@
 #!/usr/bin/python
+#/* Copyright (c) 2016 Siddhartha Shelton */
 import numpy as np
 import matplotlib.pyplot as plt
 import sys

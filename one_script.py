@@ -1,4 +1,5 @@
 #! /usr/bin/python
+#/* Copyright (c) 2016 Siddhartha Shelton */
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # # # #\#
                 #    One script to rule them all.   #

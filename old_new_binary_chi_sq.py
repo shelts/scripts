@@ -1,4 +1,5 @@
 #! /usr/bin/python
+#/* Copyright (c) 2016 Siddhartha Shelton */
 import os
 from subprocess import call
 import math as m

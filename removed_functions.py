@@ -1,3 +1,4 @@
+#/* Copyright (c) 2016 Siddhartha Shelton */
 #these are functions that were removed intact from one_script.py
 
 def diff_OS_test_v158():

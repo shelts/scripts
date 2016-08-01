@@ -1,4 +1,5 @@
 #! /usr/bin/python
+#/* Copyright (c) 2016 Siddhartha Shelton */
 import os
 import sys
 from subprocess import call

@@ -1,4 +1,5 @@
 #!/bin/bash          
+#/* Copyright (c) 2016 Siddhartha Shelton */
 #     rm -r nbody_test
 #     mkdir nbody_test
 #     cd ~/Desktop/research/nbody_test
