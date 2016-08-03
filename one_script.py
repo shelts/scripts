@@ -154,8 +154,9 @@ def nbody(paras, lua_file, hist, out, ver):
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
-         2>> " + out + "_piped.out")
+         -n 12 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+    #+ " \
+         #2>> " + out + "_piped.out")
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -1394,7 +1395,7 @@ def test_mixed_dwarf():
     
     
     lua_file = 'mixeddwarf.lua'
-    output = 'mixeddwarf_initial'
+    output = 'output_0gy'
     nbody(args, lua_file, output, output, ver)
     
 # # # # # # # # # # # # # # # # # # # # # #

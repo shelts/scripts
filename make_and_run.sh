@@ -8,12 +8,12 @@
 #     ./one_script.py
     cd ~/Desktop/research/nbody_test/bin
     
-    time  ./milkyway_nbody \
-    -f ~/Desktop/research/lua/EMD_v162.lua \
-    -o output_0gy.out \
-    -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
-    -n 8 -b   \
-    -i 0.0001 1.0 0.2 0.5 6 0.5\
+#     time  ./milkyway_nbody \
+#     -f ~/Desktop/research/lua/EMD_v162.lua \
+#     -o output_0gy.out \
+#     -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
+#     -n 8 -b   \
+#     -i 0.0001 1.0 0.2 0.5 6 0.5\
 
 #     rm ~/Desktop/research/data_testing/sim_outputs/output_0gy.out
 #     cp output_0gy.out ~/Desktop/research/data_testing/sim_outputs/output_0gy.out
