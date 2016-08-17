@@ -25,8 +25,8 @@
     -f ~/Desktop/research/lua/mixeddwarf.lua \
     -o output_0gy.out \
     -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
-    -n 8 -b   \
-    -i 0.0001 1.0 0.2 0.5 6 0.5\
+    -n 8 -b  -u \
+    -i 4.0 1.0 0.2 0.5 6 0.5\
 
 
 #     valgrind --tool=callgrind callgrind_annotate --threshold=100 --tree=both callgrind.out.* ./milkyway_nbody_162j \

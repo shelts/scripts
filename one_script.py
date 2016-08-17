@@ -24,8 +24,9 @@ import numpy as np
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-#args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [4.52593022751756, 0.803150250914145, 0.1, 0.95, 79.815063639634, 0.95]
+args = [3.945, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
+#args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #args = [3.87427734322731, 0.948765315488652, 0.356895748596523, .145236987452136, 10.1548765394315, 0.185215358746843]
 #args = [2.0, 0.98, 0.2, 0.2, 13, 0.2] #for hist with dark matter
 
@@ -91,7 +92,7 @@ outs = 2 #for the cm calculation function
 
 #I am tired of constantly adapting it for the servers
 lmc_dir = '~/research/'
-sid_dir = '~/Desktop/research/'
+sid_dir = '/home/sidd/Desktop/research/'
 sgr_dir = '/Users/master/sidd_research/'
 path = sid_dir
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -150,13 +151,16 @@ def nbody(paras, lua_file, hist, out, ver):
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     
     print('running nbody')
-    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+    os.chdir("nbody_test/bin/")
+    os.system("./milkyway_nbody" + ver + " \
         -f " + path + "lua/" + lua_file + " \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+         -n 12 -b -P  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
     #+ " \
          #2>> " + out + "_piped.out")
+    os.chdir(path)
+    #os.chdir("../")
 # # # # # # # # # #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
@@ -1381,7 +1385,7 @@ def make_some_hists():
     
 def test_mixed_dwarf():
     ver = ''
-    ft = 0.0001 #gyr
+    ft = 0.001 #gyr
     bt = 1   #gyr
     rl = 0.2  #kpc
     rr = 0.2 #kpc
@@ -1397,7 +1401,6 @@ def test_mixed_dwarf():
     lua_file = 'mixeddwarf.lua'
     output = 'output_0gy'
     nbody(args, lua_file, output, output, ver)
-    
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
