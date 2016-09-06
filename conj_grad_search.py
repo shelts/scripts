@@ -81,12 +81,12 @@ def make_correct():
 
 
 def nbody(paras, hist):
-    sim_time      = str(paras[0])
-    back_time     = str(paras[1])
-    r0            = str(paras[2])
-    light_r_ratio = str(paras[3])
-    mass_l        = str(paras[4])
-    mass_ratio    = str(paras[5])
+    sim_time      = str(abs(paras[0]))
+    back_time     = str(abs(paras[1]))
+    r0            = str(abs(paras[2]))
+    light_r_ratio = str(abs(paras[3]))
+    mass_l        = str(abs(paras[4]))
+    mass_ratio    = str(abs(paras[5]))
     
     
     #os.chdir("nbody_test/bin/")
