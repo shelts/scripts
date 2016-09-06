@@ -100,7 +100,7 @@ def nbody(paras, hist):
     #os.chdir(path)
 
 def get_value(name):
-    f = open(name + "_piped.out", 'r')
+    f = open("args_" + name + "_piped.out", 'r')
     for line in f:
         if (line.startswith("<")):
             ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
