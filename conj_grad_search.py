@@ -76,7 +76,7 @@ def rebuild():
 def make_correct():
     os.system(" " + binary + " \
         -f " + path + "lua/" + lua + " \
-        -z " + path + "quick_plots/hists/" + correct_hist + " \
+        -z " + path + "quick_plots/hists/" + correct_hist + ".hist \
         -b -i " + ft_c + " " + bt_c + " " + r_c + " " + rr_c + " " + m_c + " " + mr_c )
 
 
