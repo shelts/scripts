@@ -116,7 +116,7 @@ def function(parameters):
     rr = str(parameters[3])
     m  = str(parameters[4])
     mr = str(parameters[5])
-    print ft, bt, r, rr, m, mr
+    print "this: ", ft, bt, r, rr, m, mr
     name = ft + "_" + bt + "_" + r + "_" + rr + "_" + m + "_" + mr
     nbody(parameters, name)
     val = get_value(name)
