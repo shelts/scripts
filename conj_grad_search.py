@@ -167,7 +167,7 @@ def main():
         
     if(run_conj_grad_desc):
         x0 = initial_guess()
-        res1 = scipy.optimize.fmin_cg(function, x0, full_output = True)
+        res1 = scipy.optimize.fmin_cg(function, x0, epsilon = 1e-5, full_output = True)
         print res1
     
     if(run_test):
