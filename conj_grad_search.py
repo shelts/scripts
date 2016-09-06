@@ -89,18 +89,18 @@ def nbody(paras, hist):
     mass_ratio    = str(paras[5])
     
     
-    os.chdir("nbody_test/bin/")
-    os.system("./milkyway_nbody" + ver + " \
+    #os.chdir("nbody_test/bin/")
+    os.system("./nbody_test/bin/milkyway_nbody" + ver + " \
         -f " + path + "lua/" + lua + " \
         -h " + path + "quick_plots/hists/" + correct_hist + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + hist + ".out \
         -n 12 -b -i " + sim_time + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
-        2>> " + hist + "_piped.out")
-    os.chdir(path)
+        2>> args_" + hist + "_piped.out")
+    #os.chdir(path)
 
 def get_value(name):
-    f = open("nbody_test/bin/" + name + "_piped.out", 'r')
+    f = open(name + "_piped.out", 'r')
     for line in f:
         if (line.startswith("<")):
             ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
