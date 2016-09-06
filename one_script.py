@@ -66,18 +66,19 @@ run_mixeddward_test       = y                 #
 
 #    Histogram names     #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
-
+histogram_mw_1d_v162_1comp = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16'
 #    histograms for runs #
 test = 'mixeddwarf_initial'
 #test = 'regular_initial'
-singl = 'test_st'
 
+#hist to match against for compare after run
 correct_hist = test
-histogram_for_nbody_run = test
+#hist name for the nbody run
+histogram_for_nbody_run = histogram_mw_1d_v162_1comp
 
-
-match_hist_correct = test
-match_hist_compare = test
+#if you are just matching, these are the two hists
+match_hist_correct = histogram_mw_1d_v162_1comp
+match_hist_compare = histogram_mw_1d_v162_1comp
 plot_name = histogram_for_nbody_run
 
 output = plot_name
@@ -88,6 +89,8 @@ output2 = match_hist_correct + ".out"
 version  = ''
 #lua = "mixeddwarf.lua"
 lua = "EMD_v162.lua"
+#lua = "EMD_v162_onecomp.lua"
+
 outs = 2 #for the cm calculation function
 
 #I am tired of constantly adapting it for the servers
@@ -112,7 +115,7 @@ def standard_run():
         multiple_plot()
     
     if(run_nbody == True):
-        nbody(args, lua, histogram_for_nbody_run, output, version)
+        nbody(args, lua, histogram_for_nbody_run, output, version, False)
     
     if(run_and_compare == True):
         compare_after_run(args, lua, correct_hist, histogram_for_nbody_run, output, version)
@@ -141,7 +144,7 @@ def make_nbody():
         os.system("make -j ")
         os.chdir("../")
 # # # # # # # # # #           
-def nbody(paras, lua_file, hist, out, ver):
+def nbody(paras, lua_file, hist, out, ver, should_pipe):
     sim_time      = str(paras[0])
     back_time     = str(paras[1])
     r0            = str(paras[2])
@@ -150,15 +153,27 @@ def nbody(paras, lua_file, hist, out, ver):
     mass_ratio    = str(paras[5])
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     
-    print('running nbody')
-    os.chdir("nbody_test/bin/")
-    os.system("./milkyway_nbody" + ver + " \
-        -f " + path + "lua/" + lua_file + " \
-        -z " + path + "quick_plots/hists/" + hist + ".hist \
-        -o " + path + "quick_plots/outputs/" + out + ".out \
-         -n 12 -b -P  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
-    #+ " \
-         #2>> " + out + "_piped.out")
+    if(should_pipe == False):
+        print('running nbody')
+        os.chdir("nbody_test/bin/")
+        os.system("./milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 12 -b -P -u -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+     
+    if(should_pipe == True):
+        print('running nbody')
+        os.chdir("nbody_test/bin/")
+        os.system("./milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 12 -b -P  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
+         2>> " + out + "_piped.out")
+     
+     
+     
     os.chdir(path)
     #os.chdir("../")
 # # # # # # # # # #     
@@ -303,7 +318,7 @@ def l_vel_disp_count_data(hist_name, run_dispersion, output_type, coors, which_m
         
     lines = lines[starting_line:len(lines)]
     l = []
-    n = []
+    nd= []
     for line in lines:
         tokens = line.split(',\t');
         if tokens: #tests to make sure tokens is not empty
@@ -311,9 +326,9 @@ def l_vel_disp_count_data(hist_name, run_dispersion, output_type, coors, which_m
             bda = float(tokens[2])
             cts = float(tokens[4])
             l.append(lda)
-            n.append(cts)
+            nd.append(cts)
             
-    return l, n
+    return l, nd
 
 def l_counts_from_output_data(hist_name, run_dispersion, output_type, coors, which_matter):
     if(run_dispersion == True):
@@ -335,7 +350,7 @@ def l_counts_from_output_data(hist_name, run_dispersion, output_type, coors, whi
         
     lines = lines[starting_line:len(lines)]
     l = []
-    n = []
+    nd = []
     for line in lines:
         tokens = line.split(',\t');
         if tokens: #tests to make sure tokens is not empty
@@ -343,9 +358,9 @@ def l_counts_from_output_data(hist_name, run_dispersion, output_type, coors, whi
             bda = float(tokens[2])
             cts = float(tokens[3])
             l.append(lda)
-            n.append(cts)
+            nd.append(cts)
             
-    return l, n
+    return l, nd
 
 def l_count_data_from_hist(hist_name):
     folder = 'quick_plots/hists/'
@@ -358,7 +373,7 @@ def l_count_data_from_hist(hist_name):
             break 
     lines = lines[starting_line:len(lines)]
     l = []
-    n = []
+    nd = []
     for line in lines:
         if (line.startswith("</histogram>")):
             continue
@@ -367,9 +382,9 @@ def l_count_data_from_hist(hist_name):
             lda = float(tokens[1])
             cts = float(tokens[3])
             l.append(lda)
-            n.append(cts)
+            nd.append(cts)
             
-    return l, n
+    return l, nd
 
 def multiple_plot():
     run_disp = n
@@ -1170,130 +1185,13 @@ def lb_plot_charles(file_name):
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
-def mass_enc(file_name, rscale):
-    path_charles = 'quick_plots/outputs/charles/'
-    f = open(path_charles + file_name + '.out')
-    lines = []
-    lines = f.readlines()
-    
-    num = 1
-    for line in lines:
-        if (line.startswith("# ignore")):
-            break
-        else:
-            num += 1
-    print num
-    lines = lines[num:len(lines)]
-    total_mass_l = 0.0
-    total_mass_d = 0.0
-    mass_enc_l = 0.0
-    mass_enc_d = 0.0
-    counterl = 0
-    counterd = 0
-    for line in lines:
-        if(line.startswith("</bodies>")):
-            break
-        tokens = line.split(',')
-        isDark = int(tokens[0])
-        x = float(tokens[1])
-        y = float(tokens[2])
-        z = float(tokens[3])
-        mass = float(tokens[10])
-        r = (x * x + y * y + z * z)**0.5
-        #dark is 1
-        if(isDark == 0):
-            counterl += 1
-            total_mass_l += mass
-            if(r < rscale):
-                mass_enc_l += mass
-        if(isDark == 1):
-            counterd += 1
-            total_mass_d += mass
-            if(r < rscale):
-                mass_enc_d += mass
-                
-    print counterd, counterl
-    print 'total glob mass: ', total_mass_l * 222288.47
-    print 'total dwarf mass: ', total_mass_d * 222288.47
-    return mass_enc_d, mass_enc_l
-
-def for_charles():
-    plot_output  = n
-    plot_hists   = y
-    run          = n
-    move_ro_fo   = n
-    get_from_lmc = n
-    get_from_tel = n
-    list_of_runs = n
-    
-    #settings#
-    lua_file = "charles_EMD_v162.lua"
-    ver = ''
-    ft = 2.02 #gyr
-    bt = 2.0   #gyr
-    rl = 0.01  #kpc
-    rd = 0.01 #kpc
-    ml = 5e4   #solar
-    md = 1e6   #solar
-    
-    args = [ft, bt, rl, rd, ml, md]
-    
-    
-    
-    #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175_for_paper'
-    #output = 'charles/ft2.02gy_bt2gy_mass1e6_r0.175_single_dwarf'
-    #output = 'ft2.02gy_bt2gy_mass5e4_r0.01_single_globular'
-    #output = 'ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular'
-    #output = 'ft2.02gy_bt2gy_massl1e6_massd1e6_rl0.175_rd0.175_both_dwarf'
-    output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.01'
-    
-    if(run == True):
-        nbody(args, lua_file, output, output, ver)
-        os.system("mv quick_plots/outputs/" + output + ".out quick_plots/outputs/charles/")
-        
-    if(move_ro_fo == True):
-        os.system("mv reverse_orbit.out quick_plots/outputs/charles/")
-        os.system("mv forward_orbit.out quick_plots/outputs/charles/")
-        
-    if(get_from_lmc == True):
-        os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs/charles/")
-        
-    if(get_from_tel == True):
-        os.system("scp $teletraan:~/research/quick_plots/outputs/charles/" + output + ".out quick_plots/outputs/charles/")
-        
-    if(list_of_runs == True):
-        ft = 2.02 #gyr
-        bt = 2.0   #gyr
-        rl = 0.175  #kpc
-        rd = 0.175 #kpc
-        ml = 5e4   #solar
-        md = 1e6   #solar
-        args = [ft, bt, rl, rd, ml, md]
-        output = 'charles/ft2.02gy_bt2gy_mass1e6_r0.175_single_dwarf'
-        nbody(args, lua_file, output, output, ver)
-        
-        ft = 2.02 #gyr
-        bt = 2.0   #gyr
-        rl = 0.01  #kpc
-        rd = 0.01 #kpc
-        ml = 5e4   #solar
-        md = 5e4   #solar
-        args = [ft, bt, rl, rd, ml, md]
-        output = 'charles/ft2.02gy_bt2gy_mass5e4_r0.01_sinle_globular'
-        nbody(args, lua_file, output, output, ver)
-        
-    if(plot_output == True):
-        lb_plot(output)
-        
-    return 0
-# # # # # # # # # # # # # # # # # # # # # #
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
     file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
     file_name = 'nbody1'
     #l = 'Null.lua'
     l = 'EMD_v160_direct_fit.lua'
-    nbody(args, l, file_name, file_name, version)
+    nbody(args, l, file_name, file_name, version, False)
     #lb_plot(file_name)
     os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
@@ -1385,22 +1283,25 @@ def make_some_hists():
     
 def test_mixed_dwarf():
     ver = ''
-    ft = 0.001 #gyr
+    ft = 0.00001 #gyr
     bt = 1   #gyr
-    rl = 0.2  #kpc
-    rr = 0.2 #kpc
-    ml = 12   #solar
-    mr = 0.2   #solar
+    rl = 0.8  #kpc
+    rr = 0.5 #ratio
+    ml = 30   #sim
+    mr = 0.5   #ratio
     args = [ft, bt, rl, rr, ml, mr]
     
     lua_file = 'EMD_v162.lua'
     output = 'regular_initial'
-    #nbody(args, lua_file, output, output, ver)
+    #nbody(args, lua_file, output, output, ver, n)
     
     
     lua_file = 'mixeddwarf.lua'
-    output = 'output_0gy'
-    nbody(args, lua_file, output, output, ver)
+    #output = 'output_plummer_plummer_0gy'
+    #output = 'output_hern_hern_0gy'
+    output = 'output_nfw_nfw_0gy'
+    nbody(args, lua_file, output, output, ver, n)
+    os.system("mv ~/Desktop/research/quick_plots/outputs/" + output + ".out ~/Desktop/research/data_testing/sim_outputs/")
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
@@ -1435,9 +1336,6 @@ def stabity_test():
 
     os.chdir("data_testing")    
     os.system("./stability_test.py " + back_time + " " + r_l + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
-# # # # # # # # # # # # # # # # # # # # # #
-def get_fornax_binary():
-    os.system('scp $fornax:~/research/nbody_test/bin/milkyway_nbody ./nbody_test/bin/milkyway_nbody_fornax')
 # # # # # # # # # # # # # # # # # # # # # #
 def clean():
     os.system("rm boinc_*")

@@ -151,3 +151,121 @@ def diff_OS_test_v158():
     
     return 1
 # # # # # # # # # # # # # # # # # # # # # #
+
+def mass_enc(file_name, rscale):
+    path_charles = 'quick_plots/outputs/charles/'
+    f = open(path_charles + file_name + '.out')
+    lines = []
+    lines = f.readlines()
+    
+    num = 1
+    for line in lines:
+        if (line.startswith("# ignore")):
+            break
+        else:
+            num += 1
+    print num
+    lines = lines[num:len(lines)]
+    total_mass_l = 0.0
+    total_mass_d = 0.0
+    mass_enc_l = 0.0
+    mass_enc_d = 0.0
+    counterl = 0
+    counterd = 0
+    for line in lines:
+        if(line.startswith("</bodies>")):
+            break
+        tokens = line.split(',')
+        isDark = int(tokens[0])
+        X = float(tokens[1])
+        Y = float(tokens[2])
+        Z = float(tokens[3])
+        mass = float(tokens[10])
+        r = (X * X + Y * Y + Z * Z)**0.5
+        #dark is 1
+        if(isDark == 0):
+            counterl += 1
+            total_mass_l += mass
+            if(r < rscale):
+                mass_enc_l += mass
+        if(isDark == 1):
+            counterd += 1
+            total_mass_d += mass
+            if(r < rscale):
+                mass_enc_d += mass
+                
+    print counterd, counterl
+    print 'total glob mass: ', total_mass_l * 222288.47
+    print 'total dwarf mass: ', total_mass_d * 222288.47
+    return mass_enc_d, mass_enc_l
+
+def for_charles():
+    plot_output  = n
+    plot_hists   = y
+    run          = n
+    move_ro_fo   = n
+    get_from_lmc = n
+    get_from_tel = n
+    list_of_runs = n
+    
+    #settings#
+    lua_file = "charles_EMD_v162.lua"
+    ver = ''
+    ft = 2.02 #gyr
+    bt = 2.0   #gyr
+    rl = 0.01  #kpc
+    rd = 0.01 #kpc
+    ml = 5e4   #solar
+    md = 1e6   #solar
+    
+    args = [ft, bt, rl, rd, ml, md]
+    
+    
+    
+    #output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.175_for_paper'
+    #output = 'charles/ft2.02gy_bt2gy_mass1e6_r0.175_single_dwarf'
+    #output = 'ft2.02gy_bt2gy_mass5e4_r0.01_single_globular'
+    #output = 'ft2.02gy_bt2gy_massl5e4_massd5e4_rl0.01_rd0.01_both_globular'
+    #output = 'ft2.02gy_bt2gy_massl1e6_massd1e6_rl0.175_rd0.175_both_dwarf'
+    output = 'ft2.02gy_bt2gy_massl5e4_massd1e6_rl0.01_rd0.01'
+    
+    if(run == True):
+        nbody(args, lua_file, output, output, ver, False)
+        os.system("mv quick_plots/outputs/" + output + ".out quick_plots/outputs/charles/")
+        
+    if(move_ro_fo == True):
+        os.system("mv reverse_orbit.out quick_plots/outputs/charles/")
+        os.system("mv forward_orbit.out quick_plots/outputs/charles/")
+        
+    if(get_from_lmc == True):
+        os.system("scp $lmc:~/research/quick_plots/outputs/" + output + ".out quick_plots/outputs/charles/")
+        
+    if(get_from_tel == True):
+        os.system("scp $teletraan:~/research/quick_plots/outputs/charles/" + output + ".out quick_plots/outputs/charles/")
+        
+    if(list_of_runs == True):
+        ft = 2.02 #gyr
+        bt = 2.0   #gyr
+        rl = 0.175  #kpc
+        rd = 0.175 #kpc
+        ml = 5e4   #solar
+        md = 1e6   #solar
+        args = [ft, bt, rl, rd, ml, md]
+        output = 'charles/ft2.02gy_bt2gy_mass1e6_r0.175_single_dwarf'
+        nbody(args, lua_file, output, output, ver, False)
+        
+        ft = 2.02 #gyr
+        bt = 2.0   #gyr
+        rl = 0.01  #kpc
+        rd = 0.01 #kpc
+        ml = 5e4   #solar
+        md = 5e4   #solar
+        args = [ft, bt, rl, rd, ml, md]
+        output = 'charles/ft2.02gy_bt2gy_mass5e4_r0.01_sinle_globular'
+        nbody(args, lua_file, output, output, ver, False)
+        
+    if(plot_output == True):
+        lb_plot(output)
+        
+    return 0
+# # # # # # # # # # # # # # # # # # # # # #
