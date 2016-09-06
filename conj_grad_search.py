@@ -36,7 +36,7 @@ mr_c  = str(args[5])
 
 lmc_dir = '~/research/'
 sid_dir = '/home/sidd/Desktop/research/'
-path = sid_dir
+path = lmc_dir
 
 folder        = path + "like_surface/hists/"
 binary        = path + "nbody_test/bin/milkyway_nbody"
@@ -106,6 +106,7 @@ def get_value(name):
             ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
             tt = ss[1].split('</search_likelihood>')#chooses the second of the split parts and resplits
             l = float(tt[0])
+    print l
     return l
     
 def function(parameters):
@@ -120,7 +121,7 @@ def function(parameters):
     nbody(parameters, name)
     val = get_value(name)
     
-    return -val
+    return abs(val)
 
 
 def initial_guess():
@@ -142,8 +143,8 @@ def initial_guess():
     return x0
         
 def test():
-    #val = function(args)
-    #print val
+    val = function(args)
+    print val
     para = [3.40374881598597, 0.932995970998994, 0.283776750505688, 0.804446363133715, 6.9121529340563, 0.714150034261106]
     val = function(para)
     print("%0.15f\n" % val)
