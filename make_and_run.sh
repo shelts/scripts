@@ -22,7 +22,7 @@
 
 
     time  ./milkyway_nbody \
-    -f ~/Desktop/research/lua/mixeddwarf.lua \
+    -f ~/Desktop/research/lua/EMD_v162.lua \
     -o output_0gy.out \
     -z ~/Desktop/research/quick_plots/hists/hist_test.hist \
     -n 8 -b  -u \
