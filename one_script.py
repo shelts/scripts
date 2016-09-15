@@ -36,8 +36,8 @@ args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
-match_histograms          = y                 #
+remake                    = n                 #
+match_histograms          = n                 #
 run_and_compare           = n                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -65,6 +65,9 @@ run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_mixeddward_test       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
+slight_hist_change_test   = y                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+
 
 #    Histogram names     #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
@@ -574,13 +577,40 @@ def test_mixed_dwarf():
     os.system("mv ~/Desktop/research/quick_plots/outputs/" + output + ".out ~/Desktop/research/data_testing/sim_outputs/")
 # # # # # # # # # # # # # # # # # # # # # #
 def slight_hist_alteration_study():
+    folder = "quick_plots/hists/"
     histogram_mw_1d_v162_20k_25bins = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
     histogram_mw_1d_v162_20k_25bins_slight_change = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16_slight_change"
+    
     histogram_mw_1d_v162_1comp = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16'
     histogram_mw_1d_v162_1comp_slight_change = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16_slight_change'
     
-    
-    
+    prestine = folder + histogram_mw_1d_v162_20k_25bins + ".hist"
+    copy = folder + histogram_mw_1d_v162_20k_25bins_slight_change + ".hist"
+    os.system("cp " + prestine + " " + copy)
+      
+    copy = open(copy, 'r')
+    counts = []
+    errors = []
+    read_data = False
+    for line in copy:
+        if(line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            else:
+                ss = line.split('\t')
+                #print ss
+                count = float(ss[3])
+                
+                dd = ss[4].split("\n")
+                error = float(dd[0])
+                
+                counts.append(count)
+                errors.append(error)
+                #print("%s\t%s\t%s\t%0.15f\t%0.15f\n" % (ss[0], ss[1], ss[2], count, error))
+    copy.close()
     return 0
 
 # # # # # # # # # # # # # # # # # # # # # #
@@ -623,43 +653,44 @@ def clean():
     
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():
-    if(get_fornax_binary_now == True):
+    if(get_fornax_binary_now):
         get_fornax_binary()
         
     standard_run()
     
-    if(run_mixeddward_test == True):
+    if(run_mixeddward_test):
         test_mixed_dwarf()
         
-    if(charles == True):
+    if(charles):
         for_charles()
     
-    if(make_a_few_hists == True):
+    if(make_a_few_hists):
         make_some_hists()
     
-    #if(run_binary_compare == True):
+    #if(run_binary_compare):
         #old_new_binary_compare()
         
-    #if(run_diff_OS_test == True):
+    #if(run_diff_OS_test):
         #diff_OS_test_v160()
         #diff_OS_test_v158()
     
-    if(run_stability_test == True):
+    if(run_stability_test):
         stabity_test()
     
-    #if(recalc_para_sweep_likes == True):
+    #if(recalc_para_sweep_likes):
         #recalc_parameter_sweep_likelihoods()
     
-    #if(run_seed_fluctuation_test == True):
+    #if(run_seed_fluctuation_test):
         #different_seed_fluctuation()
     
-    if(velocity_dispersion_calc == True):
+    if(velocity_dispersion_calc):
         velocity_dispersion()
     
-    if(plot_lb == True):
+    if(plot_lb):
         lb_plot(output)
         
-        
+    if(slight_hist_change_test):
+        slight_hist_alteration_study()
     clean()
         
 main()
