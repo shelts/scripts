@@ -586,22 +586,39 @@ def slight_hist_alteration_study():
     
     prestine = folder + histogram_mw_1d_v162_20k_25bins + ".hist"
     copy = folder + histogram_mw_1d_v162_20k_25bins_slight_change + ".hist"
-    os.system("cp " + prestine + " " + copy)
+    
+    #os.system("cp " + prestine + " " + copy)
       
-    copy = open(copy, 'r')
+    prestine = open(prestine, 'r')
+    
+    header = []
     counts = []
     errors = []
+    col1   = []
+    lbins  = []
+    bbins  = []
     read_data = False
-    for line in copy:
+    read_header = True
+    for line in prestine:
+        if(read_header):
+            header.append(line)
+        
         if(line.startswith("betaBins")):
             read_data = True
+            read_header = False
             continue
+        
         if(read_data):
             if(line.startswith("</histogram>")):
                 break
+            elif(line.startswith("\n")):
+                continue
             else:
-                ss = line.split('\t')
-                #print ss
+                ss = line.split(' ')
+                col1.append(ss[0])
+                lbins.append(ss[1])
+                bbins.append(ss[2])
+                
                 count = float(ss[3])
                 
                 dd = ss[4].split("\n")
@@ -610,7 +627,21 @@ def slight_hist_alteration_study():
                 counts.append(count)
                 errors.append(error)
                 #print("%s\t%s\t%s\t%0.15f\t%0.15f\n" % (ss[0], ss[1], ss[2], count, error))
-    copy.close()
+    
+    prestine.close()
+    
+    for N in range(1, 3):
+        #randomize(counts, error, N)
+        
+        copy = folder + histogram_mw_1d_v162_20k_25bins_slight_change + "_" + str(N) + "changes.hist"
+        copy = open(copy, 'w')
+        
+        for i in range(0, len(header)):
+            copy.write(header[i])
+        for i in range(0, len(col1)):
+            copy.write("%s %s %s %0.15f %0.15f\n\n" % (col1[i], lbins[i], bbins[i], counts[i], errors[i]))
+        
+        copy.close()
     return 0
 
 # # # # # # # # # # # # # # # # # # # # # #
