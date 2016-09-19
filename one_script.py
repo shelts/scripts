@@ -38,7 +38,7 @@ args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 plot_multiple             = n                 #
@@ -343,10 +343,10 @@ def plot_N(hists, name, N):
         #plt.show()
         return 1
 
-def plot_3(hist1, hist2, hist3, name):
+def plot_4(hist1, hist2, hist3, hist4, hist5, name):
     ylimit = 0.4
-    xlower = 180 
-    xupper = -180
+    xlower = 60 
+    xupper = -60
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
@@ -360,10 +360,15 @@ def plot_3(hist1, hist2, hist3, name):
     plot_hist1 = hist1 + ".hist"
     plot_hist2 = hist2 + ".hist"
     plot_hist3 = hist3 + ".hist"
+    plot_hist4 = hist4 + ".hist"
+    plot_hist5 = hist5 + ".hist"
     
-    label1 = '25 bins'
-    label2 = '50 bins'
-    label3 = '100 bins'
+    label1 = 'correct\t 3.95'
+    label2 = '-10.047131423110589\t 3.9644355371'
+    label3 = '-23.976349630274957\t 3.9658770516'
+    label4 = '-11.889794996330375\t 3.96601335775'
+    label5 = '-23.432419009906333\t 3.97192948281'
+    
     
     print("plotting histograms\n")
     
@@ -423,13 +428,53 @@ def plot_3(hist1, hist2, hist3, name):
                 ss = line.split(' ')
                 lbins3.append(float(ss[1]))
                 counts3.append(float(ss[3]))
-            
+                
+                
+    # # # # #      
+    read_data = False
+    lbins4 = []
+    counts4 = []
+    lines = open(folder + plot_hist4, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins4.append(float(ss[1]))
+                counts4.append(float(ss[3]))
+    
+    # # # # #      
+    read_data = False
+    lbins5 = []
+    counts5 = []
+    lines = open(folder + plot_hist5, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins5.append(float(ss[1]))
+                counts5.append(float(ss[3]))       
     if(plot_overlapping == True):
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         #plt.subplot(211)
-        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1, label= label1)
+        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1,    label= label1)
         plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.75, label= label2)
-        plt.bar(lbins3, counts3, width = w_overlap, color='b', alpha=0.5, label= label3)
+        plt.bar(lbins3, counts3, width = w_overlap, color='b', alpha=0.5,  label= label3)
+        plt.bar(lbins4, counts4, width = w_overlap, color='g', alpha=0.3,  label= label4)
+        plt.bar(lbins5, counts5, width = w_overlap, color='y', alpha=0.2,  label= label5)
         plt.title('Histogram of Light Matter Distribution After 4 Gy')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -862,7 +907,7 @@ def randomize(counts, errors, N):
    
     return counts, errors
 
-def slight_hist_alteration_study():
+def slight_hist_alteration_study_bin_switch():
     Nchanges = 25
     folder = "quick_plots/hists/"
     
@@ -985,19 +1030,30 @@ def surface_spike_invest():
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
     lua_file = 'EMD_v162.lua'
     correct = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
-    nbody(args, lua_file, correct, correct, ver, False)
+    #nbody(args, lua_file, correct, correct, ver, False)
     
-    paras = [3.964435537100000, 0.98, 0.2, 0.2, 12, 0.2]
-    hist = 'spike1'
-    compare_after_run(paras, lua_file, correct, hist, hist, ver)
-    match_hists(correct, hist, ver)
+    paras = [3.964435537100000, 0.98, 0.2, 0.2, 12, 0.2]#-10.047131423110589
+    hist1 = 'spike1' 
+    #compare_after_run(paras, lua_file, correct, hist1, hist1, ver)
+    match_hists(correct, hist1, ver)
     
-    paras = [3.965877051600000, 0.98, 0.2, 0.2, 12, 0.2]
-    hist = 'spike2'
-    compare_after_run(paras, lua_file, correct, hist, hist, ver)
-    match_hists(correct, hist, ver)
+    paras = [3.965877051600000, 0.98, 0.2, 0.2, 12, 0.2]# -23.976349630274957
+    hist2 = 'spike2' 
+    #compare_after_run(paras, lua_file, correct, hist2, hist2, ver)
+    match_hists(correct, hist2, ver)
+    
+    match_hists(hist1, 'arg_3.9644355371_0.98_0.2_0.2_12_0.2', '')
+    
+    hist3 = 'arg_3.96601335775_0.98_0.2_0.2_12_0.2' #-11.889794996330375
+    hist4 = 'arg_3.97192948281_0.98_0.2_0.2_12_0.2' #-23.432419009906333
+    
+    plot_4(correct, hist1, hist2, hist3, hist4,  'spike_hists')
+    
     
     return 0
+
+##def slight_hist_alteration_study_particle_shifting():
+    
     
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
@@ -1076,7 +1132,7 @@ def main():
         lb_plot(output)
         
     if(slight_hist_change_test):
-        slight_hist_alteration_study()
+        slight_hist_alteration_study_bin_switch()
         
     if(surface_spikes):
         surface_spike_invest()
