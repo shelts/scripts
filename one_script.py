@@ -17,6 +17,8 @@ import math as mt
 import matplotlib.patches as mpatches
 from matplotlib.patches import Rectangle
 import numpy as np
+import random
+random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Control Panel       #
@@ -195,6 +197,17 @@ def match_hists(hist1, hist2, ver):
           + " -s " + path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
     print hist1, "\n", hist2
     print "\n"
+    return 0
+
+def match_hists_pipe(hist1, hist2, ver, pipe_name):
+    print "matching histograms: "
+    #using call here instead so the format of using it is on record
+    call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
+          + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
+          + " -s " + path + "quick_plots/hists/" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
+    print hist1, "\n", hist2
+    print "\n"
+    return 0
 # # # # # # # # # # 
 def compare_after_run(paras, lua_file, correct, hist, out, ver):
     sim_time      = str(paras[0])
@@ -576,20 +589,38 @@ def test_mixed_dwarf():
     nbody(args, lua_file, output, output, ver, n)
     os.system("mv ~/Desktop/research/quick_plots/outputs/" + output + ".out ~/Desktop/research/data_testing/sim_outputs/")
 # # # # # # # # # # # # # # # # # # # # # #
+
+def randomize(counts, errors, N):
+    for i in range(0, N):
+        coor1 = random.randint(0, len(counts) - 1)
+        coor2 = random.randint(0, len(counts) - 1)
+        while(coor1 == coor2):
+            coor1 = random.randint(0, len(counts) - 1)
+            coor2 = random.randint(0, len(counts) - 1)
+        
+        #print coor1, coor2, len(counts)
+        count_tmp = counts[coor1]
+        counts[coor1] = counts[coor2]
+        counts[coor2] = count_tmp
+    
+        error_tmp = errors[coor1]
+        errors[coor1] = errors[coor2]
+        errors[coor2] = error_tmp
+   
+    return counts, errors
+
 def slight_hist_alteration_study():
+    Nchanges = 25
     folder = "quick_plots/hists/"
+    name = "25bins"
+    
     histogram_mw_1d_v162_20k_25bins = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
-    histogram_mw_1d_v162_20k_25bins_slight_change = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16_slight_change"
-    
     histogram_mw_1d_v162_1comp = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16'
-    histogram_mw_1d_v162_1comp_slight_change = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16_slight_change'
-    
-    prestine = folder + histogram_mw_1d_v162_20k_25bins + ".hist"
-    copy = folder + histogram_mw_1d_v162_20k_25bins_slight_change + ".hist"
-    
-    #os.system("cp " + prestine + " " + copy)
-      
-    prestine = open(prestine, 'r')
+
+    prestine = folder + histogram_mw_1d_v162_20k_25bins
+    correct = histogram_mw_1d_v162_20k_25bins
+
+    prestinef = open(prestine + ".hist", 'r')
     
     header = []
     counts = []
@@ -599,7 +630,8 @@ def slight_hist_alteration_study():
     bbins  = []
     read_data = False
     read_header = True
-    for line in prestine:
+    
+    for line in prestinef:
         if(read_header):
             header.append(line)
         
@@ -626,22 +658,69 @@ def slight_hist_alteration_study():
                 
                 counts.append(count)
                 errors.append(error)
-                #print("%s\t%s\t%s\t%0.15f\t%0.15f\n" % (ss[0], ss[1], ss[2], count, error))
     
-    prestine.close()
-    
-    for N in range(1, 3):
-        #randomize(counts, error, N)
+    prestinef.close()
+    counts_tmp = []
+    errors_tmp = []
+    for N in range(0, Nchanges):
+        #print errors[18], errors[16]
         
-        copy = folder + histogram_mw_1d_v162_20k_25bins_slight_change + "_" + str(N) + "changes.hist"
-        copy = open(copy, 'w')
+        counts_tmp, errors_tmp = randomize(counts, errors, N)
+        
+        #print errors_tmp[18], errors_tmp[16]
+        
+        copy = prestine + "_" + str(N) + "changes"
+        copyf = open(copy + ".hist", 'w')
         
         for i in range(0, len(header)):
-            copy.write(header[i])
+            copyf.write(header[i])
         for i in range(0, len(col1)):
-            copy.write("%s %s %s %0.15f %0.15f\n\n" % (col1[i], lbins[i], bbins[i], counts[i], errors[i]))
+            copyf.write("%s %s %s %0.15f %0.15f\n\n" % (col1[i], lbins[i], bbins[i], counts_tmp[i], errors_tmp[i]))
         
-        copy.close()
+        copyf.close()
+        
+        compare = correct + "_" + str(N) + "changes"
+        
+        match_hists_pipe(correct, compare, '', name)
+        
+        
+    piped = name
+    g = open(name, 'r')
+    f = open("data_" + name + ".out", 'w')
+    counter = 0
+    for line in g:
+            if (line.startswith("<")):
+                ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
+                tt = ss[1].split('</search_likelihood>')#chooses the second of the split parts and resplits
+                f.write("%s\t%i\n" % (tt[0], counter))#writes the first of the resplit lines
+                counter += 1
+    
+    f.close()
+    g.close()
+    
+    f = open('data_' + name + '.gnuplot', 'w')
+    f.write("reset\n")
+    f.write("set terminal jpeg\n")
+    f.write("set key off\n")
+
+    f.write("set xlabel 'number of changes'\n")
+    f.write("set ylabel 'likelihood'\n")
+    f.write("set yrange [-500:0]\n")
+    f.write("set xrange[0:" + str(Nchanges) + "]\n")
+        
+    p = "./" + "data_" + name + ".out"
+    f.write("set output 'quick_plots/plot_" + name + ".jpeg' \n")
+    f.write("set title 'likelihood vs changes in hist with " + name + "' \n")
+    f.write("plot '" + p + "' using 2:1  with lines\n\n") 
+
+    f.write("# # # # # # # # # # # # # # # # # #\n")
+
+    f.close()
+
+    os.system("gnuplot data_" + name + ".gnuplot 2>>piped_output.txt")
+    os.system("rm gnuplot data_" + name + ".gnuplot")
+    os.system("rm data_" + name + ".out")
+    os.system("rm " + name)
     return 0
 
 # # # # # # # # # # # # # # # # # # # # # #
