@@ -38,7 +38,7 @@ args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 plot_multiple             = n                 #
@@ -67,7 +67,8 @@ run_stability_test        = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_mixeddward_test       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-slight_hist_change_test   = y                 #
+slight_hist_change_test   = n                 #
+surface_spikes            = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -224,7 +225,250 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
         -n 10 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
-# # # # # # # # # #       
+# # # # # # # # # #
+def plot_N(hists, name, N):
+    ylimit = 0.4
+    xlower = 180 
+    xupper = -180
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    folder = 'quick_plots/hists/'
+    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
+    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
+
+    #ls_counts = [ [][] ] 
+
+    
+    print("plotting histograms\n")
+    
+    read_data = False
+    lbins1 = []
+    counts1 = []
+    lines = open(folder + plot_hist1, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins1.append(float(ss[1]))
+                counts1.append(float(ss[3]))
+                
+    # # # # #
+    read_data = False
+    lbins2 = []
+    counts2 = []
+    lines = open(folder + plot_hist2, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins2.append(float(ss[1]))
+                counts2.append(float(ss[3]))
+            
+            
+    # # # # #      
+    read_data = False
+    lbins3 = []
+    counts3 = []
+    lines = open(folder + plot_hist1, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins3.append(float(ss[1]))
+                counts3.append(float(ss[3]))
+            
+    if(plot_overlapping == True):
+        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+        #plt.subplot(211)
+        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1, label= plot_hist1)
+        plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.5, label= plot_hist2)
+        plt.bar(lbins3, counts3, width = w_overlap, color='r', alpha=0.5, label= plot_hist2)
+        plt.title('Histogram of Light Matter Distribution After 4 Gy')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.ylabel('counts')
+        plt.legend()
+        plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
+        #plt.show()
+        
+    if(plot_adjacent == True):
+        plt.subplot(211)
+        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
+        plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
+        plt.title('Histogram of Light Matter Distribution After 4 Gy')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.ylabel('counts')
+
+        plt.subplot(212)
+        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
+        plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.xlabel('l')
+        plt.ylabel('counts')
+        
+        
+        plt.subplot(213)
+        plt.bar(lbins3, counts3, width = w_adjacent, color='k')
+        plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.xlabel('l')
+        plt.ylabel('counts')
+        #f.subplots_adjust(hspace=0)
+        plt.savefig(save_folder_adj + name + '.png', format='png')
+        #plt.show()
+        return 1
+
+def plot_3(hist1, hist2, hist3, name):
+    ylimit = 0.4
+    xlower = 180 
+    xupper = -180
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    folder = 'quick_plots/hists/'
+    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
+    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
+    
+    print "plot histogram 1: ", hist1
+    print "plot histogram 2: ", hist2
+    print "plot histogram 3: ", hist3
+    
+    plot_hist1 = hist1 + ".hist"
+    plot_hist2 = hist2 + ".hist"
+    plot_hist3 = hist3 + ".hist"
+    
+    label1 = '25 bins'
+    label2 = '50 bins'
+    label3 = '100 bins'
+    
+    print("plotting histograms\n")
+    
+    read_data = False
+    lbins1 = []
+    counts1 = []
+    lines = open(folder + plot_hist1, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins1.append(float(ss[1]))
+                counts1.append(float(ss[3]))
+                
+    # # # # #
+    read_data = False
+    lbins2 = []
+    counts2 = []
+    lines = open(folder + plot_hist2, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins2.append(float(ss[1]))
+                counts2.append(float(ss[3]))
+            
+            
+    # # # # #      
+    read_data = False
+    lbins3 = []
+    counts3 = []
+    lines = open(folder + plot_hist3, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins3.append(float(ss[1]))
+                counts3.append(float(ss[3]))
+            
+    if(plot_overlapping == True):
+        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+        #plt.subplot(211)
+        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1, label= label1)
+        plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.75, label= label2)
+        plt.bar(lbins3, counts3, width = w_overlap, color='b', alpha=0.5, label= label3)
+        plt.title('Histogram of Light Matter Distribution After 4 Gy')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.ylabel('counts')
+        plt.legend()
+        plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
+        #plt.show()
+        
+    if(plot_adjacent == True):
+        plt.subplot(311)
+        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
+        plt.legend(handles=[mpatches.Patch(color='b', label= label1)])
+        plt.title('Histogram of Light Matter Distribution After 4 Gy')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.ylabel('counts')
+
+        plt.subplot(312)
+        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
+        plt.legend(handles=[mpatches.Patch(color='k', label= label2)])
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.xlabel('l')
+        plt.ylabel('counts')
+        
+        
+        plt.subplot(313)
+        plt.bar(lbins3, counts3, width = w_adjacent, color='k')
+        plt.legend(handles=[mpatches.Patch(color='k', label= label3)])
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.xlabel('l')
+        plt.ylabel('counts')
+        #f.subplots_adjust(hspace=0)
+        plt.savefig(save_folder_adj + name + '.png', format='png')
+        #plt.show()
+        return 1
+
 def plot(hist1, hist2, name):
     ylimit = 0.4
     xlower = 180 
@@ -563,7 +807,16 @@ def velocity_dispersion():
 def make_some_hists():
     ver = '_1.62_x86_64-pc-linux-gnu__mt'
     lua_file = 'EMD_v162.lua'
-    correct = 'hist_v162_2k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__7_11_16.hist'
+    hist = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
+    nbody(args, lua_file, hist, hist, ver, False)
+    
+    lua_file = 'EMD_v162_25bins.lua'
+    hist = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_25bins'
+    nbody(args, lua_file, hist, hist, ver, False)
+    
+    lua_file = 'EMD_v162_50bins.lua'
+    hist = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_50bins'
+    nbody(args, lua_file, hist, hist, ver, False)
 
     return 0
 # # # # # # # # # # # # # # # # # # # # # #
@@ -612,13 +865,14 @@ def randomize(counts, errors, N):
 def slight_hist_alteration_study():
     Nchanges = 25
     folder = "quick_plots/hists/"
-    name = "25bins"
     
-    histogram_mw_1d_v162_20k_25bins = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
-    histogram_mw_1d_v162_1comp = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16'
+    histogram_mw_1d_v162_20k_25bins = "hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_25bins"
+    histogram_mw_1d_v162_20k_50bins = "hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_50bins"
+    histogram_mw_1d_v162_20k_100bins = "hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins"
 
-    prestine = folder + histogram_mw_1d_v162_20k_25bins
-    correct = histogram_mw_1d_v162_20k_25bins
+    name = "100bins"
+    prestine = folder + histogram_mw_1d_v162_20k_100bins
+    correct = histogram_mw_1d_v162_20k_100bins
 
     prestinef = open(prestine + ".hist", 'r')
     
@@ -721,8 +975,30 @@ def slight_hist_alteration_study():
     os.system("rm gnuplot data_" + name + ".gnuplot")
     os.system("rm data_" + name + ".out")
     os.system("rm " + name)
+    
+    plot_3(histogram_mw_1d_v162_20k_25bins, histogram_mw_1d_v162_20k_50bins, histogram_mw_1d_v162_20k_100bins, 'same_hist_diff_bins')
     return 0
 
+
+def surface_spike_invest():
+    ver = ''
+    paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
+    lua_file = 'EMD_v162.lua'
+    correct = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
+    nbody(args, lua_file, correct, correct, ver, False)
+    
+    paras = [3.964435537100000, 0.98, 0.2, 0.2, 12, 0.2]
+    hist = 'spike1'
+    compare_after_run(paras, lua_file, correct, hist, hist, ver)
+    match_hists(correct, hist, ver)
+    
+    paras = [3.965877051600000, 0.98, 0.2, 0.2, 12, 0.2]
+    hist = 'spike2'
+    compare_after_run(paras, lua_file, correct, hist, hist, ver)
+    match_hists(correct, hist, ver)
+    
+    return 0
+    
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
@@ -801,6 +1077,9 @@ def main():
         
     if(slight_hist_change_test):
         slight_hist_alteration_study()
+        
+    if(surface_spikes):
+        surface_spike_invest()
     clean()
         
 main()
