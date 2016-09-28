@@ -1066,13 +1066,88 @@ def surface_spike_invest():
 ##def slight_hist_alteration_study_particle_shifting():
     
 def orbit_location():    
-    args = [2.0, 0.98, 0.2, 0.2, 12, 0.2]
-    lua_file = "EMD_v162.lua"
-    hist =  'orbit_test'
-    #nbody(args, lua, hist, hist, version, False)
-    os.system('mv nbody_test/bin/forward_orbit.out quick_plots/')
-    os.system('mv nbody_test/bin/reverse_orbit.out quick_plots/')
-    lb_plot(hist)
+
+    lua_file = "EMD_v162_malleable.lua"
+    hist =  'orbit_test2'
+    run = n
+    plot = y
+    trash = n
+    #os.system('mv nbody_test/bin/forward_orbit.out quick_plots/')
+    #os.system('mv nbody_test/bin/reverse_orbit.out quick_plots/')
+    #lb_plot(hist)
+    
+    if(trash):
+        trash = trash
+        #args = [3.945, 0.98, 0.2, 0.2, 12, 0.2]#rad: 33.746497660125655
+        #nbody(args, lua_file, hist, hist, version, False)
+        #args = [3.945, 0.8, 0.2, 0.2, 12, 0.2]#rad: 87.116406835446654
+        #nbody(args, lua_file, hist, hist, version, False)
+
+        #args = [3.945, 1.2, 0.2, 0.2, 12, 0.2]#rad: 78.866571119221959
+        #nbody(args, lua_file, hist, hist, version, False)
+        
+        #args = [3.0, 0.98, 0.2, 0.2, 12, 0.2]#rad: 87.233271740740818
+        #nbody(args, lua_file, hist, hist, version, False)
+
+        #args = [3.0, 0.8, 0.2, 0.2, 12, 0.2]#rad: 31.251401116618435
+        #nbody(args, lua_file, hist, hist, version, False)
+
+        #args = [3.0, 1.2, 0.2, 0.2, 12, 0.2]#rad: 72.026652594362531
+        #nbody(args, lua_file, hist, hist, version, False)
+        
+        
+        #args = [5.0, 0.98, 0.2, 0.2, 12, 0.2]#rad: 81.563026239076436
+        #nbody(args, lua_file, hist, hist, version, False)
+
+        #args = [5.0, 0.8, 0.2, 0.2, 12, 0.2]#rad: 72.956494004603883
+        #nbody(args, lua_file, hist, hist, version, False)
+
+        #args = [5.0, 1.2, 0.2, 0.2, 12, 0.2]#rad: 52.676752723856929
+        #nbody(args, lua_file, hist, hist, version, False)
+        trash = trash
+    
+    
+    if(run):
+        ft = 3.0
+        bt = 0.8
+        NN = 50
+        MM = 50
+        intv_ft = (5.0 - 3.0) / NN
+        intv_bt = (1.2 - 0.8) / MM
+        f = open('radii_paras.txt', 'w')
+        for i in range(0, NN):
+            bt = 0.8
+            for j in range(0, MM):
+                args = [ft, bt, 0.2, 0.2, 12, 0.2]
+                f.write("%0.15f\t%0.15f\t%0.15f\n" % (ft, bt, ft / bt))
+                #nbody(args, lua_file, hist, hist, version, False)
+                bt += intv_bt
+            ft += intv_ft
+        f.close()
+    
+    os.system("mv nbody_test/bin/radii.out ./")
+    if(plot):
+        f = open('radii_para.gnuplot', 'w')
+        f.write("reset\n")
+        f.write("set terminal wxt persist\n")
+        #size 6000,2000\n")
+        f.write("set key off\n")
+        f.write("set xlabel 'forward time (Gyr)'\n")
+        f.write("set ylabel 'reverse time ratio'\n")
+        f.write("set zlabel 'radius GC (kpc)'\n")
+        f.write("set xrange[2.9:5.4]\n")
+        f.write("set yrange[0.78:1.24]\n")
+        f.write("set zrange[0.0:100]\n\n\n")
+        
+        f.write("set output \"~/Desktop/research/quick_plots/radius_fromGC_vs_FT_BT.jpeg\" \n")
+        p = "<paste radii_paras.txt radii.out"
+        f.write("set title '' \n")
+        f.write("splot '" + p + "' using 1:2:4  with points\n\n") 
+                
+        f.close()
+    os.system("gnuplot radii_para.gnuplot 2>>piped_output.txt")
+    os.system("rm radii_para.gnuplot")
+    return 0
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
