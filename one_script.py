@@ -68,7 +68,8 @@ run_stability_test        = n                 #
 run_mixeddward_test       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 slight_hist_change_test   = n                 #
-surface_spikes            = y                 #
+surface_spikes            = n                 #
+orbit_loc_test            = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -78,8 +79,6 @@ histogram_mw_1d_v162_1comp = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16'
 histogram_mw_1d_v162_2k = "hist_v162_2k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__7_11_16"
 histogram_mw_1d_v162_2k_25bins = "hist_v162_2k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
 histogram_mw_1d_v162_20k_25bins = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
-histogram_mw_1d_v162_20k_25bins_slight_change = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16_slight_change"
-histogram_mw_1d_v162_1comp_slight_change = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16_slight_change'
 
 #    histograms for runs #
 test = 'bestfit_2k_1000pop_sept14'
@@ -91,7 +90,7 @@ histogram_for_nbody_run = histogram_mw_1d_v162_20k_25bins
 
 #if you are just matching, these are the two hists
 match_hist_correct = histogram_mw_1d_v162_1comp
-match_hist_compare = histogram_mw_1d_v162_1comp_slight_change
+match_hist_compare = histogram_mw_1d_v162_1comp
 plot_name = histogram_for_nbody_run
 
 output = plot_name
@@ -173,7 +172,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 12 -b -P -u -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 12 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(should_pipe == True):
         print('running nbody')
@@ -364,10 +363,10 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
     plot_hist5 = hist5 + ".hist"
     
     label1 = 'correct\t 3.95'
-    label2 = '-10.047131423110589\t 3.9644355371'
-    label3 = '-23.976349630274957\t 3.9658770516'
-    label4 = '-11.889794996330375\t 3.96601335775'
-    label5 = '-23.432419009906333\t 3.97192948281'
+    label2 = '3.9644355371 \t -10.047131423110589'
+    label3 = '3.9658770516 \t -23.976349630274957 '
+    label4 = '3.96601335775 \t -11.889794996330375 '
+    label5 = '3.97192948281 \t -23.432419009906333'
     
     
     print("plotting histograms\n")
@@ -514,10 +513,10 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
         #plt.show()
         return 1
 
-def plot(hist1, hist2, name):
+def plot(hist1, hist2, name, label1, label2):
     ylimit = 0.4
-    xlower = 180 
-    xupper = -180
+    xlower = 60 
+    xupper = -60
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
@@ -526,72 +525,67 @@ def plot(hist1, hist2, name):
     #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
     print "plot histogram 1: ", hist1
     print "plot histogram 2: ", hist2
-    plot_hist1 = hist1
-    plot_hist2 = hist2
+    plot_hist1 = hist1 + ".hist"
+    plot_hist2 = hist2 + ".hist"
+
     
     print("plotting histograms\n")
-    lines = []
-    #print(os.getcwd())
-    lines = open(folder + plot_hist1).readlines();
-    
-    starting_line = 0
+    read_data = False
+    lbins1 = []
+    counts1 = []
+    lines = open(folder + plot_hist1, 'r')
     for line in lines:
-        starting_line += 1
         if (line.startswith("betaBins")):
-            break 
-    lines = lines[starting_line:len(lines)]
-    
-    sim_l = []
-    sim_n = []
-    for line in lines:
-        if (line.startswith("</histogram>")):
+            read_data = True
             continue
-        tokens = line.split();
-        if tokens: #tests to make sure tokens is not empty
-            lda = float(tokens[1])
-            cts = float(tokens[3])
-            sim_l.append(lda)
-            sim_n.append(cts)
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins1.append(float(ss[1]))
+                counts1.append(float(ss[3]))
 
-    lines = []
-    lines = open(folder + plot_hist2).readlines();
-    
-    starting_line = 0
+
+    read_data = False
+    lbins2 = []
+    counts2 = []
+    lines = open(folder + plot_hist2, 'r')
     for line in lines:
-        starting_line += 1
         if (line.startswith("betaBins")):
-            break 
-    lines = lines[starting_line:len(lines)]
-    
-    data_l = []
-    data_n = []
-    for line in lines:
-        if (line.startswith("</histogram>")):
+            read_data = True
             continue
-        tokens = line.split()
-        if tokens:
-            dat_l = float(tokens[1])
-            dat_n = float(tokens[3])
-            data_l.append(dat_l)
-            data_n.append(dat_n)
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins2.append(float(ss[1]))
+                counts2.append(float(ss[3]))
             
-    if(plot_overlapping == True):
+            
+    if(plot_overlapping):
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         #plt.subplot(211)
-        plt.bar(sim_l, sim_n, width = w_overlap, color='k', alpha=1, label= plot_hist1)
-        plt.bar(data_l, data_n, width = w_overlap, color='r', alpha=0.5, label= plot_hist2)
+        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1,    label= label1)
+        plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.75, label= label2)
         plt.title('Histogram of Light Matter Distribution After 4 Gy')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
         plt.ylabel('counts')
         plt.legend()
         plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
+        plt.clf()
         #plt.show()
         
-    if(plot_adjacent == True):
+    if(plot_adjacent):
         plt.subplot(211)
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        plt.bar(sim_l, sim_n, width = w_adjacent, color='b')
+        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
         plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
         plt.title('Histogram of Light Matter Distribution After 4 Gy')
         plt.xlim((xlower, xupper))
@@ -599,7 +593,7 @@ def plot(hist1, hist2, name):
         plt.ylabel('counts')
 
         plt.subplot(212)
-        plt.bar(data_l, data_n, width = w_adjacent, color='k')
+        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
         plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -607,6 +601,7 @@ def plot(hist1, hist2, name):
         plt.ylabel('counts')
         #f.subplots_adjust(hspace=0)
         plt.savefig(save_folder_adj + name + '.png', format='png')
+        plt.clf()
         #plt.show()
         return 1
 
@@ -624,20 +619,20 @@ def calculate_cm(paras, output1, output2, outs):
     if(outs == 1):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
 # # # # # # # # # #
+
 def lb_plot(file_name):
-    path_charles = 'quick_plots/outputs/charles/'
-    path = 'quick_plots/outputs/'
+    path_charles = 'quick_plots/outputs/'
+    path = 'quick_plots/'
     print file_name
     plot_lbr = y
     plot_light_and_dark = n
     plot_dm = n
     plot_xyz = n
-    plot_orbit = n
+    plot_orbit = y
     
     f = open(path_charles + file_name + '.out')
     lines = []
     lines = f.readlines()
-    
     num = 1
     for line in lines:
         if (line.startswith("# ignore")):
@@ -646,7 +641,7 @@ def lb_plot(file_name):
             num += 1
     
     lines = lines[num:len(lines)]
-    print num
+    #print num
     light_x , light_y , light_z = ([] for i in range(3))
     light_l , light_b , light_r = ([] for i in range(3))
     light_vx , light_vy , light_vz = ([] for i in range(3))
@@ -711,8 +706,7 @@ def lb_plot(file_name):
         #default to just plot lm
         plt.plot(light_l, light_b, '.', markersize = 1.5, color = 'c', alpha=1.0, marker = '.')
         #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
-        print("plotting:", len(light_l), " points")
-        plt.show()
+        print "plotting:", len(light_l), " points"
         # # # # # # # # # #
         if(plot_light_and_dark == True):#plot lm and dm overlapping
             plt.xlim((xlower, xupper))
@@ -722,41 +716,10 @@ def lb_plot(file_name):
             plt.title('l vs b')
             plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
             #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
-            print("plotting:", len(light_l) + len(dark_l), " points")
+            print "plotting:", len(light_l) + len(dark_l), " points"
         # # # # # # # # # #
         if(plot_orbit == True):
-            f = open(path_charles + 'reverse_orbit.out')
-            lines = []
-            lines = f.readlines()
-            orb_l , orb_b , orb_r = ([] for i in range(3))
-            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
-            for line in lines:
-                tokens = line.split('\t')
-                orbX = float(tokens[0])
-                if(orbX > 180.0):
-                    orbX = orbX - 360.0
-                orbY = float(tokens[1])
-                orbZ = float(tokens[2])
-                orbVx = float(tokens[3])
-                orbVy = float(tokens[4])
-                orbVz = float(tokens[5])
-                orb_l.append(orbX)
-                orb_b.append(orbY)
-                orb_r.append(orbZ)
-                orb_vx.append(orbVx)
-                orb_vy.append(orbVy)
-                orb_vz.append(orbVz)
-                
-            plt.xlim((xlower, xupper))
-            plt.ylim((ylower, yupper))
-            plt.xlabel('l')
-            plt.ylabel('b')
-            plt.title('l vs b')
-            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'lime', alpha=1.0, marker = '.')
-            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
-            
-            
-            f = open(path_charles + 'forward_orbit.out')
+            f = open(path + 'reverse_orbit.out')
             lines = []
             lines = f.readlines()
             orb_l , orb_b , orb_r = ([] for i in range(3))
@@ -785,6 +748,38 @@ def lb_plot(file_name):
             plt.title('l vs b')
             plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'g', alpha=1.0, marker = '.')
             #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
+            
+            
+            f = open(path + 'forward_orbit.out')
+            lines = []
+            lines = f.readlines()
+            orb_l , orb_b , orb_r = ([] for i in range(3))
+            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
+            for line in lines:
+                tokens = line.split('\t')
+                orbX = float(tokens[0])
+                if(orbX > 180.0):
+                    orbX = orbX - 360.0
+                orbY = float(tokens[1])
+                orbZ = float(tokens[2])
+                orbVx = float(tokens[3])
+                orbVy = float(tokens[4])
+                orbVz = float(tokens[5])
+                orb_l.append(orbX)
+                orb_b.append(orbY)
+                orb_r.append(orbZ)
+                orb_vx.append(orbVx)
+                orb_vy.append(orbVy)
+                orb_vz.append(orbVz)
+                
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('l')
+            plt.ylabel('b')
+            plt.title('l vs b')
+            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
+            plt.show()
 
         # # # # # # # # # #
         if(plot_dm == True):#to plot just dm
@@ -1029,32 +1024,55 @@ def surface_spike_invest():
     ver = ''
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
     lua_file = 'EMD_v162.lua'
-    correct = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
+    #correct = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
     #nbody(args, lua_file, correct, correct, ver, False)
     
     paras = [3.964435537100000, 0.98, 0.2, 0.2, 12, 0.2]#-10.047131423110589
     hist1 = 'spike1' 
     #compare_after_run(paras, lua_file, correct, hist1, hist1, ver)
-    match_hists(correct, hist1, ver)
+    #match_hists(correct, hist1, ver)
     
     paras = [3.965877051600000, 0.98, 0.2, 0.2, 12, 0.2]# -23.976349630274957
     hist2 = 'spike2' 
     #compare_after_run(paras, lua_file, correct, hist2, hist2, ver)
-    match_hists(correct, hist2, ver)
+    #match_hists(correct, hist2, ver)
     
-    match_hists(hist1, 'arg_3.9644355371_0.98_0.2_0.2_12_0.2', '')
+    #match_hists(hist1, 'arg_3.9644355371_0.98_0.2_0.2_12_0.2', '')
     
     hist3 = 'arg_3.96601335775_0.98_0.2_0.2_12_0.2' #-11.889794996330375
     hist4 = 'arg_3.97192948281_0.98_0.2_0.2_12_0.2' #-23.432419009906333
     
-    plot_4(correct, hist1, hist2, hist3, hist4,  'spike_hists')
+    #plot_4(correct, hist1, hist2, hist3, hist4,  'spike_hists')
+
+    bins = '100'
+    correct = 'parameter_sweeps_9_19_2016/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+    f = open('quick_plots/hists/parameter_sweeps_9_19_2016/likelihood_data_rand_iter_' + bins + 'bins/ft_data_vals.txt', 'r')
+    values = []
+    likes  = []
+    for line in f:
+        ss = line.split("\t")
+        value = float(ss[0])
+        like  = float(ss[1])
+        values.append(value)
+        likes.append(like)
     
-    
+    for i in range(0, len(values)):
+        hist_name = 'parameter_sweeps_9_19_2016/hists_' + bins + 'bins_tight/ft_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
+        label1 = '3.95'
+        label2 = str(values[i]) + "  l=" + str(likes[i])
+        plot(correct, hist_name, str(i), label1, label2)
     return 0
 
 ##def slight_hist_alteration_study_particle_shifting():
     
-    
+def orbit_location():    
+    args = [2.0, 0.98, 0.2, 0.2, 12, 0.2]
+    lua_file = "EMD_v162.lua"
+    hist =  'orbit_test'
+    #nbody(args, lua, hist, hist, version, False)
+    os.system('mv nbody_test/bin/forward_orbit.out quick_plots/')
+    os.system('mv nbody_test/bin/reverse_orbit.out quick_plots/')
+    lb_plot(hist)
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
@@ -1136,6 +1154,9 @@ def main():
         
     if(surface_spikes):
         surface_spike_invest()
+        
+    if(orbit_loc_test):
+        orbit_location()
     clean()
         
 main()
