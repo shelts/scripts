@@ -26,21 +26,17 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-#args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] #for hist with dark matter
-
-#args = [3.30911987740549, 0.916102936025716, 1.12718301676212, 0.1, 103.027752634138, 0.01]
-#args = [5, 0.969492704328154, 0.1, 0.1, 25.3226470423393, 0.95]#-5.851168932
-#args = [4.7954947538674, 0.968157430551938, 0.1, 0.157181217824109, 27.4116374908477, 0.95]#-7.072973562,
+args = [1.1, 0.98, 0.2, 0.2, 12, 0.2] 
+#args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] 
 
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
@@ -68,29 +64,25 @@ run_stability_test        = n                 #
 run_mixeddward_test       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 slight_hist_change_test   = n                 #
-surface_spikes            = n                 #
-orbit_loc_test            = y                 #
+plot_all_hist             = n                 #
+orbit_loc_test            = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
 #    Histogram names     #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
-histogram_mw_1d_v162_1comp = 'hist_v162_ft3p945_rt0p98_r0p2_m12__8_30_16'
-histogram_mw_1d_v162_2k = "hist_v162_2k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__7_11_16"
-histogram_mw_1d_v162_2k_25bins = "hist_v162_2k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
-histogram_mw_1d_v162_20k_25bins = "hist_v162_20k__25bins_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_14_16"
 
 #    histograms for runs #
-test = 'bestfit_2k_1000pop_sept14'
-
+test = 'test_correct'
+test2 = 'test'
 #hist to match against for compare after run
-correct_hist = histogram_mw_1d_v162_20k_25bins
+correct_hist = test
 #hist name for the nbody run
-histogram_for_nbody_run = histogram_mw_1d_v162_20k_25bins
+histogram_for_nbody_run = test2
 
 #if you are just matching, these are the two hists
-match_hist_correct = histogram_mw_1d_v162_1comp
-match_hist_compare = histogram_mw_1d_v162_1comp
+match_hist_correct = test
+match_hist_compare = test2
 plot_name = histogram_for_nbody_run
 
 output = plot_name
@@ -101,7 +93,6 @@ output2 = match_hist_correct + ".out"
 version  = ''
 #lua = "mixeddwarf.lua"
 lua = "EMD_v162.lua"
-#lua = "EMD_v162_onecomp.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -172,7 +163,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 12 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(should_pipe == True):
         print('running nbody')
@@ -223,7 +214,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 10 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 10 -b -u  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #
 def plot_N(hists, name, N):
     ylimit = 0.4
@@ -520,6 +511,7 @@ def plot(hist1, hist2, name, label1, label2):
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
+    folder = 'like_surface/'
     save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
     save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
     #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
@@ -1019,34 +1011,16 @@ def slight_hist_alteration_study_bin_switch():
     plot_3(histogram_mw_1d_v162_20k_25bins, histogram_mw_1d_v162_20k_50bins, histogram_mw_1d_v162_20k_100bins, 'same_hist_diff_bins')
     return 0
 
-
-def surface_spike_invest():
+# # # # # # # # # # # # # # # # # # # # # #
+def plot_all_hists():
     ver = ''
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
     lua_file = 'EMD_v162.lua'
-    #correct = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
-    #nbody(args, lua_file, correct, correct, ver, False)
-    
-    paras = [3.964435537100000, 0.98, 0.2, 0.2, 12, 0.2]#-10.047131423110589
-    hist1 = 'spike1' 
-    #compare_after_run(paras, lua_file, correct, hist1, hist1, ver)
-    #match_hists(correct, hist1, ver)
-    
-    paras = [3.965877051600000, 0.98, 0.2, 0.2, 12, 0.2]# -23.976349630274957
-    hist2 = 'spike2' 
-    #compare_after_run(paras, lua_file, correct, hist2, hist2, ver)
-    #match_hists(correct, hist2, ver)
-    
-    #match_hists(hist1, 'arg_3.9644355371_0.98_0.2_0.2_12_0.2', '')
-    
-    hist3 = 'arg_3.96601335775_0.98_0.2_0.2_12_0.2' #-11.889794996330375
-    hist4 = 'arg_3.97192948281_0.98_0.2_0.2_12_0.2' #-23.432419009906333
-    
-    #plot_4(correct, hist1, hist2, hist3, hist4,  'spike_hists')
-
-    bins = '100'
-    correct = 'parameter_sweeps_9_19_2016/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-    f = open('quick_plots/hists/parameter_sweeps_9_19_2016/likelihood_data_rand_iter_' + bins + 'bins/ft_data_vals.txt', 'r')
+    sweep = 'parameter_sweeps_10_6_2016_narrow_random_sweep'
+    bins = '25'
+    typ = 'ft'
+    correct = sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+    f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
     values = []
     likes  = []
     for line in f:
@@ -1057,20 +1031,20 @@ def surface_spike_invest():
         likes.append(like)
     
     for i in range(0, len(values)):
-        hist_name = 'parameter_sweeps_9_19_2016/hists_' + bins + 'bins_tight/ft_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
-        label1 = '3.95'
-        label2 = str(values[i]) + "  l=" + str(likes[i])
+        hist_name = sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
+        label1 = '3.95gy'
+        label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i])
         plot(correct, hist_name, str(i), label1, label2)
     return 0
 
 ##def slight_hist_alteration_study_particle_shifting():
     
 def orbit_location():    
-
     lua_file = "EMD_v162_malleable.lua"
     hist =  'orbit_test2'
     run = n
-    plot = y
+    plot = n
+    sweep_radii = y
     trash = n
     #os.system('mv nbody_test/bin/forward_orbit.out quick_plots/')
     #os.system('mv nbody_test/bin/reverse_orbit.out quick_plots/')
@@ -1107,7 +1081,7 @@ def orbit_location():
         trash = trash
     
     
-    if(run):
+    if(run):#runs possible combos of paras to get distance from GC
         ft = 3.0
         bt = 0.8
         NN = 50
@@ -1126,7 +1100,7 @@ def orbit_location():
         f.close()
     
     os.system("mv nbody_test/bin/radii.out ./")
-    if(plot):
+    if(plot):#this plots the radii from the GC it goes through
         f = open('radii_para.gnuplot', 'w')
         f.write("reset\n")
         f.write("set terminal wxt persist\n")
@@ -1147,6 +1121,34 @@ def orbit_location():
         f.close()
     os.system("gnuplot radii_para.gnuplot 2>>piped_output.txt")
     os.system("rm radii_para.gnuplot")
+    
+    
+    if(sweep_radii):
+        get_radii = n
+        if(get_radii):
+            bins = '25'
+            typ = 'ft'
+            f = open('like_surface/parameter_sweeps_10_6_2016_narrow_random_sweep/25bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
+            vals = []
+            for line in f:
+                ss = line.split("\t")
+                value = float(ss[0])
+                like  = float(ss[1])
+                vals.append(value)
+            for i in range(0, len(vals)):
+                args = [3.95, vals[i], 0.2, 0.2, 12, 0.2]
+                nbody(args, lua_file, hist, hist, version, False)
+                
+            os.system("mv nbody_test/bin/radii_sweep.out ./")
+        
+        f = open('radii_sweep.out', 'r')
+        radii = []
+        for line in f:
+            value = float(line)
+            radii.append(value)
+        
+        plot_all_hists()
+    
     return 0
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
@@ -1227,8 +1229,8 @@ def main():
     if(slight_hist_change_test):
         slight_hist_alteration_study_bin_switch()
         
-    if(surface_spikes):
-        surface_spike_invest()
+    if(plot_all_hist):
+        plot_all_hists()
         
     if(orbit_loc_test):
         orbit_location()
