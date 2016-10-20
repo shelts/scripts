@@ -74,7 +74,7 @@ histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
 test = 'test_correct'
-test2 = 'test'
+test2 = 'test_compare'
 #hist to match against for compare after run
 correct_hist = test
 #hist name for the nbody run
@@ -118,7 +118,7 @@ def standard_run():
         multiple_plot()
     
     if(run_nbody == True):
-        nbody(args, lua, histogram_for_nbody_run, output, version, False)
+        nbody(args, lua, correct_hist, correct_hist, version, False)
     
     if(run_and_compare == True):
         compare_after_run(args, lua, correct_hist, histogram_for_nbody_run, output, version)
@@ -214,7 +214,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 10 -b -u  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 10 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #
 def plot_N(hists, name, N):
     ylimit = 0.4
