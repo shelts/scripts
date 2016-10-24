@@ -34,9 +34,9 @@ args = [1.1, 0.98, 0.2, 0.2, 12, 0.2]
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
-run_and_compare           = y                 #
+run_and_compare           = n                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
@@ -66,6 +66,7 @@ run_mixeddward_test       = n                 #
 slight_hist_change_test   = n                 #
 plot_all_hist             = n                 #
 orbit_loc_test            = n                 #
+plot_n_from_hists         = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -1016,8 +1017,8 @@ def plot_all_hists():
     ver = ''
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
     lua_file = 'EMD_v162.lua'
-    sweep = 'parameter_sweeps_10_6_2016_narrow_random_sweep'
-    bins = '25'
+    sweep = 'parameter_sweeps_10_21_2016_post_best_like_fix_narrow_random_0.9sim'
+    bins = '100'
     typ = 'ft'
     correct = sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
     f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
@@ -1033,11 +1034,53 @@ def plot_all_hists():
     for i in range(0, len(values)):
         hist_name = sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
         label1 = '3.95gy'
-        label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i])
+        label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i]) + "% sim" + str(values[i]/3.95)
         plot(correct, hist_name, str(i), label1, label2)
     return 0
 
-##def slight_hist_alteration_study_particle_shifting():
+
+def plot_n_ofhist():
+    ver = ''
+    sweep = 'parameter_sweeps_10_20_2016_post_best_like_fix_narrow_random_0.95sim'
+    bins = '100'
+    typ = 'ft'
+    correct = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct.hist'
+    f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
+    
+    values = []
+    likes  = []
+    for line in f:
+        ss = line.split("\t")
+        value = float(ss[0])
+        like  = float(ss[1])
+        values.append(value)
+        likes.append(like)
+    
+    n = []
+    for i in range(0, len(values)):
+        hist_name = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2.hist'
+        hist = open(hist_name, 'r')
+        for line in hist:
+            if(line.startswith("n = ")):
+                ss = line.split("n = ")
+                n_values = float(ss[1])
+                print n_values
+                print values[i]
+                n.append(n_values)
+                
+    plt.plot(values, n, color='r', label= 'n vs ft')
+    plt.title('number of bodies in histogram vs ft')
+    #plt.xlim((values[0], xupper))
+    #plt.ylim((0.0, ylimit))
+    plt.ylabel('n')
+    plt.legend()
+    plt.savefig('n_vs_ft.png', format='png')
+    plt.show()
+    plt.clf()           
+    
+    print n
+    
+    return 0
     
 def orbit_location():    
     lua_file = "EMD_v162_malleable.lua"
@@ -1231,7 +1274,10 @@ def main():
         
     if(plot_all_hist):
         plot_all_hists()
-        
+    
+    if(plot_n_from_hists):
+        plot_n_ofhist()
+    
     if(orbit_loc_test):
         orbit_location()
     clean()
