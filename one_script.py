@@ -33,10 +33,10 @@ args = [1.1, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = n                 #
+run_nbody                 = y                 #
+remake                    = y                 #
 match_histograms          = n                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
@@ -66,7 +66,8 @@ run_mixeddward_test       = n                 #
 slight_hist_change_test   = n                 #
 plot_all_hist             = n                 #
 orbit_loc_test            = n                 #
-plot_n_from_hists         = y                 #
+plot_n_from_hists         = n                 #
+check_sweep_hist_likes    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -195,8 +196,8 @@ def match_hists_pipe(hist1, hist2, ver, pipe_name):
     print "matching histograms: "
     #using call here instead so the format of using it is on record
     call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
-          + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
-          + " -s " + path + "quick_plots/hists/" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
+          + " -h " + path + "" + hist1 + '.hist'
+          + " -s " + path + "" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
     print hist1, "\n", hist2
     print "\n"
     return 0
@@ -1056,7 +1057,7 @@ def plot_n_ofhist():
         values.append(value)
         likes.append(like)
     
-    n = []
+    ns = []
     for i in range(0, len(values)):
         hist_name = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2.hist'
         hist = open(hist_name, 'r')
@@ -1066,9 +1067,9 @@ def plot_n_ofhist():
                 n_values = float(ss[1])
                 print n_values
                 print values[i]
-                n.append(n_values)
+                ns.append(n_values)
                 
-    plt.plot(values, n, color='r', label= 'n vs ft')
+    plt.plot(values, ns, color='r', label= 'n vs ft')
     plt.title('number of bodies in histogram vs ft')
     #plt.xlim((values[0], xupper))
     #plt.ylim((0.0, ylimit))
@@ -1081,8 +1082,68 @@ def plot_n_ofhist():
     print n
     
     return 0
+
+def check_hist_likes():
+    redo_likes = n
+    plot_components = y
+    ver = ''
+    sweep = 'parameter_sweeps_10_20_2016_post_best_like_fix_narrow_random_0.95sim'
+    bins = '100'
+    typ = 'ft'
+    correct = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
     
-def orbit_location():    
+    f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
+    values = []
+    likes  = []
+    for line in f:
+        ss = line.split("\t")
+        value = float(ss[0])
+        like  = float(ss[1])
+        values.append(value)
+        likes.append(like)
+    
+    if(redo_likes):
+        for i in range(0, len(values)):
+            hist_name = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
+            match_hists_pipe(correct, hist_name, ver, sweep)
+            
+    f.close()
+    
+    if(plot_components):
+        g = open(sweep, 'r')
+        emds = []
+        costs = []
+        likes = []
+        for line in g:
+            if(line.startswith("log(CostComponent) = ")):
+                ss = line.split("log(CostComponent) = ")
+                cost = float(ss[1])
+                costs.append(cost)
+            if(line.startswith("log(EMDComponent) = ")):
+                ss = line.split("log(EMDComponent) = ")
+                emd = float(ss[1])
+                emds.append(emd)
+            if(line.startswith("<search_likelihood>")):
+                   ss = line.split("<search_likelihood>")
+                   dd = ss[1].split("</search_likelihood>")
+                   like = float(dd[0])
+                   likes.append(like)
+        g.close()
+        
+        plt.plot(values, emds, color='r', label= 'emd')
+        plt.plot(values, costs, color='g', label= 'cost')
+        plt.plot(values, likes, color='k', label= 'like')
+        plt.title('number of bodies in histogram vs ft')
+        #plt.xlim((values[0], xupper))
+        plt.ylim((-50.0, 0.0))
+        plt.ylabel('likelihood')
+        plt.legend()
+        plt.savefig('n_vs_ft.png', format='png')
+        plt.show()
+        plt.clf()
+        
+                   
+def orbit_location():         
     lua_file = "EMD_v162_malleable.lua"
     hist =  'orbit_test2'
     run = n
@@ -1280,6 +1341,9 @@ def main():
     
     if(orbit_loc_test):
         orbit_location()
+        
+    if(check_sweep_hist_likes):
+        check_hist_likes()
     clean()
         
 main()
