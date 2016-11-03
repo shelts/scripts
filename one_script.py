@@ -33,10 +33,10 @@ args = [1.1, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
-remake                    = y                 #
+run_nbody                 = n                 #
+remake                    = n                 #
 match_histograms          = n                 #
-run_and_compare           = y                 #
+run_and_compare           = n                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
@@ -47,27 +47,26 @@ plot_hists                = n                 #
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_lb                   = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-get_fornax_binary_now     = n                 #
+lb_plot_switch            = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 # possible tests #                            #
 # # # # # # # # # # # # # # # # # # # # # # # #
-velocity_dispersion_calc  = n                 #
+velocity_disp_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-make_a_few_hists          = n                 #
+make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_stability_test        = n                 #
+stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_mixeddward_test       = n                 #
+test_mixed_dwarf_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-slight_hist_change_test   = n                 #
-plot_all_hist             = n                 #
-orbit_loc_test            = n                 #
-plot_n_from_hists         = n                 #
-check_sweep_hist_likes    = n                 #
+hstalt_binswap_switch     = n                 #
+plot_all_hists_switch     = n                 #
+orbit_location_switch     = n                 #
+plot_n_ofhist_switch      = n                 #
+check_hist_likes_switch   = n                 #
+check_timestep_switch     = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -94,7 +93,7 @@ output2 = match_hist_correct + ".out"
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
 #lua = "mixeddwarf.lua"
-lua = "EMD_v162.lua"
+lua = "EMD_v162_bestlike.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -896,7 +895,7 @@ def randomize(counts, errors, N):
    
     return counts, errors
 
-def slight_hist_alteration_study_bin_switch():
+def hstalt_binswap():
     Nchanges = 25
     folder = "quick_plots/hists/"
     
@@ -1254,6 +1253,73 @@ def orbit_location():
         plot_all_hists()
     
     return 0
+
+
+def check_timestep():
+    rl = [0.05, 0.5]
+    rr = [0.1, 0.5]
+    ml = [1, 50]
+    mr = [0.1, 0.95]
+    f = open("times.txt", 'w')
+    rl_inc = 0.1
+    rr_inc = 0.05
+    ml_inc = 1
+    mr_inc = 0.05
+    
+    irl = rl[0]
+    while(1):
+        irr = rr[0]
+        while(1):
+            iml = ml[0]
+            while(1):
+                imr = mr[0]
+                while(1):
+                    dwarfMass = iml / imr
+                    rscale_t  = irl / irr
+                    rd  = rscale_t *  (1.0 - irr)
+                    md    = dwarfMass * (1.0 - imr)
+                    
+                    
+                    mass_enc_d = md * (irl)**3 * ( (irl)**2 + (rd)**2  )**(-3.0/2.0)
+
+                    mass_enc_l = iml * (rd)**3 * ( (irl)**2 + (rd)**2  )**(-3.0/2.0)
+
+                    s1 = (irl)**3 / (mass_enc_d + iml)
+                    s2 = (rd)**3 / (mass_enc_l + md)
+                    
+                    if(s1 < s2):
+                        s = s1
+                    else:
+                        s = s2
+                    
+                    t = (1 / 100.0) * ( mt.pi * (4.0 / 3.0) * s)**(1.0/2.0)
+                    f.write("%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\n" % (t, irl, irr, iml, imr, rd, md))
+                    
+                    if(imr > mr[1]):
+                        break
+                    else:
+                        imr += mr_inc
+                
+                if(iml > ml[1]):
+                    break
+                else:
+                    iml += ml_inc
+            
+            if(irr > rr[1]):
+                break
+            else:
+                irr += rr_inc
+                
+        if(irl > rl[1]):
+            break
+        else:
+            irl += rl_inc
+                    
+                    
+                    
+                   
+    f.close()
+    
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
     args = [0.9862, 0.2, 0.2, 12, .2]
@@ -1294,56 +1360,43 @@ def clean():
     
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():
-    if(get_fornax_binary_now):
-        get_fornax_binary()
-        
     standard_run()
     
-    if(run_mixeddward_test):
+    if(test_mixed_dwarf_switch):
         test_mixed_dwarf()
         
     if(charles):
         for_charles()
     
-    if(make_a_few_hists):
+    if(make_some_hists_switch):
         make_some_hists()
     
-    #if(run_binary_compare):
-        #old_new_binary_compare()
-        
-    #if(run_diff_OS_test):
-        #diff_OS_test_v160()
-        #diff_OS_test_v158()
-    
-    if(run_stability_test):
+    if(stabity_test_switch):
         stabity_test()
     
-    #if(recalc_para_sweep_likes):
-        #recalc_parameter_sweep_likelihoods()
-    
-    #if(run_seed_fluctuation_test):
-        #different_seed_fluctuation()
-    
-    if(velocity_dispersion_calc):
+    if(velocity_disp_switch):
         velocity_dispersion()
     
-    if(plot_lb):
+    if(lb_plot_switch):
         lb_plot(output)
         
-    if(slight_hist_change_test):
-        slight_hist_alteration_study_bin_switch()
+    if(hstalt_binswap_switch):
+        hstalt_binswap()
         
-    if(plot_all_hist):
+    if(plot_all_hists_switch):
         plot_all_hists()
     
-    if(plot_n_from_hists):
+    if(plot_n_ofhist_switch):
         plot_n_ofhist()
     
-    if(orbit_loc_test):
+    if(orbit_location_switch):
         orbit_location()
         
-    if(check_sweep_hist_likes):
+    if(check_hist_likes_switch):
         check_hist_likes()
     clean()
+    
+    if(check_timestep_switch):
+        check_timestep()
         
 main()
