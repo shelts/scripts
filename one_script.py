@@ -55,7 +55,7 @@ lb_plot_switch            = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_disp_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-make_some_hists_switch    = n                 #
+make_some_hists_switch    = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -66,7 +66,7 @@ plot_all_hists_switch     = n                 #
 orbit_location_switch     = n                 #
 plot_n_ofhist_switch      = n                 #
 check_hist_likes_switch   = n                 #
-check_timestep_switch     = y                 #
+check_timestep_switch     = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -92,8 +92,8 @@ output2 = match_hist_correct + ".out"
 
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-#lua = "mixeddwarf.lua"
-lua = "EMD_v162_bestlike.lua"
+lua = "mixeddwarf.lua"
+#lua = "EMD_v162_bestlike.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -141,8 +141,8 @@ def standard_run():
 def make_nbody():
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        #os.system("rm -r nbody_test")
-        #os.system("mkdir nbody_test")
+        os.system("rm -r nbody_test")
+        os.system("mkdir nbody_test")
         os.chdir("nbody_test")
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
@@ -334,8 +334,8 @@ def plot_N(hists, name, N):
         #plt.show()
         return 1
 
-def plot_4(hist1, hist2, hist3, hist4, hist5, name):
-    ylimit = 0.4
+def plot_4(hist1, hist2, hist3, hist4, name):
+    ylimit = 0.1
     xlower = 60 
     xupper = -60
     w_overlap = 2.5
@@ -352,13 +352,13 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
     plot_hist2 = hist2 + ".hist"
     plot_hist3 = hist3 + ".hist"
     plot_hist4 = hist4 + ".hist"
-    plot_hist5 = hist5 + ".hist"
+    #plot_hist5 = hist5 + ".hist"
     
     label1 = 'correct\t 3.95'
-    label2 = '3.9644355371 \t -10.047131423110589'
-    label3 = '3.9658770516 \t -23.976349630274957 '
-    label4 = '3.96601335775 \t -11.889794996330375 '
-    label5 = '3.97192948281 \t -23.432419009906333'
+    label2 = '-5.615887703633109'
+    label3 = '-6.361401978455249 '
+    label4 = '-4.853374558 '
+    #label5 = '3.97192948281 \t -23.432419009906333'
     
     
     print("plotting histograms\n")
@@ -440,24 +440,26 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
                 lbins4.append(float(ss[1]))
                 counts4.append(float(ss[3]))
     
-    # # # # #      
-    read_data = False
-    lbins5 = []
-    counts5 = []
-    lines = open(folder + plot_hist5, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins5.append(float(ss[1]))
-                counts5.append(float(ss[3]))       
+    ## # # # #      
+    #read_data = False
+    #lbins5 = []
+    #counts5 = []
+    #lines = open(folder + plot_hist5, 'r')
+    #for line in lines:
+        #if (line.startswith("betaBins")):
+            #read_data = True
+            #continue
+        #if(read_data):
+            #if(line.startswith("</histogram>")):
+                #break
+            #elif(line.startswith("\n")):
+                #continue
+            #else:
+                #ss = line.split(' ')
+                #lbins5.append(float(ss[1]))
+                #counts5.append(float(ss[3]))       
+                
+                
     if(plot_overlapping == True):
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         #plt.subplot(211)
@@ -465,7 +467,7 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
         plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.75, label= label2)
         plt.bar(lbins3, counts3, width = w_overlap, color='b', alpha=0.5,  label= label3)
         plt.bar(lbins4, counts4, width = w_overlap, color='g', alpha=0.3,  label= label4)
-        plt.bar(lbins5, counts5, width = w_overlap, color='y', alpha=0.2,  label= label5)
+        #plt.bar(lbins5, counts5, width = w_overlap, color='y', alpha=0.2,  label= label5)
         plt.title('Histogram of Light Matter Distribution After 4 Gy')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -475,7 +477,7 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
         #plt.show()
         
     if(plot_adjacent == True):
-        plt.subplot(311)
+        plt.subplot(411)
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         plt.bar(lbins1, counts1, width = w_adjacent, color='b')
         plt.legend(handles=[mpatches.Patch(color='b', label= label1)])
@@ -484,7 +486,7 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
         plt.ylim((0.0, ylimit))
         plt.ylabel('counts')
 
-        plt.subplot(312)
+        plt.subplot(412)
         plt.bar(lbins2, counts2, width = w_adjacent, color='k')
         plt.legend(handles=[mpatches.Patch(color='k', label= label2)])
         plt.xlim((xlower, xupper))
@@ -493,9 +495,17 @@ def plot_4(hist1, hist2, hist3, hist4, hist5, name):
         plt.ylabel('counts')
         
         
-        plt.subplot(313)
-        plt.bar(lbins3, counts3, width = w_adjacent, color='k')
+        plt.subplot(413)
+        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
         plt.legend(handles=[mpatches.Patch(color='k', label= label3)])
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.xlabel('l')
+        plt.ylabel('counts')
+        
+        plt.subplot(414)
+        plt.bar(lbins3, counts3, width = w_adjacent, color='k')
+        plt.legend(handles=[mpatches.Patch(color='k', label= label4)])
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
         plt.xlabel('l')
@@ -838,19 +848,30 @@ def velocity_dispersion():
     os.system("./scripts/velocity_dispersion.py " + file_name)
 # # # # # # # # # # # # # # # # # # # # # #
 def make_some_hists():
-    ver = '_1.62_x86_64-pc-linux-gnu__mt'
-    lua_file = 'EMD_v162.lua'
-    hist = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins'
-    nbody(args, lua_file, hist, hist, ver, False)
+    ver = ''
+    lua_file = 'EMD_v162_malleable.lua'
+    cor_hist = 'hist_v162_2k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__7_11_16'
     
-    lua_file = 'EMD_v162_25bins.lua'
-    hist = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_25bins'
-    nbody(args, lua_file, hist, hist, ver, False)
+    args = [4.98307971702889, 0.968890922982242, 0.104342397337317, 0.454711809661241, 25, 0.95]
+    hist1 = 'mw_best_fit1.1'
+    nbody(args, lua_file, hist1, hist1, ver, False)
+    match_hists(cor_hist, hist1, ver)
+   
+    args = [4.31887475447728, 0.966407963540408, 0.109778609406203, 0.27909923158586, 24.6120846327394, 0.95]
+    hist2 = 'mw_best_fit2'
+    #nbody(args, lua_file, hist, hist, ver, False)
+    #match_hists(cor_hist, hist, ver)
     
-    lua_file = 'EMD_v162_50bins.lua'
-    hist = 'hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_50bins'
-    nbody(args, lua_file, hist, hist, ver, False)
-
+    args = [4.19554142467678, 0.965346934366972, 0.146965033782182, 0.5, 24.9266278594736, 0.95]
+    hist3 = 'mw_best_fit3'
+    #nbody(args, lua_file, hist3, hist3, ver, False)
+    compare_after_run(args, lua_file, cor_hist, hist3, hist3, ver)
+    match_hists(cor_hist, hist3, ver)
+    
+    
+    plot_4(cor_hist, hist1, hist2, hist3, 'bestfit')
+    
+    
     return 0
 # # # # # # # # # # # # # # # # # # # # # #
 def test_mixed_dwarf():
