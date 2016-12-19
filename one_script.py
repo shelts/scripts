@@ -26,15 +26,16 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [1.1, 0.98, 0.2, 0.2, 12, 0.2] 
-#args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] 
+#args = [1.0, 0.98, 0.2, 0.2, 12, 0.2] 
+args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] 
 
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = n                 #
+run_nbody                 = y                 #
+remake                    = run_nbody                 #
+pots_dens_plot_switch     = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 plot_multiple             = n                 #
@@ -55,7 +56,7 @@ lb_plot_switch            = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_disp_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-make_some_hists_switch    = y                 #
+make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -77,9 +78,9 @@ histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 test = 'test_correct'
 test2 = 'test_compare'
 #hist to match against for compare after run
-correct_hist = test
+correct_hist = test2
 #hist name for the nbody run
-histogram_for_nbody_run = test2
+histogram_for_nbody_run = correct_hist
 
 #if you are just matching, these are the two hists
 match_hist_correct = test
@@ -119,7 +120,7 @@ def standard_run():
         multiple_plot()
     
     if(run_nbody == True):
-        nbody(args, lua, correct_hist, correct_hist, version, False)
+        nbody(args, lua, histogram_for_nbody_run, histogram_for_nbody_run, version, False)
     
     if(run_and_compare == True):
         compare_after_run(args, lua, correct_hist, histogram_for_nbody_run, output, version)
@@ -141,8 +142,8 @@ def standard_run():
 def make_nbody():
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        os.system("rm -r nbody_test")
-        os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")
+        #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
@@ -854,22 +855,22 @@ def make_some_hists():
     
     args = [4.98307971702889, 0.968890922982242, 0.104342397337317, 0.454711809661241, 25, 0.95]
     hist1 = 'mw_best_fit1.1'
-    nbody(args, lua_file, hist1, hist1, ver, False)
-    match_hists(cor_hist, hist1, ver)
+    #nbody(args, lua_file, hist1, hist1, ver, False)
+    #match_hists(cor_hist, hist1, ver)
    
     args = [4.31887475447728, 0.966407963540408, 0.109778609406203, 0.27909923158586, 24.6120846327394, 0.95]
     hist2 = 'mw_best_fit2'
     #nbody(args, lua_file, hist, hist, ver, False)
-    #match_hists(cor_hist, hist, ver)
+    match_hists(cor_hist, hist2, ver)
     
     args = [4.19554142467678, 0.965346934366972, 0.146965033782182, 0.5, 24.9266278594736, 0.95]
-    hist3 = 'mw_best_fit3'
+    hist3 = 'mw_best_fit3.1'
     #nbody(args, lua_file, hist3, hist3, ver, False)
-    compare_after_run(args, lua_file, cor_hist, hist3, hist3, ver)
+    #compare_after_run(args, lua_file, cor_hist, hist3, hist3, ver)
     match_hists(cor_hist, hist3, ver)
     
     
-    plot_4(cor_hist, hist1, hist2, hist3, 'bestfit')
+    #plot_4(cor_hist, hist1, hist2, hist3, 'bestfit')
     
     
     return 0
@@ -1058,7 +1059,7 @@ def plot_all_hists():
         label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i]) + "% sim" + str(values[i]/3.95)
         plot(correct, hist_name, str(i), label1, label2)
     return 0
-
+# # # # # # # # # # # # # # # # # # # # # #
 
 def plot_n_ofhist():
     ver = ''
@@ -1102,7 +1103,7 @@ def plot_n_ofhist():
     print n
     
     return 0
-
+# # # # # # # # # # # # # # # # # # # # # #
 def check_hist_likes():
     redo_likes = n
     plot_components = y
@@ -1162,7 +1163,7 @@ def check_hist_likes():
         plt.show()
         plt.clf()
         
-                   
+# # # # # # # # # # # # # # # # # # # # # #
 def orbit_location():         
     lua_file = "EMD_v162_malleable.lua"
     hist =  'orbit_test2'
@@ -1275,7 +1276,7 @@ def orbit_location():
     
     return 0
 
-
+# # # # # # # # # # # # # # # # # # # # # #
 def check_timestep():
     rl = [0.05, 0.5]
     rr = [0.1, 0.5]
@@ -1340,6 +1341,159 @@ def check_timestep():
                     
                    
     f.close()
+
+# # # # # # # # # # # # # # # # # # # # # #
+
+def pots_dens_plot():
+    f = open('pots_dens_plt.gnuplot', 'w')
+    names = ["NFW", "PL", "GH"]
+    if(n):    
+        os.system("mv ./nbody_test/bin/dens_potsNFW.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/dist_funcNFW.out ./quick_plots/")
+        
+        os.system("mv ./nbody_test/bin/dens_potsGH.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/dist_funcGH.out ./quick_plots/")
+        
+        os.system("mv ./nbody_test/bin/dens_potsPL.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/dist_funcPL.out ./quick_plots/")
+        
+        f.write("reset\n")
+        f.write("set terminal png size 900,1000 enhanced\n")
+        f.write("set output './quick_plots/pots_dens.png' \n")
+        f.write("set multiplot layout 3,4 rowsfirst\n")
+        for i in range(0, len(names)):
+            f.write("set key off\n")
+            
+            
+            p = "./quick_plots/dens_pots" + names[i] + ".out"
+            f.write("set title 'dens " + names[i] + " ' \n")
+            f.write("set xlabel 'r'\n")
+            f.write("set ylabel 'r^2 rho'\n")
+            #f.write("set yrange [0:4]\n")
+            #f.write("set xrange [0:10]\n")
+            f.write("plot '" + p + "' using 1:2  with lines, \n\n") 
+            
+            f.write("set title 'potentials " + names[i] + " ' \n")
+            f.write("set xlabel 'r'\n")
+            f.write("set ylabel 'potential'\n")
+            #f.write("set yrange [0:140]\n")
+            #f.write("set xrange [0 :10 ]\n")
+            f.write("plot '" + p + "' using 1:3  with lines, \n\n")
+            f.write("# # # # # # # # # # # # # # # # # #\n")
+            
+            f.write("set title 'dist fun " + names[i] + " f(r)' \n")
+            f.write("set xlabel 'r'\n")
+            f.write("set ylabel 'v^2 f'\n")
+            #f.write("set yrange[0:17]\n")
+            #f.write("set xrange [0 : 1.2]\n")
+            p = "./quick_plots/dist_func" + names[i] + ".out"
+            f.write("plot '" + p + "' using 1:5  with lines, '" + p + "' using 7:5  with dots\n\n")
+            
+            f.write("set title 'dist fun " + names[i] + " f(v)' \n")
+            f.write("set xlabel 'v'\n")
+            f.write("set ylabel 'v^2 f'\n")
+            #f.write("set yrange [0:4]\n")
+            #f.write("set xrange [0:10]\n")
+            p = "./quick_plots/dist_func" + names[i] + ".out"
+            f.write("plot '" + p + "' using 4:6  with dots\n\n")
+            
+            #f.write("unset multiplot\n")
+    
+    if(n):
+        os.system("mv ./nbody_test/bin/dist_func2D.out ./quick_plots/")
+        f.write("reset\n")
+        f.write("set terminal wxt persist\n")
+        f.write("set key off\n")
+        f.write("set xlabel 'r'\n")
+        f.write("set ylabel 'v'\n")
+        f.write("set zlabel 'v^2 f'\n")
+        f.write("set xrange [0.8:1.0]\n")
+        f.write("set yrange [0:10]\n")
+        f.write("set zrange [0:]\n")
+        #f.write("set cbrange [0 :0.001]\n")
+        #f.write("set output './quick_plots/distfunc.png' \n")
+        p = "./quick_plots/dist_func2D.out"
+        f.write("splot '" + p + "' using 1:2:3  with dots \n\n")
+    
+    
+
+    if(n):
+        os.system("mv ./nbody_test/bin/energyNFW.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/energyPL.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/energyGH.out ./quick_plots/")
+        
+        f.write("reset\n")
+        f.write("set terminal png size 900,1000 enhanced\n")
+        f.write("set output './quick_plots/energy.png'\n")
+        f.write("set multiplot layout 3,1 rowsfirst\n")
+        for i in range(0, len(names)):
+            p = "./quick_plots/energy" + names[i] + ".out"
+            f.write("set title 'energy " + names[i] + " ' \n")
+            f.write("set xlabel 'r'\n")
+            f.write("set ylabel 'energy'\n")
+            #f.write("set yrange [0:4]\n")
+            f.write("set xrange [0:50]\n")
+            f.write("plot '" + p + "' using 1:2  with lines title 'potential', '" + p + "' using 1:3  with lines title ' energy' \n\n") 
+
+    
+    if(y):
+        os.system("mv ./nbody_test/bin/integrandNFW.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/integrandPL.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/integrandGH.out ./quick_plots/")
+        
+        f.write("reset\n")
+        f.write("set terminal png size 700,900 enhanced\n")
+        f.write("set output './quick_plots/integrand.png'\n")
+        f.write("set multiplot layout 3,1 rowsfirst\n")
+        ylims = ["-50", "-50", "-1000"]
+        for i in range(0, len(names)):
+            p = "./quick_plots/integrand" + names[i] + ".out"
+            f.write("set title 'integrand " + names[i] + " ' \n")
+            f.write("set xlabel 'r'\n")
+            f.write("set ylabel 'integrand'\n")
+            f.write("set yrange [0:" + ylims[i] + "]\n")
+            f.write("set xrange [0:2]\n")
+            f.write("plot '" + p + "' using 1:2  with lines title 'integrand', '" + p + "' using 8:2  with lines title ' upperlimit',  '" + p + "' using 9:2  with lines title ' lowerlimit' \n\n") 
+
+    if(n):
+        os.system("mv ./nbody_test/bin/NFW.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/PL.out ./quick_plots/")
+        os.system("mv ./nbody_test/bin/GH.out ./quick_plots/")
+        
+        f.write("reset\n")
+        f.write("set terminal png size 900,1000 enhanced\n")
+        f.write("set output './quick_plots/sampling.png'\n")
+        f.write("set multiplot layout 3,1 rowsfirst\n")
+        ylims = ["-1000", "-200", "-1000"]
+        for i in range(0, len(names)):
+            p = "./quick_plots/" + names[i] + ".out"
+            f.write("set title 'sampling" + names[i] + " ' \n")
+            f.write("set xlabel 'n'\n")
+            f.write("set ylabel 'pick'\n")
+            f.write("set yrange [0:1]\n")
+            f.write("set xrange [0:20]\n")
+            f.write("plot '" + p + "' using 0:3  with lines title 'd/dmax', '" + p + "' using 0:4  with lines title ' u' \n\n") 
+            
+        f.write("unset multiplot\n")
+        f.write("reset\n")
+        f.write("set terminal png size 900,1000 enhanced\n")
+        f.write("set output './quick_plots/sampling2.png'\n")
+        f.write("set multiplot layout 3,1 rowsfirst\n")
+        for i in range(0, len(names)):
+            p = "./quick_plots/" + names[i] + ".out"
+            f.write("set title 'sampling" + names[i] + " ' \n")
+            f.write("set xlabel 'n'\n")
+            f.write("set ylabel 'pick'\n")
+            f.write("set yrange [-2:2]\n")
+            f.write("set xrange [0:200]\n")
+            f.write("plot '" + p + "' using 0:5  with lines title ''  \n\n") 
+
+    
+    
+    f.close()
+    os.system("gnuplot pots_dens_plt.gnuplot 2>>piped_output.txt")
+    #os.system("rm pots_dens_plt.gnuplot")
+    
     
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
@@ -1419,5 +1573,8 @@ def main():
     
     if(check_timestep_switch):
         check_timestep()
+        
+    if(pots_dens_plot_switch):
+        pots_dens_plot();
         
 main()
