@@ -33,9 +33,8 @@ args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
-remake                    = run_nbody                 #
-pots_dens_plot_switch     = n                 #
+run_nbody                 = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 plot_multiple             = n                 #
@@ -58,16 +57,18 @@ velocity_disp_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-stabity_test_switch       = n                 #
+stabity_test_switch       = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 test_mixed_dwarf_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
+pots_dens_plot_switch     = n                 #
 hstalt_binswap_switch     = n                 #
 plot_all_hists_switch     = n                 #
 orbit_location_switch     = n                 #
 plot_n_ofhist_switch      = n                 #
 check_hist_likes_switch   = n                 #
 check_timestep_switch     = n                 #
+quick_calculator_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 
@@ -75,19 +76,21 @@ check_timestep_switch     = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
-test = 'test_correct'
-test2 = 'test_compare'
+nfw  = 'output_nfw_nfw_0gy'
+plum = 'output_plummer_plummer_0gy'
+hern = 'output_hern_hern_0gy'
+plum_nfw = 'output_plummer_nfw_0gy'
 #hist to match against for compare after run
-correct_hist = test2
+correct_hist = nfw
 #hist name for the nbody run
 histogram_for_nbody_run = correct_hist
 
 #if you are just matching, these are the two hists
-match_hist_correct = test
-match_hist_compare = test2
+match_hist_correct = histogram_for_nbody_run
+match_hist_compare = histogram_for_nbody_run
 plot_name = histogram_for_nbody_run
 
-output = plot_name
+output = histogram_for_nbody_run
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
@@ -1497,42 +1500,49 @@ def pots_dens_plot():
     
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
-    args = [0.9862, 0.2, 0.2, 12, .2]
+    args = [0.0001, 0.9862, 1.0, 0.5, 48, .5]
 
     sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
     ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
     N               = 1
     M               = 0
-    back_time       = str(args[0])
-    r_l             = str(args[1])
-    light_r_ratio   = str(args[2])
-    mass_l          = str(args[3])
-    mass_ratio      = str(args[4])
     
-    stability_rebuild = y
-    stability_run     = y
+    b_t = str(args[1])
+    r_l = str(args[2])
+    r_r = str(args[3])
+    m_l = str(args[4])
+    m_r = str(args[5])
     
-    if(stability_rebuild == True):
-        #os.system("rm -r nbody_test")
-        #os.system("mkdir nbody_test")
-        os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
-        os.system("make -j ")
-        os.chdir("../")
     
-    if(stability_run == True):
-        for i in range(M, N):
-            os.system("" + path + "nbody_test/bin/milkyway_nbody \
-                -f " + path + "lua/Null.lua \
-                -o " + path + "data_testing/sim_outputs/output_" + (ext[i]) + "gy.out \
-                -n 8 -x -i "+ str(sim_time[i]) + " " + back_time + " " + r_l + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+    ver = ''
+    lua_file = "mixeddwarf.lua"
+    
+    nfw  = 'output_nfw_nfw_0gy'
+    plum = 'output_plummer_plummer_0gy'
+    hern = 'output_hern_hern_0gy'
+    plum_nfw = 'output_plummer_nfw_0gy'
 
+    fn = nfw
+    nbody(args, lua_file, fn, fn, ver, False)
+    
+    
     os.chdir("data_testing")    
-    os.system("./stability_test.py " + back_time + " " + r_l + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+    os.system("./stability_test.py " + b_t + " " + r_l + " " + r_r + " " + m_l + " " + m_r)
 # # # # # # # # # # # # # # # # # # # # # #
 def clean():
     os.system("rm boinc_*")
+# # # # # # # # # # # # # # # # # # # # # #    
+
+def quick_calculator():
     
+    ans = (73.8 /1000.0) * 3.154 / 3.086
+    ans = 3.0 * ans * ans / (8.0 * mt.pi)
+    
+    print ans
+    
+    ans = 200.0 * ans * 4 * mt.pi / 3
+    
+    print ans 
 # # # # # # # # # # # # # # # # # # # # # #    
 def main():
     standard_run()
@@ -1576,5 +1586,8 @@ def main():
         
     if(pots_dens_plot_switch):
         pots_dens_plot();
-        
+    
+    if(quick_calculator_switch):
+        quick_calculator()
+    
 main()
