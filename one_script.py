@@ -168,7 +168,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 8 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(should_pipe == True):
         print('running nbody')
@@ -1500,7 +1500,7 @@ def pots_dens_plot():
     
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
-    args = [0.0001, 0.9862, 1.0, 0.5, 48, .5]
+    args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
 
     sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
     ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
@@ -1523,7 +1523,16 @@ def stabity_test():
     plum_nfw = 'output_plummer_nfw_0gy'
 
     fn = nfw
-    nbody(args, lua_file, fn, fn, ver, False)
+    #args = [sim_time[0], 0.9862, 0.8, 0.5, 24, .5]
+    #nbody(args, lua_file, fn, fn, ver, False)
+    
+    for i in range(M, N):
+        args[0] = sim_time[i]
+        nfw  = 'output_nfw_nfw_' + ext[i] + 'gy'
+        plum = 'output_plummer_plummer_' + ext[i] + 'gy'
+        plum_nfw = 'output_plummer_nfw_' + ext[i] + 'gy'
+        fn = plum_nfw
+        nbody(args, lua_file, fn, fn, ver, False)
     
     
     os.chdir("data_testing")    
