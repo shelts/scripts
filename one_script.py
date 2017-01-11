@@ -1500,11 +1500,11 @@ def pots_dens_plot():
     
 # # # # # # # # # # # # # # # # # # # # # #
 def stabity_test():
-    args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
-
+    #args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
+    args = [0.0001, 0.9862, 0.2, 0.2, 24, .2]
     sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
     ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
-    N               = 1
+    N               = 6
     M               = 0
     
     b_t = str(args[1])
@@ -1530,8 +1530,9 @@ def stabity_test():
         args[0] = sim_time[i]
         nfw  = 'output_nfw_nfw_' + ext[i] + 'gy'
         plum = 'output_plummer_plummer_' + ext[i] + 'gy'
+        hern = 'output_hern_hern_' + ext[i] + 'gy'
         plum_nfw = 'output_plummer_nfw_' + ext[i] + 'gy'
-        fn = plum_nfw
+        fn = nfw
         nbody(args, lua_file, fn, fn, ver, False)
     
     
