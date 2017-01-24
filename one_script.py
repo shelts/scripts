@@ -34,7 +34,7 @@ args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2]
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 plot_multiple             = n                 #
@@ -1504,8 +1504,10 @@ def stabity_test():
     #args = [0.0001, 0.9862, 0.2, 0.2, 24, .2]
     sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
     ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
-    N               = 1
+    N               = 6
     M               = 0
+    
+    make_nbody()
     
     b_t = str(args[1])
     r_l = str(args[2])
