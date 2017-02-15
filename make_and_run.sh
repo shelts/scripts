@@ -21,7 +21,7 @@
 #     ./stability_test.py 1.0 0.2 0.5 6 0.5
 
 
-    time  ./milkyway_nbody \
+    time  ./milkyway_nbody --help\
     -f ~/Desktop/research/lua/mixeddwarf.lua \
     -o output_0gy.out \
     -z ~/Desktop/research/quick_plots/hists/hist_test.hist \

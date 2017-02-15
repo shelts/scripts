@@ -26,17 +26,17 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-#args = [1.0, 0.98, 0.2, 0.2, 12, 0.2] 
-args = [0.000001, 1.0, 0.2, 0.2, 12, 0.2] 
-
+args = [2.0, 0.98, 0.2, 0.2, 12, 0.2] 
+#args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] #-139.926917096209706
+#args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] #-139.926917096209706
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
-match_histograms          = n                 #
-run_and_compare           = n                 #
+remake                    = y                 #
+match_histograms          = y                 #
+run_and_compare           = y                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
@@ -57,7 +57,7 @@ velocity_disp_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-stabity_test_switch       = y                 #
+stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 test_mixed_dwarf_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -76,17 +76,18 @@ quick_calculator_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
-nfw  = 'output_nfw_nfw_0gy'
-plum = 'output_plummer_plummer_0gy'
-hern = 'output_hern_hern_0gy'
-plum_nfw = 'output_plummer_nfw_0gy'
+test = 'testing_veldisp_changes'
+test2 = 'testing_veldisp_changes2'
+test3 = 'testing_veldisp_changes3'
+
+js_test = "js_test"
 #hist to match against for compare after run
-correct_hist = nfw
+correct_hist = test
 #hist name for the nbody run
-histogram_for_nbody_run = correct_hist
+histogram_for_nbody_run = test2
 
 #if you are just matching, these are the two hists
-match_hist_correct = histogram_for_nbody_run
+match_hist_correct = test
 match_hist_compare = histogram_for_nbody_run
 plot_name = histogram_for_nbody_run
 
@@ -97,7 +98,7 @@ output2 = match_hist_correct + ".out"
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
 lua = "mixeddwarf.lua"
-#lua = "EMD_v162_bestlike.lua"
+#lua = "EMD_v162.lua"
 
 outs = 2 #for the cm calculation function
 
@@ -136,7 +137,7 @@ def standard_run():
         calculate_cm(args, output1, output2, outs)
     
     if(plot_hists == True):
-        plot(match_hist_correct + ".hist" , match_hist_compare + ".hist", plot_name)
+        plot(match_hist_correct , match_hist_compare, plot_name, '1', '2')
     
     #if(plot_lb == True):
         #os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
@@ -168,7 +169,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 8 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(should_pipe == True):
         print('running nbody')
@@ -190,7 +191,7 @@ def match_hists(hist1, hist2, ver):
     #using call here instead so the format of using it is on record
     call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
           + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
-          + " -s " + path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
+          + " -S " + path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
     print hist1, "\n", hist2
     print "\n"
     return 0
@@ -526,7 +527,7 @@ def plot(hist1, hist2, name, label1, label2):
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
-    folder = 'like_surface/'
+    #folder = 'like_surface/'
     save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
     save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
     #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
@@ -632,10 +633,10 @@ def lb_plot(file_name):
     path = 'quick_plots/'
     print file_name
     plot_lbr = y
-    plot_light_and_dark = n
+    plot_light_and_dark = y
     plot_dm = n
     plot_xyz = n
-    plot_orbit = y
+    plot_orbit = n
     
     f = open(path_charles + file_name + '.out')
     lines = []
@@ -722,7 +723,7 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
-            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter', format='png')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
             print "plotting:", len(light_l) + len(dark_l), " points"
         # # # # # # # # # #
         if(plot_orbit == True):
@@ -1504,7 +1505,7 @@ def stabity_test():
     #args = [0.0001, 0.9862, 0.2, 0.2, 24, .2]
     sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
     ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
-    N               = 6
+    N               = 1
     M               = 0
     
     make_nbody()
