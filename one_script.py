@@ -26,7 +26,7 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [2.0, 0.98, 0.2, 0.2, 12, 0.2] 
+args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] #-139.926917096209706
 #args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] #-139.926917096209706
 
@@ -36,14 +36,14 @@ args = [2.0, 0.98, 0.2, 0.2, 12, 0.2]
 run_nbody                 = n                 #
 remake                    = y                 #
 match_histograms          = y                 #
-run_and_compare           = y                 #
+run_and_compare           = n                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_hists                = n                 #
+plot_hists                = y                 #
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -76,18 +76,16 @@ quick_calculator_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
-test = 'testing_veldisp_changes'
-test2 = 'testing_veldisp_changes2'
-test3 = 'testing_veldisp_changes3'
+correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+test = 'parameter_sweep_test'
 
-js_test = "js_test"
 #hist to match against for compare after run
-correct_hist = test
+correct_hist = correct
 #hist name for the nbody run
-histogram_for_nbody_run = test2
+histogram_for_nbody_run = test
 
 #if you are just matching, these are the two hists
-match_hist_correct = test
+match_hist_correct = correct_hist
 match_hist_compare = histogram_for_nbody_run
 plot_name = histogram_for_nbody_run
 
@@ -220,7 +218,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 10 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 10 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #
 def plot_N(hists, name, N):
     ylimit = 0.4
@@ -522,8 +520,8 @@ def plot_4(hist1, hist2, hist3, hist4, name):
 
 def plot(hist1, hist2, name, label1, label2):
     ylimit = 0.4
-    xlower = 60 
-    xupper = -60
+    xlower = 180 
+    xupper = -180
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
