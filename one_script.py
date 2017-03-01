@@ -49,7 +49,7 @@ plot_veldisp_switch       = y                 #
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-lb_plot_switch            = y                 #
+lb_plot_switch            = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -172,7 +172,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b  -P --no-clean-checkpoint -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -b  -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_correct " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(should_pipe == True):
         print('running nbody')
@@ -204,7 +204,7 @@ def match_hists_pipe(hist1, hist2, ver, pipe_name):
     #using call here instead so the format of using it is on record
     call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
           + " -h " + path + "" + hist1 + '.hist'
-          + " -s " + path + "" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
+          + " -S " + path + "" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
     print hist1, "\n", hist2
     print "\n"
     return 0
