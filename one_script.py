@@ -27,6 +27,7 @@ random.seed(a = 12345678)
 y = True
 n = False
 args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
+#args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] #-139.926917096209706
 #args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] #-139.926917096209706
 
@@ -35,8 +36,8 @@ args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = y                 #
-match_histograms          = y                 #
-run_and_compare           = n                 #
+match_histograms          = n                 #
+run_and_compare           = y                 #
 plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
@@ -44,10 +45,11 @@ charles                   = n                 #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = y                 #
+plot_veldisp_switch       = y                 #
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-lb_plot_switch            = n                 #
+lb_plot_switch            = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -115,27 +117,30 @@ path = sid_dir
 #    standard nbody running functions     #
 # # # # # # # # # # # # # # # # # # # # # #
 def standard_run():
-    if(remake == True):
+    if(remake):
         make_nbody()
         
-    if(plot_multiple == True):    
+    if(plot_multiple):    
         multiple_plot()
     
-    if(run_nbody == True):
+    if(run_nbody):
         nbody(args, lua, histogram_for_nbody_run, histogram_for_nbody_run, version, False)
     
-    if(run_and_compare == True):
+    if(run_and_compare):
         compare_after_run(args, lua, correct_hist, histogram_for_nbody_run, output, version)
     
-    if(match_histograms == True):
+    if(match_histograms):
         match_hists(match_hist_correct, match_hist_compare, version)
         
         
-    if(calc_cm == True):
+    if(calc_cm):
         calculate_cm(args, output1, output2, outs)
     
-    if(plot_hists == True):
+    if(plot_hists):
         plot(match_hist_correct , match_hist_compare, plot_name, '1', '2')
+        
+    if(plot_veldisp_switch):
+        plot_veldisp(match_hist_correct , match_hist_compare, plot_name + "_velDisp", '1', '2')
     
     #if(plot_lb == True):
         #os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
@@ -167,7 +172,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 8 -b  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -b  -P --no-clean-checkpoint -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(should_pipe == True):
         print('running nbody')
@@ -218,7 +223,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -h " + path + "quick_plots/hists/" + correct + ".hist \
         -z " + path + "quick_plots/hists/" + hist + ".hist \
         -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 10 -b -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+        -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #
 def plot_N(hists, name, N):
     ylimit = 0.4
@@ -611,6 +616,98 @@ def plot(hist1, hist2, name, label1, label2):
         #plt.show()
         return 1
 
+
+def plot_veldisp(hist1, hist2, name, label1, label2):
+    ylimit = 150
+    xlower = 180 
+    xupper = -180
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    folder = 'quick_plots/hists/'
+    #folder = 'like_surface/'
+    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
+    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
+    #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
+    print "plot histogram 1: ", hist1
+    print "plot histogram 2: ", hist2
+    plot_hist1 = hist1 + ".hist"
+    plot_hist2 = hist2 + ".hist"
+
+    
+    print("plotting histograms\n")
+    read_data = False
+    lbins1 = []
+    velD1 = []
+    lines = open(folder + plot_hist1, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins1.append(float(ss[1]))
+                velD1.append(float(ss[5]))
+
+
+    read_data = False
+    lbins2 = []
+    velD2 = []
+    lines = open(folder + plot_hist2, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins2.append(float(ss[1]))
+                velD2.append(float(ss[5]))
+            
+    if(plot_overlapping):
+        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+        #plt.subplot(211)
+        plt.bar(lbins1, velD1, width = w_overlap, color='k', alpha=1,    label= label1)
+        plt.bar(lbins2, velD2, width = w_overlap, color='r', alpha=0.75, label= label2)
+        plt.title('Line of Sight Vel Disp Distribution')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.ylabel('vel disp')
+        plt.legend()
+        plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
+        plt.clf()
+        #plt.show()
+        
+    if(plot_adjacent):
+        plt.subplot(211)
+        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
+        plt.bar(lbins1, velD1, width = w_adjacent, color='b')
+        plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
+        plt.title('Line of Sight Vel Disp Distribution')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.ylabel('counts')
+
+        plt.subplot(212)
+        plt.bar(lbins2, velD2, width = w_adjacent, color='k')
+        plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, ylimit))
+        plt.xlabel('l')
+        plt.ylabel('vel disp')
+        #f.subplots_adjust(hspace=0)
+        plt.savefig(save_folder_adj + name + '.png', format='png')
+        plt.clf()
+        #plt.show()
+        return 1
 # # # # # # # # # #       
 def calculate_cm(paras, output1, output2, outs):
     sim_time      = str(paras[0])
