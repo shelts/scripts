@@ -34,18 +34,18 @@ args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
+run_nbody                 = y                 #
 remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = y                 #
-plot_multiple             = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_hists                = y                 #
-plot_veldisp_switch       = y                 #
+plot_hists                = n                 #
+plot_veldisp_switch       = n                 #
+vlos_plot_switch          = n
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -79,19 +79,21 @@ histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
 correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-test = 'parameter_sweep_test'
+test = 'parameter_sweep_test2'
 
 #hist to match against for compare after run
 correct_hist = correct
 #hist name for the nbody run
-histogram_for_nbody_run = test
+histogram_for_nbody_run = correct_hist
+histogram_for_nbody_run_and_compare = test
 
 #if you are just matching, these are the two hists
-match_hist_correct = correct_hist
-match_hist_compare = histogram_for_nbody_run
+match_hist_correct = histogram_for_nbody_run
+match_hist_compare = histogram_for_nbody_run_and_compare
 plot_name = histogram_for_nbody_run
 
 output = histogram_for_nbody_run
+output_run_compare = histogram_for_nbody_run_and_compare
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
@@ -120,14 +122,11 @@ def standard_run():
     if(remake):
         make_nbody()
         
-    if(plot_multiple):    
-        multiple_plot()
-    
     if(run_nbody):
         nbody(args, lua, histogram_for_nbody_run, histogram_for_nbody_run, version, False)
     
     if(run_and_compare):
-        compare_after_run(args, lua, correct_hist, histogram_for_nbody_run, output, version)
+        compare_after_run(args, lua, correct_hist, histogram_for_nbody_run_and_compare, output_run_compare, version)
     
     if(match_histograms):
         match_hists(match_hist_correct, match_hist_compare, version)
@@ -142,6 +141,9 @@ def standard_run():
     if(plot_veldisp_switch):
         plot_veldisp(match_hist_correct , match_hist_compare, plot_name + "_velDisp", '1', '2')
     
+    
+    if(vlos_plot_switch):
+        vlos_plot(match_hist_correct, match_hist_compare)
     #if(plot_lb == True):
         #os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
     return 0
@@ -225,123 +227,6 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
         -o " + path + "quick_plots/outputs/" + out + ".out \
         -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #
-def plot_N(hists, name, N):
-    ylimit = 0.4
-    xlower = 180 
-    xupper = -180
-    w_overlap = 2.5
-    w_adjacent = 1.5
-    folder = 'quick_plots/hists/'
-    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
-    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
-
-    #ls_counts = [ [][] ] 
-
-    
-    print("plotting histograms\n")
-    
-    read_data = False
-    lbins1 = []
-    counts1 = []
-    lines = open(folder + plot_hist1, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins1.append(float(ss[1]))
-                counts1.append(float(ss[3]))
-                
-    # # # # #
-    read_data = False
-    lbins2 = []
-    counts2 = []
-    lines = open(folder + plot_hist2, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins2.append(float(ss[1]))
-                counts2.append(float(ss[3]))
-            
-            
-    # # # # #      
-    read_data = False
-    lbins3 = []
-    counts3 = []
-    lines = open(folder + plot_hist1, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins3.append(float(ss[1]))
-                counts3.append(float(ss[3]))
-            
-    if(plot_overlapping == True):
-        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        #plt.subplot(211)
-        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1, label= plot_hist1)
-        plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.5, label= plot_hist2)
-        plt.bar(lbins3, counts3, width = w_overlap, color='r', alpha=0.5, label= plot_hist2)
-        plt.title('Histogram of Light Matter Distribution After 4 Gy')
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.ylabel('counts')
-        plt.legend()
-        plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
-        #plt.show()
-        
-    if(plot_adjacent == True):
-        plt.subplot(211)
-        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
-        plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
-        plt.title('Histogram of Light Matter Distribution After 4 Gy')
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.ylabel('counts')
-
-        plt.subplot(212)
-        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
-        plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.xlabel('l')
-        plt.ylabel('counts')
-        
-        
-        plt.subplot(213)
-        plt.bar(lbins3, counts3, width = w_adjacent, color='k')
-        plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.xlabel('l')
-        plt.ylabel('counts')
-        #f.subplots_adjust(hspace=0)
-        plt.savefig(save_folder_adj + name + '.png', format='png')
-        #plt.show()
-        return 1
-
 def plot_4(hist1, hist2, hist3, hist4, name):
     ylimit = 0.1
     xlower = 60 
@@ -524,7 +409,7 @@ def plot_4(hist1, hist2, hist3, hist4, name):
         return 1
 
 def plot(hist1, hist2, name, label1, label2):
-    ylimit = 0.4
+    ylimit = 1.0
     xlower = 180 
     xupper = -180
     w_overlap = 2.5
@@ -588,6 +473,7 @@ def plot(hist1, hist2, name, label1, label2):
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
         plt.ylabel('counts')
+        plt.xlabel('Lambda')
         plt.legend()
         plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
         plt.clf()
@@ -602,6 +488,7 @@ def plot(hist1, hist2, name, label1, label2):
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
         plt.ylabel('counts')
+        plt.xlabel('Lambda')
 
         plt.subplot(212)
         plt.bar(lbins2, counts2, width = w_adjacent, color='k')
@@ -618,7 +505,7 @@ def plot(hist1, hist2, name, label1, label2):
 
 
 def plot_veldisp(hist1, hist2, name, label1, label2):
-    ylimit = 150
+    ylimit = 100
     xlower = 180 
     xupper = -180
     w_overlap = 2.5
@@ -638,6 +525,7 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
     read_data = False
     lbins1 = []
     velD1 = []
+    #Ncount1 = []
     lines = open(folder + plot_hist1, 'r')
     for line in lines:
         if (line.startswith("betaBins")):
@@ -652,11 +540,13 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
                 ss = line.split(' ')
                 lbins1.append(float(ss[1]))
                 velD1.append(float(ss[5]))
+                #Ncount1.append(float(ss[4]))
 
 
     read_data = False
     lbins2 = []
     velD2 = []
+    #Ncount2 = []
     lines = open(folder + plot_hist2, 'r')
     for line in lines:
         if (line.startswith("betaBins")):
@@ -671,12 +561,15 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
                 ss = line.split(' ')
                 lbins2.append(float(ss[1]))
                 velD2.append(float(ss[5]))
+                #Ncount2.append(float(ss[4]))
             
     if(plot_overlapping):
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         #plt.subplot(211)
         plt.bar(lbins1, velD1, width = w_overlap, color='k', alpha=1,    label= label1)
         plt.bar(lbins2, velD2, width = w_overlap, color='r', alpha=0.75, label= label2)
+        #plt.bar(lbins2, Ncount1, width = w_overlap, color='black', alpha=0.75, label= label2)
+        #plt.bar(lbins2, Ncount2, width = w_overlap, color='b', alpha=0.75, label= label2)
         plt.title('Line of Sight Vel Disp Distribution')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -695,6 +588,7 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
         plt.ylabel('counts')
+        plt.xlabel('Lambda')
 
         plt.subplot(212)
         plt.bar(lbins2, velD2, width = w_adjacent, color='k')
@@ -703,6 +597,7 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
         plt.ylim((0.0, ylimit))
         plt.xlabel('l')
         plt.ylabel('vel disp')
+        plt.xlabel('Lambda')
         #f.subplots_adjust(hspace=0)
         plt.savefig(save_folder_adj + name + '.png', format='png')
         plt.clf()
@@ -723,12 +618,239 @@ def calculate_cm(paras, output1, output2, outs):
         os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
 # # # # # # # # # #
 
+def convert_to_Lambda_Beta(x1, x2, x3, cartesian):
+    phi   = mt.radians(128.79)
+    theta = mt.radians(54.39)
+    psi   = mt.radians(90.70)
+    
+    if(cartesian):
+        x = x1
+        y = x2
+        z = x3
+        x += 8.0 #convert to solar centric
+    else:
+        l = mt.radians(x1)
+        b = mt.radians(x2)
+        r = x3
+        
+        x = r * mt.cos(l) * mt.cos(b) #this is solar centered x
+        y = r * mt.sin(l) * mt.cos(b)
+        z = r * mt.sin(b)
+    
+    #A = MB
+    B = [x, y, z]
+    M_row1 = [mt.cos(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.sin(psi),
+               mt.cos(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.sin(psi),
+               mt.sin(psi) * mt.sin(theta)]
+    
+    M_row2 = [-mt.sin(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.cos(psi),
+               -mt.sin(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.cos(psi),
+               mt.cos(psi) * mt.sin(theta)]
+    
+    M_row3 = [mt.sin(theta) * mt.sin(phi), 
+               -mt.sin(theta) * mt.cos(phi),
+               mt.cos(theta)]
+    
+    A1 = M_row1[0] * B[0] + M_row1[1] * B[1] + M_row1[2] * B[2]
+    A2 = M_row2[0] * B[0] + M_row2[1] * B[1] + M_row2[2] * B[2]
+    A3 = M_row3[0] * B[0] + M_row3[1] * B[1] + M_row3[2] * B[2]
+    
+    beta = mt.asin(-A3 / mt.sqrt(A1 * A1 + A2 * A2 + A3 * A3))
+    lamb = mt.atan2(A2, A1)
+    
+    beta = mt.degrees(beta)
+    lamb = mt.degrees(lamb)
+    
+    return lamb, beta
+
+def vlos_plot(file1, file2):
+    ylimit = 100
+    xlower = 180 
+    xupper = -180
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    folder = 'quick_plots/hists/'
+    #folder = 'like_surface/'
+    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
+    #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
+    print "plot histogram 1: ", file1
+    print "plot histogram 2: ", file2
+    plot_hist1 = file1 + ".hist"
+    plot_hist2 = file2 + ".hist"
+    label1 = '1'
+    label2 = '2'
+    
+    print("plotting histograms\n")
+    read_data = False
+    lbins1 = []
+    velD1 = []
+    Ncount1 = []
+    counts1 = []
+    lines = open(folder + plot_hist1, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins1.append(float(ss[1]))
+                counts1.append(float(ss[3]))
+                Ncount1.append(float(ss[4]))
+                velD1.append(float(ss[5]))
+
+
+
+
+    read_data = False
+    lbins2 = []
+    velD2 = []
+    Ncount2 = []
+    counts2 = []
+    lines = open(folder + plot_hist2, 'r')
+    for line in lines:
+        if (line.startswith("betaBins")):
+            read_data = True
+            continue
+        if(read_data):
+            if(line.startswith("</histogram>")):
+                break
+            elif(line.startswith("\n")):
+                continue
+            else:
+                ss = line.split(' ')
+                lbins2.append(float(ss[1]))
+                counts2.append(float(ss[3]))
+                Ncount2.append(float(ss[4]))
+                velD2.append(float(ss[5]))
+     
+    #folder = 'quick_plots/outputs/'
+    #output1 = file1 + ".out"
+    #output2 = file2 + ".out"
+    #read_data = False
+    #lbins1 = []
+    #vlos1 = []
+    #lines = open(folder + output1, 'r')
+    #for line in lines:
+        #if (line.startswith("betaBins")):
+            #read_data = True
+            #continue
+        #if(read_data):
+            #if(line.startswith("</histogram>")):
+                #break
+            #elif(line.startswith("\n")):
+                #continue
+            #else:
+                #ss = line.split(' ')
+                #lbins2.append(float(ss[1]))
+                #counts2.append(float(ss[3]))
+                #Ncount2.append(float(ss[4]))
+                #velD2.append(float(ss[5]))     
+     
+     
+     
+    if(plot_adjacent):
+        count_y_limit = 0.4
+        rawcount_y_limit = 2000
+        vel_disp_ylimit = 100
+        
+        f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+        f.subplots_adjust(hspace=0)
+        f.subplots_adjust(wspace=0)
+        #plt.subplots(4, sharex = True, sharey = True)
+        ax1 = plt.subplot(421)
+        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
+        plt.title('Line of Sight Vel Disp Distribution')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, count_y_limit))
+        plt.ylabel('counts')
+
+        ax2 = plt.subplot(422)
+        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, count_y_limit))
+        plt.yticks([])
+
+        ax5 = plt.subplot(423)
+        plt.bar(lbins1, Ncount1, width = w_adjacent, color='b')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, rawcount_y_limit))
+        plt.ylabel('raw count')
+        #plt.xlabel('Lambda')
+
+        ax6 = plt.subplot(424)
+        plt.bar(lbins2, Ncount2, width = w_adjacent, color='k')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, rawcount_y_limit))
+        plt.yticks([])
+        #plt.xlabel('Lambda')
+        
+        ax3 = plt.subplot(425)
+        #plt.subplots(2, sharex = True, sharey = False)
+        plt.bar(lbins1, velD1, width = w_adjacent, color='b')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, vel_disp_ylimit))
+        plt.ylabel('vel disp')
+
+        ax4 = plt.subplot(426)
+        plt.bar(lbins2, velD2, width = w_adjacent, color='k')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, vel_disp_ylimit))
+        plt.yticks([])
+        
+        
+    if(plot_overlapping):
+        count_y_limit = 0.4
+        rawcount_y_limit = 2000
+        vel_disp_ylimit = 100
+        
+        f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+        f.subplots_adjust(hspace=0)
+        f.subplots_adjust(wspace=0)
+
+        ax1 = plt.subplot(411)
+        plt.bar(lbins1, counts1, width = w_adjacent, color='k', alpha=1,    label= label1)
+        plt.bar(lbins2, counts2, width = w_adjacent, color='r', alpha=0.75, label= label2)
+        plt.title('Line of Sight Vel Disp Distribution')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, count_y_limit))
+        plt.ylabel('counts')
+        plt.legend()
+        
+        ax3 = plt.subplot(412)
+        plt.bar(lbins1, Ncount1, width = w_adjacent, color='k', alpha=1,    label= label1)
+        plt.bar(lbins2, Ncount2, width = w_adjacent, color='r', alpha=0.75, label= label2)
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, rawcount_y_limit))
+        plt.ylabel('raw count')
+        plt.xlabel('Lambda')
+        plt.legend()
+        
+        ax2 = plt.subplot(413)
+        plt.bar(lbins1, velD1, width = w_adjacent, color='k', alpha=1,    label= label1)
+        plt.bar(lbins2, velD2, width = w_adjacent, color='r', alpha=0.75, label= label2)
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, vel_disp_ylimit))
+        plt.ylabel('vel disp')
+        plt.legend()
+        
+        
+        #plt.savefig(save_folder_adj + name + '.png', format='png')
+        #plt.clf()
+        plt.show()
+        return 1
+
+    
 def lb_plot(file_name):
     path_charles = 'quick_plots/outputs/'
     path = 'quick_plots/'
     print file_name
     plot_lbr = y
-    plot_light_and_dark = y
+    plot_light_and_dark = n
     plot_dm = n
     plot_xyz = n
     plot_orbit = n
@@ -795,7 +917,7 @@ def lb_plot(file_name):
     fig = plt.figure()
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     # # # # # # # # # #
-    if(plot_lbr == True):
+    if(plot_lbr):
         plt.figure(figsize=(20, 20))
         xlower = -180.0
         xupper = 180.0
@@ -807,11 +929,11 @@ def lb_plot(file_name):
         plt.ylabel('b')
         plt.title('l vs b')
         #default to just plot lm
-        plt.plot(light_l, light_b, '.', markersize = 1.5, color = 'c', alpha=1.0, marker = '.')
-        #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_light', format='png')
+        plt.plot(light_l, light_b, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
         print "plotting:", len(light_l), " points"
         # # # # # # # # # #
-        if(plot_light_and_dark == True):#plot lm and dm overlapping
+        if(plot_light_and_dark):#plot lm and dm overlapping
             plt.xlim((xlower, xupper))
             plt.ylim((ylower, yupper))
             plt.xlabel('l')
@@ -821,7 +943,7 @@ def lb_plot(file_name):
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
             print "plotting:", len(light_l) + len(dark_l), " points"
         # # # # # # # # # #
-        if(plot_orbit == True):
+        if(plot_orbit):
             f = open(path + 'reverse_orbit.out')
             lines = []
             lines = f.readlines()
@@ -885,7 +1007,7 @@ def lb_plot(file_name):
             plt.show()
 
         # # # # # # # # # #
-        if(plot_dm == True):#to plot just dm
+        if(plot_dm):#to plot just dm
             plt.clf()
             plt.figure(figsize=(20, 20))
             plt.xlim((xlower, xupper))
@@ -896,7 +1018,7 @@ def lb_plot(file_name):
             plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_dark', format='png')
             
-    if(plot_xyz == True):
+    if(plot_xyz):
         xlower = 50
         xupper = -50
         fig.tight_layout()
@@ -1591,7 +1713,7 @@ def pots_dens_plot():
     
     f.close()
     os.system("gnuplot pots_dens_plt.gnuplot 2>>piped_output.txt")
-    #os.system("rm pots_dens_plt.gnuplot")
+    os.system("rm pots_dens_plt.gnuplot")
     
     
 # # # # # # # # # # # # # # # # # # # # # #
@@ -1642,7 +1764,6 @@ def clean():
 # # # # # # # # # # # # # # # # # # # # # #    
 
 def quick_calculator():
-    
     ans = (73.8 /1000.0) * 3.154 / 3.086
     ans = 3.0 * ans * ans / (8.0 * mt.pi)
     
