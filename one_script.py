@@ -45,7 +45,7 @@ calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
-vlos_plot_switch          = n
+vlos_plot_switch          = y
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -144,6 +144,7 @@ def standard_run():
     
     if(vlos_plot_switch):
         vlos_plot(match_hist_correct, match_hist_compare)
+        
     #if(plot_lb == True):
         #os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
     return 0
@@ -663,6 +664,53 @@ def convert_to_Lambda_Beta(x1, x2, x3, cartesian):
     
     return lamb, beta
 
+
+def binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs):
+    lambda_coors = []
+    beta_coors   = []
+    
+    bin_size = abs(angle_cuttoffs[0] - angle_cuttoffs[1]) / angle_cuttoffs[2]
+    mid_bins = []
+    which_bin = []
+    which_lambda = []
+    which_vlos = []
+    which_beta = []
+    #setting up the mid bin coordinates
+    for i in range(0, angle_cuttoffs[2]):
+        mid_bin = angle_cuttoffs[0] + i * bin_size + bin_size / 2.0
+        mid_bins.append(mid_bin)
+        
+    #transform to lambda beta coordinates from lbr
+    for i in range(0, len(lcoors)):
+        lambda_tmp, beta_tmp = convert_to_Lambda_Beta(lcoors[i], bcoors[i], rcoors[i], False)
+        lambda_coors.append(lambda_tmp)
+        beta_coors.append(beta_tmp)
+        
+
+    for i in range(0, len(lambda_coors)):#go through the different lambda coordinates
+        if(beta_coors[i] >= angle_cuttoffs[3] and beta_coors[i] <= angle_cuttoffs[4]):#if it is between the beta cuttoffs
+            for j in range(0, len(mid_bins)):#go through the bin coordinates
+                left_edge  = mid_bins[j] - bin_size / 2.0 #edges of the bin
+                right_edge = mid_bins[j] + bin_size / 2.0 #edges of the bin
+                
+                if(lambda_coors[i] >= left_edge and lambda_coors[i] <= right_edge):#check if the lambda coor falls in the bin
+                    which_bin.append(mid_bins[j])#which mid bin it should be 
+                    which_lambda.append(lambda_coors[i])#the coordinate that was put there
+                    which_vlos.append(vloss[i])#the line of sight vel
+                    which_beta.append(beta_coors[i])
+                    break 
+                
+    
+    #for i in range(0, len(which_bin)):
+        #if(which_bin[i] == 15.0):
+            #print which_bin[i], which_vlos[i], which_lambda[i], which_beta[i]
+    return which_bin, which_vlos
+
+    
+#def calc_vel_disps(which_bin, which_vlos):
+    
+
+
 def vlos_plot(file1, file2):
     ylimit = 100
     xlower = 180 
@@ -670,17 +718,22 @@ def vlos_plot(file1, file2):
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
-    #folder = 'like_surface/'
     save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
-    #os.system("" + path + "scripts/plot_matching_hist.py " + hist1 + " " + hist2)
+    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
+    
     print "plot histogram 1: ", file1
     print "plot histogram 2: ", file2
+    
     plot_hist1 = file1 + ".hist"
     plot_hist2 = file2 + ".hist"
+    
     label1 = '1'
     label2 = '2'
     
+    name = 'vlos_plots'
     print("plotting histograms\n")
+    
+    #this is the reading of the of the counts, raw counts, vel disp from hist 1
     read_data = False
     lbins1 = []
     velD1 = []
@@ -705,7 +758,7 @@ def vlos_plot(file1, file2):
 
 
 
-
+    #this is the reading of the of the counts, raw counts, vel disp from hist 2
     read_data = False
     lbins2 = []
     velD2 = []
@@ -728,31 +781,67 @@ def vlos_plot(file1, file2):
                 Ncount2.append(float(ss[4]))
                 velD2.append(float(ss[5]))
      
-    #folder = 'quick_plots/outputs/'
-    #output1 = file1 + ".out"
-    #output2 = file2 + ".out"
-    #read_data = False
-    #lbins1 = []
-    #vlos1 = []
-    #lines = open(folder + output1, 'r')
-    #for line in lines:
-        #if (line.startswith("betaBins")):
-            #read_data = True
-            #continue
-        #if(read_data):
-            #if(line.startswith("</histogram>")):
-                #break
-            #elif(line.startswith("\n")):
-                #continue
-            #else:
-                #ss = line.split(' ')
-                #lbins2.append(float(ss[1]))
-                #counts2.append(float(ss[3]))
-                #Ncount2.append(float(ss[4]))
-                #velD2.append(float(ss[5]))     
      
+    #reading the vLOS and lbr from the output files. 
+    angle_cuttoffs = [-150.0, 150.0, 50, -10.0, 10.0, 1]
+    folder = 'quick_plots/outputs/'
+    output1 = file1 + ".out"
+    output2 = file2 + ".out"
+    read_data = False
+    lcoors = []
+    bcoors = []
+    rcoors = []
+    vloss  = []
+    lines = open(folder + output1, 'r')
+    for line in lines:
+        if (line.startswith("# ignore")):
+            read_data = True
+            continue
+        if(read_data):
+            ss = line.split(',')
+            if(line.startswith("\n")):
+                continue
+            elif(float(ss[0]) == 0):
+                lcoors.append(float(ss[4]))
+                bcoors.append(float(ss[5]))
+                rcoors.append(float(ss[6]))
+                vloss.append(float(ss[11]))     
      
+    which_bin1 = []
+    which_vlos1 = []
+    which_bin1, which_vlos1 = binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs)
+
+    read_data = False
+    lcoors = []
+    bcoors = []
+    rcoors = []
+    vloss  = []
+    lines = open(folder + output2, 'r')
+    for line in lines:
+        if (line.startswith("# ignore")):
+            read_data = True
+            continue
+        if(read_data):
+            ss = line.split(',')
+            if(line.startswith("\n")):
+                continue
+            elif(float(ss[0]) == 0):
+                lcoors.append(float(ss[4]))
+                bcoors.append(float(ss[5]))
+                rcoors.append(float(ss[6]))
+                vloss.append(float(ss[11]))     
      
+    which_bin2 = []
+    which_vlos2 = []
+    vel_disps2 = []
+    which_bin2, which_vlos2 = binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs)
+    
+    vel_disps1 = []
+    vel_disps2 = []
+    #vel_disps1 = calc_vel_disps(which_bin1, which_vlos1)
+    #vel_disps2 = calc_vel_disps(which_bin2, which_vlos2)
+    
+    
     if(plot_adjacent):
         count_y_limit = 0.4
         rawcount_y_limit = 2000
@@ -802,6 +891,20 @@ def vlos_plot(file1, file2):
         plt.ylim((0.0, vel_disp_ylimit))
         plt.yticks([])
         
+        ax3 = plt.subplot(427)
+        #plt.subplots(2, sharex = True, sharey = False)
+        plt.scatter(which_bin1, which_vlos1, color='b', s=.5, marker= 'o')
+        plt.xlim((xlower, xupper))
+        #plt.ylim((0.0, vel_disp_ylimit))
+        plt.ylabel('vel disp')
+
+        ax4 = plt.subplot(428)
+        plt.scatter(which_bin2, which_vlos2, color='k', s=.5, marker= 'o')
+        plt.xlim((xlower, xupper))
+        #plt.ylim((0.0, vel_disp_ylimit))
+        plt.yticks([])
+        plt.savefig(save_folder_adj + name + '.png', format='png', dpi=1000)
+        
         
     if(plot_overlapping):
         count_y_limit = 0.4
@@ -838,10 +941,20 @@ def vlos_plot(file1, file2):
         plt.ylabel('vel disp')
         plt.legend()
         
-        
-        #plt.savefig(save_folder_adj + name + '.png', format='png')
+        ax2 = plt.subplot(414)
+        plt.scatter(which_bin1, which_vlos1, s=.2, marker= '.', color='k', alpha=1,label= label1)
+        plt.scatter(which_bin2, which_vlos2, s=.2, marker= '.', color='c', alpha=0.25, label= label2)
+        plt.xlim((xlower, xupper))
+        #plt.ylim((0.0, vel_disp_ylimit))
+        plt.ylabel('vel disp')
+        plt.legend()
+        plt.savefig(save_folder_ove + name + '_overlapping.png', format='png', dpi=1000)
         #plt.clf()
-        plt.show()
+        #plt.show()
+        
+        
+        
+        
         return 1
 
     
