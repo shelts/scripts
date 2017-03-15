@@ -31,13 +31,11 @@ args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2]
 #args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] #-139.926917096209706
 #args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] #-139.926917096209706
 
-# # # # # # # # # # # # # # # # # # # # # # # #
-#    SWITCHES for standard_run()  #           #
-# # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
-run_and_compare           = y                 #
+run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 charles                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -45,11 +43,12 @@ calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
-vlos_plot_switch          = n
+vlos_plot_switch          = n                 #
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 lb_plot_switch            = n                 #
+lambda_beta_plot_switch   = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -72,38 +71,42 @@ check_hist_likes_switch   = n                 #
 check_timestep_switch     = n                 #
 quick_calculator_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-
-
-#    Histogram names     #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Circuitry           #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#    Histogram names      #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
-#    histograms for runs #
-correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_2k'
-test = 'parameter_sweep_test_2k'
+#    histograms for runs  #
+correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+test = 'parameter_sweep_test2'
 
-#hist to match against for compare after run
+#    hist to match against for compare after run  #
 correct_hist = correct
-#hist name for the nbody run
+
+#    hist name for the nbody run   #
 histogram_for_nbody_run = correct_hist
 histogram_for_nbody_run_and_compare = test
 
-#if you are just matching, these are the two hists
+#    if you are just matching, these are the two hists #
 match_hist_correct = histogram_for_nbody_run
 match_hist_compare = histogram_for_nbody_run_and_compare
 plot_name = histogram_for_nbody_run
 
-output = histogram_for_nbody_run
+output = correct
 output_run_compare = histogram_for_nbody_run_and_compare
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
+#    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
 lua = "mixeddwarf.lua"
 #lua = "EMD_v162.lua"
 
-outs = 2 #for the cm calculation function
-
+#    pathways  #
 #I am tired of constantly adapting it for the servers
 lmc_dir = '~/research/'
 sid_dir = '/home/sidd/Desktop/research/'
@@ -145,10 +148,8 @@ def standard_run():
     if(vlos_plot_switch):
         vlos_plot(match_hist_correct, match_hist_compare)
         
-    #if(plot_lb == True):
-        #os.system("./scripts/lb_plot.py quick_plots/outputs/" + output)
     return 0
-# # # # # # # # # #         
+# #        
 def make_nbody():
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
@@ -158,7 +159,7 @@ def make_nbody():
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
-# # # # # # # # # #           
+# #    
 def nbody(paras, lua_file, hist, out, ver, should_pipe):
     sim_time      = str(paras[0])
     back_time     = str(paras[1])
@@ -199,9 +200,9 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
      
      
      
-    os.chdir(path)
     #os.chdir("../")
-# # # # # # # # # #     
+    os.chdir(path)
+# #     
 def match_hists(hist1, hist2, ver):
     print "matching histograms: "
     #using call here instead so the format of using it is on record
@@ -211,7 +212,7 @@ def match_hists(hist1, hist2, ver):
     print hist1, "\n", hist2
     print "\n"
     return 0
-
+# # 
 def match_hists_pipe(hist1, hist2, ver, pipe_name):
     print "matching histograms: "
     #using call here instead so the format of using it is on record
@@ -221,7 +222,7 @@ def match_hists_pipe(hist1, hist2, ver, pipe_name):
     print hist1, "\n", hist2
     print "\n"
     return 0
-# # # # # # # # # # 
+# # 
 def compare_after_run(paras, lua_file, correct, hist, out, ver):
     sim_time      = str(paras[0])
     back_time     = str(paras[1])
@@ -247,188 +248,11 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
             -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
-# # # # # # # # # #
-def plot_4(hist1, hist2, hist3, hist4, name):
-    ylimit = 0.1
-    xlower = 60 
-    xupper = -60
-    w_overlap = 2.5
-    w_adjacent = 1.5
-    folder = 'quick_plots/hists/'
-    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
-    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
-    
-    print "plot histogram 1: ", hist1
-    print "plot histogram 2: ", hist2
-    print "plot histogram 3: ", hist3
-    
-    plot_hist1 = hist1 + ".hist"
-    plot_hist2 = hist2 + ".hist"
-    plot_hist3 = hist3 + ".hist"
-    plot_hist4 = hist4 + ".hist"
-    #plot_hist5 = hist5 + ".hist"
-    
-    label1 = 'correct\t 3.95'
-    label2 = '-5.615887703633109'
-    label3 = '-6.361401978455249 '
-    label4 = '-4.853374558 '
-    #label5 = '3.97192948281 \t -23.432419009906333'
-    
-    
-    print("plotting histograms\n")
-    
-    read_data = False
-    lbins1 = []
-    counts1 = []
-    lines = open(folder + plot_hist1, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins1.append(float(ss[1]))
-                counts1.append(float(ss[3]))
-                
-    # # # # #
-    read_data = False
-    lbins2 = []
-    counts2 = []
-    lines = open(folder + plot_hist2, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins2.append(float(ss[1]))
-                counts2.append(float(ss[3]))
-            
-            
-    # # # # #      
-    read_data = False
-    lbins3 = []
-    counts3 = []
-    lines = open(folder + plot_hist3, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins3.append(float(ss[1]))
-                counts3.append(float(ss[3]))
-                
-                
-    # # # # #      
-    read_data = False
-    lbins4 = []
-    counts4 = []
-    lines = open(folder + plot_hist4, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins4.append(float(ss[1]))
-                counts4.append(float(ss[3]))
-    
-    ## # # # #      
-    #read_data = False
-    #lbins5 = []
-    #counts5 = []
-    #lines = open(folder + plot_hist5, 'r')
-    #for line in lines:
-        #if (line.startswith("betaBins")):
-            #read_data = True
-            #continue
-        #if(read_data):
-            #if(line.startswith("</histogram>")):
-                #break
-            #elif(line.startswith("\n")):
-                #continue
-            #else:
-                #ss = line.split(' ')
-                #lbins5.append(float(ss[1]))
-                #counts5.append(float(ss[3]))       
-                
-                
-    if(plot_overlapping == True):
-        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        #plt.subplot(211)
-        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1,    label= label1)
-        plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.75, label= label2)
-        plt.bar(lbins3, counts3, width = w_overlap, color='b', alpha=0.5,  label= label3)
-        plt.bar(lbins4, counts4, width = w_overlap, color='g', alpha=0.3,  label= label4)
-        #plt.bar(lbins5, counts5, width = w_overlap, color='y', alpha=0.2,  label= label5)
-        plt.title('Histogram of Light Matter Distribution After 4 Gy')
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.ylabel('counts')
-        plt.legend()
-        plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
-        #plt.show()
-        
-    if(plot_adjacent == True):
-        plt.subplot(411)
-        #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
-        plt.legend(handles=[mpatches.Patch(color='b', label= label1)])
-        plt.title('Histogram of Light Matter Distribution After 4 Gy')
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.ylabel('counts')
-
-        plt.subplot(412)
-        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
-        plt.legend(handles=[mpatches.Patch(color='k', label= label2)])
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.xlabel('l')
-        plt.ylabel('counts')
-        
-        
-        plt.subplot(413)
-        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
-        plt.legend(handles=[mpatches.Patch(color='k', label= label3)])
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.xlabel('l')
-        plt.ylabel('counts')
-        
-        plt.subplot(414)
-        plt.bar(lbins3, counts3, width = w_adjacent, color='k')
-        plt.legend(handles=[mpatches.Patch(color='k', label= label4)])
-        plt.xlim((xlower, xupper))
-        plt.ylim((0.0, ylimit))
-        plt.xlabel('l')
-        plt.ylabel('counts')
-        #f.subplots_adjust(hspace=0)
-        plt.savefig(save_folder_adj + name + '.png', format='png')
-        #plt.show()
-        return 1
-
+# # 
+# # # # # # # # # # # # # # # # # # # # # #
+#        histogram plot                   #
+# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def plot(hist1, hist2, name, label1, label2):
     ylimit = 1.0
     xlower = 180 
@@ -523,8 +347,7 @@ def plot(hist1, hist2, name, label1, label2):
         plt.clf()
         #plt.show()
         return 1
-
-
+# # 
 def plot_veldisp(hist1, hist2, name, label1, label2):
     ylimit = 100
     xlower = 180 
@@ -624,21 +447,11 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
         plt.clf()
         #plt.show()
         return 1
-# # # # # # # # # #       
-def calculate_cm(paras, output1, output2, outs):
-    sim_time      = str(paras[0])
-    back_time     = str(paras[1])
-    r0            = str(paras[2])
-    light_r_ratio = str(paras[3])
-    mass_l        = str(paras[4])
-    mass_ratio    = str(paras[5])
-    
-    if(outs == 2):
-        os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output1 + " " + output2)
-    if(outs == 1):
-        os.system("./scripts/output_cm_calc.py " + mass_l + " " + mass_ratio + " " + output)
-# # # # # # # # # #
-
+# # 
+# # # # # # # # # # # # # # # # # # # # # #
+#        NON-histogram plot               #
+# # # # # # # # # # # # # # # # # # # # # #
+# #
 def convert_to_Lambda_Beta(x1, x2, x3, cartesian):
     phi   = mt.radians(128.79)
     theta = mt.radians(54.39)
@@ -684,7 +497,6 @@ def convert_to_Lambda_Beta(x1, x2, x3, cartesian):
     
     return lamb, beta
 
-
 def binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs):
     lambda_coors = []
     beta_coors   = []
@@ -725,11 +537,6 @@ def binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs):
         #if(which_bin[i] == 15.0):
             #print which_bin[i], which_vlos[i], which_lambda[i], which_beta[i]
     return which_bin, which_vlos
-
-    
-#def calc_vel_disps(which_bin, which_vlos):
-    
-
 
 def vlos_plot(file1, file2):
     ylimit = 100
@@ -976,8 +783,96 @@ def vlos_plot(file1, file2):
         
         
         return 1
-
+ 
+def lambda_beta_plot(file_name):
+    path_charles = 'quick_plots/outputs/'
+    path = 'quick_plots/'
+    print file_name
+    plot_lbr = y
+    plot_light_and_dark = n
+    plot_dm_alone = n
     
+    f = open(path_charles + file_name + '.out')
+    lines = []
+    lines = f.readlines()
+    num = 1
+    for line in lines:
+        if (line.startswith("# ignore")):
+            break
+        else:
+            num += 1
+    
+    lines = lines[num:len(lines)]
+    light_l , light_b , light_r = ([] for i in range(3))
+    dark_l , dark_b , dark_r = ([] for i in range(3))
+
+    for line in lines:
+        if(line.startswith("</bodies>")):
+            break
+        tokens = line.split(', ')
+        isDark = int(tokens[0])
+        l = float(tokens[4])
+        #if(l > 180.0):
+            #l = l - 360.0
+        b = float(tokens[5])
+        r = float(tokens[6])
+        if(isDark == 0):
+            light_l.append(l)
+            light_b.append(b)
+            light_r.append(r)
+        if(isDark == 1):
+            dark_l.append(l)
+            dark_b.append(b)
+            dark_r.append(r)
+    
+
+    #converting to lambda beta
+    for i in range(0, len(light_l)):
+        light_l[i], light_b[i] = convert_to_Lambda_Beta(light_l[i], light_b[i], light_r[i], False)
+        dark_l[i], dark_b[i]   = convert_to_Lambda_Beta(dark_l[i],  dark_b[i],  dark_r[i],  False)
+
+    fig = plt.figure()
+    fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
+    # # # # # # # # # #
+    if(plot_lbr):
+        plt.figure(figsize=(20, 20))
+        xlower = -360.0
+        xupper = 360.0
+        ylower = -80
+        yupper = 80
+        plt.xlim((xlower, xupper))
+        plt.ylim((ylower, yupper))
+        plt.xlabel('lambda')
+        plt.ylabel('beta')
+        plt.title('lambda vs beta')
+        #default to just plot lm
+        plt.plot(light_l, light_b, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta', format='png')
+        print "plotting:", len(light_l), " points"
+        # # # # # # # # # #
+        if(plot_light_and_dark):#plot lm and dm overlapping
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('lambda')
+            plt.ylabel('beta')
+            plt.title('lambda vs beta')
+            plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta', format='png')
+            print "plotting:", len(light_l) + len(dark_l), " points"
+        # # # # # # # # # #
+        if(plot_dm_alone):#to plot just dm
+            plt.clf()
+            plt.figure(figsize=(20, 20))
+            plt.xlim((xlower, xupper))
+            plt.ylim((ylower, yupper))
+            plt.xlabel('lambda')
+            plt.ylabel('beta')
+            plt.title('lambda vs beta')
+            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lambdabeta_dark', format='png')
+            
+    return 0 
+ 
 def lb_plot(file_name):
     path_charles = 'quick_plots/outputs/'
     path = 'quick_plots/'
@@ -1188,7 +1083,7 @@ def lb_plot(file_name):
         plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_xyz', format='png')
     
     return 0
-
+# #
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
@@ -1201,7 +1096,7 @@ def velocity_dispersion():
     nbody(args, l, file_name, file_name, version, False)
     #lb_plot(file_name)
     os.system("./scripts/velocity_dispersion.py " + file_name)
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def make_some_hists():
     ver = ''
     lua_file = 'EMD_v162_malleable.lua'
@@ -1228,7 +1123,7 @@ def make_some_hists():
     
     
     return 0
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def test_mixed_dwarf():
     ver = ''
     ft = 0.00001 #gyr
@@ -1250,8 +1145,11 @@ def test_mixed_dwarf():
     output = 'output_nfw_nfw_0gy'
     nbody(args, lua_file, output, output, ver, n)
     os.system("mv ~/Desktop/research/quick_plots/outputs/" + output + ".out ~/Desktop/research/data_testing/sim_outputs/")
+# # 
 # # # # # # # # # # # # # # # # # # # # # #
-
+#               MISC                      #
+# # # # # # # # # # # # # # # # # # # # # #
+# #
 def randomize(counts, errors, N):
     for i in range(0, N):
         coor1 = random.randint(0, len(counts) - 1)
@@ -1270,7 +1168,7 @@ def randomize(counts, errors, N):
         errors[coor2] = error_tmp
    
     return counts, errors
-
+# # 
 def hstalt_binswap():
     Nchanges = 25
     folder = "quick_plots/hists/"
@@ -1387,8 +1285,7 @@ def hstalt_binswap():
     
     plot_3(histogram_mw_1d_v162_20k_25bins, histogram_mw_1d_v162_20k_50bins, histogram_mw_1d_v162_20k_100bins, 'same_hist_diff_bins')
     return 0
-
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def plot_all_hists():
     ver = ''
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
@@ -1413,8 +1310,7 @@ def plot_all_hists():
         label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i]) + "% sim" + str(values[i]/3.95)
         plot(correct, hist_name, str(i), label1, label2)
     return 0
-# # # # # # # # # # # # # # # # # # # # # #
-
+# #
 def plot_n_ofhist():
     ver = ''
     sweep = 'parameter_sweeps_10_20_2016_post_best_like_fix_narrow_random_0.95sim'
@@ -1457,7 +1353,7 @@ def plot_n_ofhist():
     print n
     
     return 0
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def check_hist_likes():
     redo_likes = n
     plot_components = y
@@ -1516,8 +1412,7 @@ def check_hist_likes():
         plt.savefig('n_vs_ft.png', format='png')
         plt.show()
         plt.clf()
-        
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def orbit_location():         
     lua_file = "EMD_v162_malleable.lua"
     hist =  'orbit_test2'
@@ -1629,8 +1524,7 @@ def orbit_location():
         plot_all_hists()
     
     return 0
-
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def check_timestep():
     rl = [0.05, 0.5]
     rr = [0.1, 0.5]
@@ -1695,9 +1589,7 @@ def check_timestep():
                     
                    
     f.close()
-
-# # # # # # # # # # # # # # # # # # # # # #
-
+# # 
 def pots_dens_plot():
     f = open('pots_dens_plt.gnuplot', 'w')
     names = ["NFW", "PL", "GH"]
@@ -1847,9 +1739,7 @@ def pots_dens_plot():
     f.close()
     os.system("gnuplot pots_dens_plt.gnuplot 2>>piped_output.txt")
     os.system("rm pots_dens_plt.gnuplot")
-    
-    
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def stabity_test():
     args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
     #args = [0.0001, 0.9862, 0.2, 0.2, 24, .2]
@@ -1891,21 +1781,15 @@ def stabity_test():
     
     os.chdir("data_testing")    
     os.system("./stability_test.py " + b_t + " " + r_l + " " + r_r + " " + m_l + " " + m_r)
-# # # # # # # # # # # # # # # # # # # # # #
+# # 
 def clean():
     os.system("rm boinc_*")
-# # # # # # # # # # # # # # # # # # # # # #    
-
-def quick_calculator():
-    ans = (73.8 /1000.0) * 3.154 / 3.086
-    ans = 3.0 * ans * ans / (8.0 * mt.pi)
-    
-    print ans
-    
-    ans = 200.0 * ans * 4 * mt.pi / 3
-    
-    print ans 
-# # # # # # # # # # # # # # # # # # # # # #    
+# #      
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+                #/# # # # # # # # # # # # # # \#
+                #          Generator           #
+                #\# # # # # # # # # # # # # # /#
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #    
 def main():
     standard_run()
     
@@ -1926,6 +1810,9 @@ def main():
     
     if(lb_plot_switch):
         lb_plot(output)
+    
+    if(lambda_beta_plot_switch):
+        lambda_beta_plot(output)
         
     if(hstalt_binswap_switch):
         hstalt_binswap()
@@ -1951,5 +1838,6 @@ def main():
     
     if(quick_calculator_switch):
         quick_calculator()
-    
+
+# spark plug #
 main()
