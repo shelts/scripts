@@ -12,11 +12,8 @@ import os
 import subprocess
 from subprocess import call
 import matplotlib.pyplot as plt
-from matplotlib import cm
 import math as mt
 import matplotlib.patches as mpatches
-from matplotlib.patches import Rectangle
-import numpy as np
 import random
 random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -28,31 +25,39 @@ y = True
 n = False
 args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-#args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] #-139.926917096209706
-#args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] #-139.926917096209706
+#args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
+#args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # #
+#              Standard Run switches          #
+# # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-charles                   = n                 #
+
 # # # # # # # # # # # # # # # # # # # # # # # #
-calc_cm                   = n                 #
+#              Hist Plot Switches             #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
 vlos_plot_switch          = n                 #
-plot_overlapping          = y                 #
-plot_adjacent             = y                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-lb_plot_switch            = n                 #
-lambda_beta_plot_switch   = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
-# possible tests #                            #
+#              Non-Hist Plot Switches         #
+# # # # # # # # # # # # # # # # # # # # # # # #
+lb_plot_switch            = n                 #
+lambda_beta_plot_switch   = y                 #
+
+plot_adjacent             = y                 #
+plot_overlapping          = y                 #
+# # # # # # # # # # # # # # # # # # # # # # # #
+
+
+# # # # # # # # # # # # # # # # # # # # # # # #
+#              possible tests                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_disp_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -63,7 +68,6 @@ stabity_test_switch       = n                 #
 test_mixed_dwarf_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 pots_dens_plot_switch     = n                 #
-hstalt_binswap_switch     = n                 #
 plot_all_hists_switch     = n                 #
 orbit_location_switch     = n                 #
 plot_n_ofhist_switch      = n                 #
@@ -71,6 +75,7 @@ check_hist_likes_switch   = n                 #
 check_timestep_switch     = n                 #
 quick_calculator_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Circuitry           #
@@ -135,9 +140,6 @@ def standard_run():
         match_hists(match_hist_correct, match_hist_compare, version)
         
         
-    if(calc_cm):
-        calculate_cm(args, output1, output2, outs)
-    
     if(plot_hists):
         plot(match_hist_correct , match_hist_compare, plot_name, '1', '2')
         
@@ -458,21 +460,21 @@ def convert_to_Lambda_Beta(x1, x2, x3, cartesian):
     psi   = mt.radians(90.70)
     
     if(cartesian):
-        x = x1
-        y = x2
-        z = x3
-        x += 8.0 #convert to solar centric
+        x_coor = x1
+        y_coor = x2
+        z_coor = x3
+        x_coor += 8.0 #convert to solar centric
     else:
         l = mt.radians(x1)
         b = mt.radians(x2)
         r = x3
         
-        x = r * mt.cos(l) * mt.cos(b) #this is solar centered x
-        y = r * mt.sin(l) * mt.cos(b)
-        z = r * mt.sin(b)
+        x_coor = r * mt.cos(l) * mt.cos(b) #this is solar centered x
+        y_coor = r * mt.sin(l) * mt.cos(b)
+        z_coor = r * mt.sin(b)
     
     #A = MB
-    B = [x, y, z]
+    B = [x_coor, y_coor, z_coor]
     M_row1 = [mt.cos(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.sin(psi),
                mt.cos(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.sin(psi),
                mt.sin(psi) * mt.sin(theta)]
@@ -1796,9 +1798,6 @@ def main():
     if(test_mixed_dwarf_switch):
         test_mixed_dwarf()
         
-    if(charles):
-        for_charles()
-    
     if(make_some_hists_switch):
         make_some_hists()
     
@@ -1814,8 +1813,6 @@ def main():
     if(lambda_beta_plot_switch):
         lambda_beta_plot(output)
         
-    if(hstalt_binswap_switch):
-        hstalt_binswap()
         
     if(plot_all_hists_switch):
         plot_all_hists()
