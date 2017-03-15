@@ -34,7 +34,7 @@ args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #    SWITCHES for standard_run()  #           #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
+run_nbody                 = n                 #
 remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = y                 #
@@ -45,7 +45,7 @@ calc_cm                   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
-vlos_plot_switch          = y
+vlos_plot_switch          = n
 plot_overlapping          = y                 #
 plot_adjacent             = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -78,8 +78,8 @@ quick_calculator_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs #
-correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-test = 'parameter_sweep_test2'
+correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_2k'
+test = 'parameter_sweep_test_2k'
 
 #hist to match against for compare after run
 correct_hist = correct
@@ -175,8 +175,18 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b  -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+     
+    if(False and should_pipe == False):
+        print('running nbody')
+        os.chdir("nbody_test/bin/")
+        os.system("./milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
             -n 10 -b  -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_correct " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
+    
     if(should_pipe == True):
         print('running nbody')
         os.chdir("nbody_test/bin/")
@@ -221,12 +231,22 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
     mass_ratio    = str(paras[5])
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     print('running nbody')
-    os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
-        -f " + path + "lua/" + lua_file + " \
-        -h " + path + "quick_plots/hists/" + correct + ".hist \
-        -z " + path + "quick_plots/hists/" + hist + ".hist \
-        -o " + path + "quick_plots/outputs/" + out + ".out \
-        -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+    if(True):
+        os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -h " + path + "quick_plots/hists/" + correct + ".hist \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+    
+    if(False):#this is the version that will run from a checkpoint
+        print 'this'
+        os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -h " + path + "quick_plots/hists/" + correct + ".hist \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # # # # # # # # #
 def plot_4(hist1, hist2, hist3, hist4, name):
     ylimit = 0.1
