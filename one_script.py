@@ -23,18 +23,18 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
-#args = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
 #args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] 
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = n                 #
+run_nbody                 = y                 #
+remake                    = y                 #
 match_histograms          = n                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -42,7 +42,7 @@ run_and_compare           = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
-vlos_plot_switch          = n                 #
+vlos_plot_switch          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -131,10 +131,10 @@ def standard_run():
         make_nbody()
         
     if(run_nbody):
-        nbody(args, lua, histogram_for_nbody_run, histogram_for_nbody_run, version, False)
+        nbody(args_run, lua, histogram_for_nbody_run, histogram_for_nbody_run, version, False)
     
     if(run_and_compare):
-        compare_after_run(args, lua, correct_hist, histogram_for_nbody_run_and_compare, output_run_compare, version)
+        compare_after_run(args_run_comp, lua, correct_hist, histogram_for_nbody_run_and_compare, output_run_compare, version)
     
     if(match_histograms):
         match_hists(match_hist_correct, match_hist_compare, version)
@@ -171,7 +171,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
     mass_ratio    = str(paras[5])
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     
-    if(should_pipe == False):
+    if(False and should_pipe == False):
         print('running nbody')
         os.chdir("nbody_test/bin/")
         os.system("./milkyway_nbody" + ver + " \
@@ -180,7 +180,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -o " + path + "quick_plots/outputs/" + out + ".out \
             -n 10 -b  -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
-    if(False and should_pipe == False):
+    if(True and should_pipe == False):
         print('running nbody')
         os.chdir("nbody_test/bin/")
         os.system("./milkyway_nbody" + ver + " \
@@ -234,7 +234,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
     mass_ratio    = str(paras[5])
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     print('running nbody')
-    if(True):
+    if(False):
         os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
             -f " + path + "lua/" + lua_file + " \
             -h " + path + "quick_plots/hists/" + correct + ".hist \
@@ -242,7 +242,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
             -o " + path + "quick_plots/outputs/" + out + ".out \
             -n 10 -b -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
     
-    if(False):#this is the version that will run from a checkpoint
+    if(True):#this is the version that will run from a checkpoint
         print 'this'
         os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
             -f " + path + "lua/" + lua_file + " \
