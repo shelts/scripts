@@ -35,6 +35,7 @@ run_nbody                 = y                 #
 remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = y                 #
+run_from_checkpoint       = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -49,7 +50,7 @@ vlos_plot_switch          = y                 #
 #              Non-Hist Plot Switches         #
 # # # # # # # # # # # # # # # # # # # # # # # #
 lb_plot_switch            = n                 #
-lambda_beta_plot_switch   = y                 #
+lambda_beta_plot_switch   = n                 #
 
 plot_adjacent             = y                 #
 plot_overlapping          = y                 #
@@ -158,7 +159,7 @@ def make_nbody():
         #os.system("rm -r nbody_test")
         #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
 # #    
@@ -171,8 +172,8 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
     mass_ratio    = str(paras[5])
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
     
-    if(False and should_pipe == False):
-        print('running nbody')
+    if(not run_from_checkpoint and should_pipe == False):
+        print('running nbody1 ')
         os.chdir("nbody_test/bin/")
         os.system("./milkyway_nbody" + ver + " \
             -f " + path + "lua/" + lua_file + " \
@@ -180,8 +181,8 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -o " + path + "quick_plots/outputs/" + out + ".out \
             -n 10 -b  -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
-    if(True and should_pipe == False):
-        print('running nbody')
+    if(run_from_checkpoint and should_pipe == False):
+        print('running nbody from checkpoint')
         os.chdir("nbody_test/bin/")
         os.system("./milkyway_nbody" + ver + " \
             -f " + path + "lua/" + lua_file + " \
@@ -233,8 +234,8 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
     mass_l        = str(paras[4])
     mass_ratio    = str(paras[5])
         #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
-    print('running nbody')
-    if(False):
+    if(not run_from_checkpoint):
+        print('running nbody 2')
         os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
             -f " + path + "lua/" + lua_file + " \
             -h " + path + "quick_plots/hists/" + correct + ".hist \
@@ -242,8 +243,8 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
             -o " + path + "quick_plots/outputs/" + out + ".out \
             -n 10 -b -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
     
-    if(True):#this is the version that will run from a checkpoint
-        print 'this'
+    if(run_from_checkpoint):#this is the version that will run from a checkpoint
+        print 'running from checkpoint'
         os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
             -f " + path + "lua/" + lua_file + " \
             -h " + path + "quick_plots/hists/" + correct + ".hist \

@@ -1,10 +1,10 @@
 #!/bin/bash          
 #/* Copyright (c) 2016 Siddhartha Shelton */
-#     rm -r nbody_test
-#     mkdir nbody_test
-#     cd ~/Desktop/research/nbody_test
-#     cmake  -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/
-#     make -j 
+    rm -r nbody_test
+    mkdir nbody_test
+    cd ~/Desktop/research/nbody_test
+    cmake  -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/
+    make  
 #     ./one_script.py
     cd ~/Desktop/research/nbody_test/bin
     
