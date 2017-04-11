@@ -23,7 +23,8 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
 args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
 #args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] 
@@ -87,7 +88,7 @@ histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs  #
 correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-test = 'parameter_sweep_test2'
+test = 'parameter_sweep_test_ft_4.03730890303'
 
 #    hist to match against for compare after run  #
 correct_hist = correct
@@ -101,6 +102,8 @@ match_hist_correct = histogram_for_nbody_run
 match_hist_compare = histogram_for_nbody_run_and_compare
 plot_name = histogram_for_nbody_run
 
+match_hist_correct = histogram_for_nbody_run
+match_hist_compare = histogram_for_nbody_run_and_compare
 output = correct
 output_run_compare = histogram_for_nbody_run_and_compare
 output1 = match_hist_correct + ".out"
@@ -179,7 +182,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b  -P -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -b   -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(run_from_checkpoint and should_pipe == False):
         print('running nbody from checkpoint')
@@ -188,7 +191,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b  -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_correct " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -b  -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_correct_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     
     if(should_pipe == True):
@@ -241,7 +244,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
             -h " + path + "quick_plots/hists/" + correct + ".hist \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+            -n 10 -b -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
     
     if(run_from_checkpoint):#this is the version that will run from a checkpoint
         print 'running from checkpoint'
@@ -250,7 +253,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
             -h " + path + "quick_plots/hists/" + correct + ".hist \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+            -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep_ft_4p03730890303 " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
 # # 
 # # # # # # # # # # # # # # # # # # # # # #
 #        histogram plot                   #
@@ -613,7 +616,7 @@ def vlos_plot(file1, file2):
      
      
     #reading the vLOS and lbr from the output files. 
-    angle_cuttoffs = [-150.0, 150.0, 50, -10.0, 10.0, 1]
+    angle_cuttoffs = [-150.0, 150.0, 50, -15.0, 15.0, 1]
     folder = 'quick_plots/outputs/'
     output1 = file1 + ".out"
     output2 = file2 + ".out"
@@ -729,7 +732,7 @@ def vlos_plot(file1, file2):
         plt.ylabel('vel disp')
 
         ax4 = plt.subplot(428)
-        plt.scatter(which_bin2, which_vlos2, color='k', s=.5, marker= 'o')
+        plt.scatter(which_bin2, which_vlos2, color='k', s=.5, marker= 'o', )
         plt.xlim((xlower, xupper))
         #plt.ylim((0.0, vel_disp_ylimit))
         plt.yticks([])
@@ -772,8 +775,8 @@ def vlos_plot(file1, file2):
         plt.legend()
         
         ax2 = plt.subplot(414)
-        plt.scatter(which_bin1, which_vlos1, s=.2, marker= '.', color='k', alpha=1,label= label1)
-        plt.scatter(which_bin2, which_vlos2, s=.2, marker= '.', color='c', alpha=0.25, label= label2)
+        plt.scatter(which_bin1, which_vlos1, s=1, marker= '.',  color='red', alpha=1,label= label1, edgecolors='none')
+        plt.scatter(which_bin2, which_vlos2, s=1, marker= '.', color='blue', alpha=1, label= label2, edgecolors='none')
         plt.xlim((xlower, xupper))
         #plt.ylim((0.0, vel_disp_ylimit))
         plt.ylabel('vel disp')
