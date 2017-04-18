@@ -9,12 +9,12 @@ import matplotlib.patches as mpatches
 import random
 random.seed(a = 123456789)
 
-vgsr_cutoff = 200 
-dist_cutoff = 50
+vgsr_cutoff = 25 
+dist_cutoff = 5
 l_cutoff    = mt.radians(5)
 b_cutoff    = mt.radians(2.5)
-min_cluster_size = 15
-threshold = 10
+min_cluster_size = 10
+threshold = 2
 
 
 #since charles and keighly all have different data
@@ -29,10 +29,8 @@ starts_with = 'g0'
 
 class Point:
     
-    def __init__(self, vgsr, dist, l, b):
+    def __init__(self, l, b):
         
-        self.vgsr = vgsr
-        self.dist = dist
         self.l    = l 
         self.b    = b
         self.cd = None              # core distance
@@ -44,10 +42,12 @@ class Point:
     # --------------------------------------------------------------------------
     
     def distance(self, point):
-        
+        #self.del_l
+        #self.del_b
         #distance is simply the dist between two points in x, y
-        del_vgsrsq =  dist_cutoff * ( (self.vgsr - point.vgsr)**2 ) / vgsr_cutoff
-        del_distsq =  vgsr_cutoff * ( (self.dist - point.dist)**2 ) / dist_cutoff
+        #del_vgsrsq =  ( (self.vgsr - point.vgsr)**2 ) 
+        #del_distsq =  ( (self.dist - point.dist)**2 ) 
+        
         
     # ------------------------------------------------------------------------------
     # KEIG- I need you to put in the distance between two l and b points in the sky
@@ -58,13 +58,10 @@ class Point:
         b1_rad = mt.radians(self.b)
         b2_rad = mt.radians(point.b)
         
-        del_ls_sq  =  ( (l1_rad - l2_rad)**2 ) 
-        del_bs_sq  =  ( (b1_rad - b2_rad)**2 ) 
+        #angular_dist = ( l1_rad * mt.cos(b1_rad) - l2_rad * mt.cos(b2_rad) )**2 
+        angular_dist =  ( (l1_rad - l2_rad)**2  + (b1_rad - b2_rad)**2) 
         
-        angular_dist = ( l1_rad * mt.cos(b1_rad) - l2_rad * mt.cos(b2_rad) )**2 
-        
-        r = (del_vgsrsq + del_distsq + del_ls_sq + del_bs_sq)
-        #r = (del_vgsrsq + del_distsq + angular_dist)
+        r = (angular_dist)
         r = mt.sqrt(r)
         
         return r
@@ -86,11 +83,9 @@ class Cluster:
 
     def centroid(self):
         n_points = len(self.points)
-        sum_dist = sum([p.dist for p in self.points]) / n_points
-        sum_vgsr = sum([p.vgsr for p in self.points]) / n_points
         sum_ls   = sum([p.l    for p in self.points]) / n_points
         sum_bs   = sum([p.b    for p in self.points]) / n_points
-        return Point(sum_vgsr, sum_dist, sum_ls, sum_bs)
+        return Point(sum_ls, sum_bs)
             
     # --------------------------------------------------------------------------
     # calculate the region (centroid, bounding radius) for the cluster
@@ -317,10 +312,10 @@ def plot_raw_data_and_clusters(x, y, cluster_x, cluster_y, counter, name, xlabel
     plt.savefig(name, format='png', dpi=1000)
     plt.clf()
 
-def make_points(vgsrs, dists, ls, bs):
+def make_points( ls, bs):
     points = []
-    for i in range(0,len(vgsrs)):
-        points.append(Point(vgsrs[i], dists[i], ls[i], bs[i]))
+    for i in range(0,len(ls)):
+        points.append(Point(ls[i], bs[i]))
     return points
 
 
@@ -358,21 +353,45 @@ def make_random_points_with_cluster():
     return xs, ys
 
 
-def main():
-    file_name = "Low_Met.csv"
 
-    vgsrs, dists, ls, bs = get_data(file_name)
-    #plot_raw_data(dists, vgsrs)
+
+
+
+def find_clusters_lb(points, ls, bs):
+    cut_off_rad = mt.sqrt( (l_cutoff * mt.cos(b_cutoff) )**2)
     
-    points = make_points(vgsrs, dists, ls, bs)
+    
+    optics = Optics(points, cut_off_rad, min_cluster_size) # 100m radius for neighbor consideration, cluster size >= 2 points
+    optics.run()                    # run the algorithm
+    clusters = optics.cluster(threshold)   # 50m threshold for clustering
+
+    counter = 0
+    for cluster in clusters:
+        counter += 1
+
+    print counter
+    cluster_ls = []
+    cluster_bs = []
+    
+    cluster_ls_tmp = []
+    cluster_bs_tmp = []
+    
+    for cluster in clusters:
+        cluster_ls_tmp = []
+        cluster_bs_tmp = []
+        for i in range(0, len(cluster.points)):
+            cluster_ls_tmp.append(cluster.points[i].l)
+            cluster_bs_tmp.append(cluster.points[i].b)
+        print len(cluster_ls_tmp) , len(cluster_bs_tmp)
         
-    cut_off_rad = mt.sqrt( vgsr_cutoff**2  + dist_cutoff**2 + l_cutoff**2 + b_cutoff**2)
-    #print points
+        cluster_ls.append(cluster_ls_tmp)
+        cluster_bs.append(cluster_bs_tmp)
+    plot_raw_data_and_clusters(ls   , bs   , cluster_ls   , cluster_bs, counter  , 'l_b'      , 'l'   , 'b')
+
+
+def find_clusters_vd(points, vgsrs, dists ):
+    cut_off_rad = mt.sqrt( vgsr_cutoff**2 + dist_cutoff**2 ) 
     
-    # testing with random data #
-    #dists, vgsrs = make_random_points_with_cluster()
-    #plot_raw_data(dists,vgsrs)
-    #points = make_points(vgsrs, dists)
     
     optics = Optics(points, cut_off_rad, min_cluster_size) # 100m radius for neighbor consideration, cluster size >= 2 points
     optics.run()                    # run the algorithm
@@ -386,34 +405,48 @@ def main():
     cluster_vgrs = []
     cluster_dists = []
     
+    
     cluster_vgrs_tmp = []
     cluster_dists_tmp = []
     
-    cluster_ls = []
-    cluster_bs = []
-    
-    cluster_ls_tmp = []
-    cluster_bs_tmp = []
     for cluster in clusters:
         cluster_vgrs_tmp = []
         cluster_dists_tmp = []
-        cluster_ls_tmp = []
-        cluster_bs_tmp = []
         for i in range(0, len(cluster.points)):
-            cluster_vgrs_tmp.append(cluster.points[i].vgsr)
-            cluster_dists_tmp.append(cluster.points[i].dist)
-            
-            cluster_ls_tmp.append(cluster.points[i].l)
-            cluster_bs_tmp.append(cluster.points[i].b)
-        print len(cluster_ls_tmp) , len(cluster_bs_tmp)
+            cluster_vgrs_tmp.append(cluster.points[i].l)
+            cluster_dists_tmp.append(cluster.points[i].b)
+
+        print len(cluster_vgrs_tmp) , len(cluster_dists_tmp)
+        
         cluster_vgrs.append(cluster_vgrs_tmp)
         cluster_dists.append(cluster_dists_tmp)
-        
-        cluster_ls.append(cluster_ls_tmp)
-        cluster_bs.append(cluster_bs_tmp)
-        
-    plot_raw_data_and_clusters(dists, vgsrs, cluster_dists, cluster_vgrs, counter,  'dist_vgsr', 'dist', 'Vgsr' )
-    plot_raw_data_and_clusters(ls   , bs   , cluster_ls   , cluster_bs  , counter,  'l_b'      , 'l'   , 'b')
-    #print cluster_vgrs
+    plot_raw_data_and_clusters(dists, vgsrs, cluster_dists, cluster_vgrs, counter, 'dist_vgsr', 'dist', 'Vgsr' )
 
+
+
+
+
+
+
+def main():
+    file_name = "Low_Met.csv"
+
+    vgsrs, dists, ls, bs = get_data(file_name)
+    #plot_raw_data(dists, vgsrs)
+    
+    points_lb = make_points( ls, bs)
+    points_vd = make_points( vgsrs, dists)
+    
+    find_clusters_lb(points_lb, ls, bs)
+    
+    find_clusters_vd(points_vd, vgsrs, dists)
+    
+    
+    
+    # testing with random data #
+    #dists, vgsrs = make_random_points_with_cluster()
+    #plot_raw_data(dists,vgsrs)
+    #points = make_points(vgsrs, dists)
+    
+    
 main()

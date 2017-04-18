@@ -25,18 +25,19 @@ y = True
 n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
-args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-#args = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
-#args = [0.0001, 1.0, 0.2, 0.2, 12, 0.2] 
+#args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
+args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
+#args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
-remake                    = y                 #
-match_histograms          = n                 #
+run_nbody                 = n                 #
+remake                    = n                 #
+match_histograms          = y                 #
 run_and_compare           = y                 #
-run_from_checkpoint       = y                 #
+run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -44,7 +45,7 @@ run_from_checkpoint       = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
-vlos_plot_switch          = y                 #
+vlos_plot_switch          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -62,6 +63,7 @@ plot_overlapping          = y                 #
 #              possible tests                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_disp_switch      = n                 #
+ramp_para_tst_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -89,13 +91,15 @@ histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 #    histograms for runs  #
 correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
 test = 'parameter_sweep_test_ft_4.03730890303'
+run_test = 'run_test'
+run_test2 = 'run_test2'
 
 #    hist to match against for compare after run  #
-correct_hist = correct
+correct_hist = run_test
 
 #    hist name for the nbody run   #
 histogram_for_nbody_run = correct_hist
-histogram_for_nbody_run_and_compare = test
+histogram_for_nbody_run_and_compare = run_test2
 
 #    if you are just matching, these are the two hists #
 match_hist_correct = histogram_for_nbody_run
@@ -159,8 +163,8 @@ def standard_run():
 def make_nbody():
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        #os.system("rm -r nbody_test")
-        #os.system("mkdir nbody_test")
+        os.system("rm -r nbody_test")
+        os.system("mkdir nbody_test")
         os.chdir("nbody_test")
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
@@ -182,7 +186,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b   -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -b -P  -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(run_from_checkpoint and should_pipe == False):
         print('running nbody from checkpoint')
@@ -244,7 +248,7 @@ def compare_after_run(paras, lua_file, correct, hist, out, ver):
             -h " + path + "quick_plots/hists/" + correct + ".hist \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+            -n 10 -b -P -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
     
     if(run_from_checkpoint):#this is the version that will run from a checkpoint
         print 'running from checkpoint'
@@ -880,11 +884,11 @@ def lambda_beta_plot(file_name):
     return 0 
  
 def lb_plot(file_name):
-    path_charles = 'quick_plots/outputs/'
+    path_charles = 'quick_plots/outputs/ramping/'
     path = 'quick_plots/'
     print file_name
     plot_lbr = y
-    plot_light_and_dark = n
+    plot_light_and_dark = y
     plot_dm = n
     plot_xyz = n
     plot_orbit = n
@@ -974,7 +978,7 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/ramping/' + file_name, format='png')
             print "plotting:", len(light_l) + len(dark_l), " points"
         # # # # # # # # # #
         if(plot_orbit):
@@ -1093,6 +1097,54 @@ def lb_plot(file_name):
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
+def ramp_para_tst():
+    hist1 = "ramping_off"
+    hist2 = "ramping_on"
+    lua1  = "ramp_off.lua"
+    lua2  = "ramp_on.lua"
+    
+    ramp_args = [4.0, 0.98, 0.2, 0.2, 12, 0.2] 
+    nbody(ramp_args, lua2, hist2, hist2, version, False)
+    
+    #out = 0
+    #while(out < 2740):
+        #lb_plot( str(out))
+        #out += 20
+        
+    
+    if(n):
+        ramp_args = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
+        hist2 = "0_ramping_on_" + str(ramp_args[0])
+        nbody(ramp_args, lua2, hist2, hist2, version, False)
+        lb_plot(hist2)
+        
+        time = 2.5
+        i = 10
+        while(time < 4.25):
+            ramp_args = [time, 0.98, 0.2, 0.2, 12, 0.2] 
+            hist2 = str(i) + "_ramping_on_" + str(ramp_args[0])
+            nbody(ramp_args, lua2, hist2, hist2, version, False)
+            lb_plot(hist2)
+            time += 0.25
+            i += 1
+    if(n):
+        ramp_args = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
+        hist2 = "0_ramping_off_" + str(ramp_args[0])
+        nbody(ramp_args, lua2, hist2, hist2, version, False)
+        lb_plot(hist2)
+        
+        time = 2.5
+        i = 10
+        while(time < 4.25):
+            ramp_args = [time, 0.98, 0.2, 0.2, 12, 0.2] 
+            hist2 = str(i) + "_ramping_off_" + str(ramp_args[0])
+            nbody(ramp_args, lua2, hist2, hist2, version, False)
+            lb_plot(hist2)
+            time += 0.25
+            i += 1
+    #plot(hist1, hist1, "ramping", 'ramp_off', 'ramp_on')
+
+# #
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
     file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
@@ -1839,6 +1891,9 @@ def main():
     
     if(quick_calculator_switch):
         quick_calculator()
+        
+    if(ramp_para_tst_switch):
+        ramp_para_tst()
 
 # spark plug #
 main()
