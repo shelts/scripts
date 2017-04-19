@@ -34,11 +34,11 @@ args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45]
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
-make_for_release_switch   = y
+make_for_release_switch   = not remake
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -175,11 +175,11 @@ def make_nbody():
 def make_for_release():
     flags = ' '
     nbody_openmp_sep_opencl = 'ON'
-    cmake_shared_flags = ["-DBOINC_RELEASE_NAMES=ON", "-DSEPARATION=OFF", "-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER", "-DNBODY_OPENMP=" + nbody_openmp_sep_opencl, "-DSEPARATION_OPENCL=" + nbody_openmp_sep_opencl]
+    cmake_shared_flags = ["-DBOINC_RELEASE_NAMES=OFF", "-DSEPARATION=OFF", "-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER", "-DNBODY_OPENMP=" + nbody_openmp_sep_opencl, "-DSEPARATION_OPENCL=" + nbody_openmp_sep_opencl]
     
     # CMake flags used for windows
     cmake_static_flag = ["-DNBODY_STATIC=ON",  "-DBOINC_APPLICATION=ON",  "-DCMAKE_BUILD_TYPE=Release"]
-    other_flags = ["-DCMAKE_FIND_ROOT_PATH=/srv/chroot/hardy_amd64", "-DOPENCL_INCLUDE_DIRS=/srv/chroot/hardy_amd64/usr/local/cuda/include/"]
+    other_flags = ["-DCMAKE_FIND_ROOT_PATH=/srv/chroot/hardy_amd64", "-DOPENCL_LIBRARIES=/srv/chroot/hardy_amd64/usr/lib/libOpenCL.so", "-DOPENCL_INCLUDE_DIRS=/srv/chroot/hardy_amd64/usr/local/cuda/include/"]
     
     for i in other_flags:
         flags += i 
@@ -196,8 +196,8 @@ def make_for_release():
     print flags
     
     os.chdir("./")
-    os.system("rm -r nbody_test")
-    os.system("mkdir nbody_test")
+    #os.system("rm -r nbody_test")
+    #os.system("mkdir nbody_test")
     os.chdir("nbody_test")
     os.system("cmake " + flags + path + "milkywayathome_client/")
     os.system("make -j ")
