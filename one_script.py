@@ -24,7 +24,7 @@ random.seed(a = 12345678)
 y = True
 n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
+#args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 args_run = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
 args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
@@ -35,9 +35,10 @@ args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45]
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = n                 #
-match_histograms          = y                 #
-run_and_compare           = y                 #
+match_histograms          = n                 #
+run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
+make_for_release_switch   = y
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -169,6 +170,39 @@ def make_nbody():
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
+
+
+def make_for_release():
+    flags = ' '
+    nbody_openmp_sep_opencl = 'ON'
+    cmake_shared_flags = ["-DBOINC_RELEASE_NAMES=ON", "-DSEPARATION=OFF", "-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER", "-DNBODY_OPENMP=" + nbody_openmp_sep_opencl, "-DSEPARATION_OPENCL=" + nbody_openmp_sep_opencl]
+    
+    # CMake flags used for windows
+    cmake_static_flag = ["-DNBODY_STATIC=ON",  "-DBOINC_APPLICATION=ON",  "-DCMAKE_BUILD_TYPE=Release"]
+    other_flags = ["-DCMAKE_FIND_ROOT_PATH=/srv/chroot/hardy_amd64", "-DOPENCL_INCLUDE_DIRS=/srv/chroot/hardy_amd64/usr/local/cuda/include/"]
+    
+    for i in other_flags:
+        flags += i 
+        flags += ' '
+    
+    for i in cmake_shared_flags:
+        flags += i 
+        flags += ' '
+    for i in cmake_static_flag:
+        flags += i
+        flags += ' '
+    
+    
+    print flags
+    
+    os.chdir("./")
+    os.system("rm -r nbody_test")
+    os.system("mkdir nbody_test")
+    os.chdir("nbody_test")
+    os.system("cmake " + flags + path + "milkywayathome_client/")
+    os.system("make -j ")
+    os.chdir("../")
+
 # #    
 def nbody(paras, lua_file, hist, out, ver, should_pipe):
     sim_time      = str(paras[0])
@@ -1894,6 +1928,9 @@ def main():
         
     if(ramp_para_tst_switch):
         ramp_para_tst()
+        
+    if(make_for_release_switch):
+        make_for_release()
 
 # spark plug #
 main()
