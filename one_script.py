@@ -25,20 +25,23 @@ y = True
 n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
-#args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run = [2.0, 0.98, 0.2, 0.3, 12, 0.45] 
-args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
+args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run = [0.001, 0.98, 0.2, 0.5, 12, 0.5] 
+args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
+#<search_likelihood>-168.789794875181201</search_likelihood>
+
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 run_from_checkpoint       = n                 #
-make_for_release_switch   = not remake
+make_for_release_switch   = n
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -96,11 +99,11 @@ run_test = 'run_test'
 run_test2 = 'run_test2'
 
 #    hist to match against for compare after run  #
-correct_hist = run_test
+correct_hist = correct
 
 #    hist name for the nbody run   #
 histogram_for_nbody_run = correct_hist
-histogram_for_nbody_run_and_compare = run_test2
+histogram_for_nbody_run_and_compare = run_test
 
 #    if you are just matching, these are the two hists #
 match_hist_correct = histogram_for_nbody_run
@@ -109,14 +112,15 @@ plot_name = histogram_for_nbody_run
 
 match_hist_correct = histogram_for_nbody_run
 match_hist_compare = histogram_for_nbody_run_and_compare
-output = correct
+
+output = 'output_plummer_plummer_0gy'
 output_run_compare = histogram_for_nbody_run_and_compare
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
-version  = ''
+version  = '_1.64_x86_64-pc-linux-gnu__mt'
 lua = "mixeddwarf.lua"
 #lua = "EMD_v162.lua"
 
@@ -171,33 +175,40 @@ def make_nbody():
         os.system("make -j ")
         os.chdir("../")
 
-
 def make_for_release():
-    flags = ' '
-    nbody_openmp_sep_opencl = 'ON'
-    cmake_shared_flags = ["-DBOINC_RELEASE_NAMES=OFF", "-DSEPARATION=OFF", "-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER", "-DNBODY_OPENMP=" + nbody_openmp_sep_opencl, "-DSEPARATION_OPENCL=" + nbody_openmp_sep_opencl]
+    linux = n
+    windows = y
+    if(linux):
+        flags = ' '
+        nbody_openmp_sep_opencl = 'ON'
+        cmake_shared_flags = ["-DBOINC_RELEASE_NAMES=OFF", "-DSEPARATION=OFF", "-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER", "-DNBODY_OPENMP=" + nbody_openmp_sep_opencl, "-DSEPARATION_OPENCL=" + nbody_openmp_sep_opencl]
+        
+        # CMake flags used for windows
+        cmake_static_flag = ["-DNBODY_STATIC=ON",  "-DBOINC_APPLICATION=ON",  "-DCMAKE_BUILD_TYPE=Release"]
+        other_flags = ["-DCMAKE_FIND_ROOT_PATH=/srv/chroot/hardy_amd64", "-DOPENCL_LIBRARIES=/srv/chroot/hardy_amd64/usr/lib/libOpenCL.so", "-DOPENCL_INCLUDE_DIRS=/srv/chroot/hardy_amd64/usr/local/cuda/include/"]
+        
+        for i in other_flags:
+            flags += i 
+            flags += ' '
+        
+        for i in cmake_shared_flags:
+            flags += i 
+            flags += ' '
+        for i in cmake_static_flag:
+            flags += i
+            flags += ' '
+        
+        
+        print flags
+        
+    if(windows):
+        flags = '-DCMAKE_TOOLCHAIN_FILE=cmake_modules/MinGW32-Cross-Toolchain.cmake'
     
-    # CMake flags used for windows
-    cmake_static_flag = ["-DNBODY_STATIC=ON",  "-DBOINC_APPLICATION=ON",  "-DCMAKE_BUILD_TYPE=Release"]
-    other_flags = ["-DCMAKE_FIND_ROOT_PATH=/srv/chroot/hardy_amd64", "-DOPENCL_LIBRARIES=/srv/chroot/hardy_amd64/usr/lib/libOpenCL.so", "-DOPENCL_INCLUDE_DIRS=/srv/chroot/hardy_amd64/usr/local/cuda/include/"]
     
-    for i in other_flags:
-        flags += i 
-        flags += ' '
-    
-    for i in cmake_shared_flags:
-        flags += i 
-        flags += ' '
-    for i in cmake_static_flag:
-        flags += i
-        flags += ' '
-    
-    
-    print flags
     
     os.chdir("./")
-    #os.system("rm -r nbody_test")
-    #os.system("mkdir nbody_test")
+    os.system("rm -r nbody_test")
+    os.system("mkdir nbody_test")
     os.chdir("nbody_test")
     os.system("cmake " + flags + path + "milkywayathome_client/")
     os.system("make -j ")
@@ -918,7 +929,7 @@ def lambda_beta_plot(file_name):
     return 0 
  
 def lb_plot(file_name):
-    path_charles = 'quick_plots/outputs/ramping/'
+    path_charles = 'quick_plots/outputs/'
     path = 'quick_plots/'
     print file_name
     plot_lbr = y
@@ -1012,7 +1023,7 @@ def lb_plot(file_name):
             plt.ylabel('b')
             plt.title('l vs b')
             plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/ramping/' + file_name, format='png')
+            plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
             print "plotting:", len(light_l) + len(dark_l), " points"
         # # # # # # # # # #
         if(plot_orbit):
