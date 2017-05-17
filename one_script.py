@@ -25,9 +25,9 @@ y = True
 n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
-args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-#args_run = [0.001, 0.98, 0.2, 0.5, 12, 0.5] 
-args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
 #<search_likelihood>-168.789794875181201</search_likelihood>
@@ -39,7 +39,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 run_nbody                 = n                 #
 remake                    = n                 #
 match_histograms          = n                 #
-run_and_compare           = y                 #
+run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
 make_for_release_switch   = n
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -102,7 +102,7 @@ run_test2 = 'run_test2'
 correct_hist = correct
 
 #    hist name for the nbody run   #
-histogram_for_nbody_run = correct_hist
+histogram_for_nbody_run = run_test
 histogram_for_nbody_run_and_compare = run_test
 
 #    if you are just matching, these are the two hists #
@@ -113,16 +113,16 @@ plot_name = histogram_for_nbody_run
 match_hist_correct = histogram_for_nbody_run
 match_hist_compare = histogram_for_nbody_run_and_compare
 
-output = 'output_plummer_plummer_0gy'
+output = histogram_for_nbody_run
 output_run_compare = histogram_for_nbody_run_and_compare
 output1 = match_hist_correct + ".out"
 output2 = match_hist_correct + ".out"
 
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
-version  = '_1.64_x86_64-pc-linux-gnu__mt'
-lua = "mixeddwarf.lua"
-#lua = "EMD_v162.lua"
+version  = ''
+lua = "full_control.lua"
+#lua = "EMD_v164.lua"
 
 #    pathways  #
 #I am tired of constantly adapting it for the servers
@@ -168,8 +168,8 @@ def standard_run():
 def make_nbody():
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        os.system("rm -r nbody_test")
-        os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")
+        #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
@@ -231,7 +231,7 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
             -f " + path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -b -P  -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -u -b -P  -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(run_from_checkpoint and should_pipe == False):
         print('running nbody from checkpoint')
@@ -1142,53 +1142,6 @@ def lb_plot(file_name):
 # # # # # # # # # # # # # # # # # # # # # #
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
-def ramp_para_tst():
-    hist1 = "ramping_off"
-    hist2 = "ramping_on"
-    lua1  = "ramp_off.lua"
-    lua2  = "ramp_on.lua"
-    
-    ramp_args = [4.0, 0.98, 0.2, 0.2, 12, 0.2] 
-    nbody(ramp_args, lua2, hist2, hist2, version, False)
-    
-    #out = 0
-    #while(out < 2740):
-        #lb_plot( str(out))
-        #out += 20
-        
-    
-    if(n):
-        ramp_args = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-        hist2 = "0_ramping_on_" + str(ramp_args[0])
-        nbody(ramp_args, lua2, hist2, hist2, version, False)
-        lb_plot(hist2)
-        
-        time = 2.5
-        i = 10
-        while(time < 4.25):
-            ramp_args = [time, 0.98, 0.2, 0.2, 12, 0.2] 
-            hist2 = str(i) + "_ramping_on_" + str(ramp_args[0])
-            nbody(ramp_args, lua2, hist2, hist2, version, False)
-            lb_plot(hist2)
-            time += 0.25
-            i += 1
-    if(n):
-        ramp_args = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-        hist2 = "0_ramping_off_" + str(ramp_args[0])
-        nbody(ramp_args, lua2, hist2, hist2, version, False)
-        lb_plot(hist2)
-        
-        time = 2.5
-        i = 10
-        while(time < 4.25):
-            ramp_args = [time, 0.98, 0.2, 0.2, 12, 0.2] 
-            hist2 = str(i) + "_ramping_off_" + str(ramp_args[0])
-            nbody(ramp_args, lua2, hist2, hist2, version, False)
-            lb_plot(hist2)
-            time += 0.25
-            i += 1
-    #plot(hist1, hist1, "ramping", 'ramp_off', 'ramp_on')
-
 # #
 def velocity_dispersion():
     args = [3.95, 1.0, 0.2, 0.8, 12, 48]
@@ -1199,55 +1152,6 @@ def velocity_dispersion():
     nbody(args, l, file_name, file_name, version, False)
     #lb_plot(file_name)
     os.system("./scripts/velocity_dispersion.py " + file_name)
-# # 
-def make_some_hists():
-    ver = ''
-    lua_file = 'EMD_v162_malleable.lua'
-    cor_hist = 'hist_v162_2k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__7_11_16'
-    
-    args = [4.98307971702889, 0.968890922982242, 0.104342397337317, 0.454711809661241, 25, 0.95]
-    hist1 = 'mw_best_fit1.1'
-    #nbody(args, lua_file, hist1, hist1, ver, False)
-    #match_hists(cor_hist, hist1, ver)
-   
-    args = [4.31887475447728, 0.966407963540408, 0.109778609406203, 0.27909923158586, 24.6120846327394, 0.95]
-    hist2 = 'mw_best_fit2'
-    #nbody(args, lua_file, hist, hist, ver, False)
-    match_hists(cor_hist, hist2, ver)
-    
-    args = [4.19554142467678, 0.965346934366972, 0.146965033782182, 0.5, 24.9266278594736, 0.95]
-    hist3 = 'mw_best_fit3.1'
-    #nbody(args, lua_file, hist3, hist3, ver, False)
-    #compare_after_run(args, lua_file, cor_hist, hist3, hist3, ver)
-    match_hists(cor_hist, hist3, ver)
-    
-    
-    #plot_4(cor_hist, hist1, hist2, hist3, 'bestfit')
-    
-    
-    return 0
-# # 
-def test_mixed_dwarf():
-    ver = ''
-    ft = 0.00001 #gyr
-    bt = 1   #gyr
-    rl = 0.8  #kpc
-    rr = 0.5 #ratio
-    ml = 30   #sim
-    mr = 0.5   #ratio
-    args = [ft, bt, rl, rr, ml, mr]
-    
-    lua_file = 'EMD_v162.lua'
-    output = 'regular_initial'
-    #nbody(args, lua_file, output, output, ver, n)
-    
-    
-    lua_file = 'mixeddwarf.lua'
-    #output = 'output_plummer_plummer_0gy'
-    #output = 'output_hern_hern_0gy'
-    output = 'output_nfw_nfw_0gy'
-    nbody(args, lua_file, output, output, ver, n)
-    os.system("mv ~/Desktop/research/quick_plots/outputs/" + output + ".out ~/Desktop/research/data_testing/sim_outputs/")
 # # 
 # # # # # # # # # # # # # # # # # # # # # #
 #               MISC                      #
@@ -1414,220 +1318,6 @@ def plot_all_hists():
         plot(correct, hist_name, str(i), label1, label2)
     return 0
 # #
-def plot_n_ofhist():
-    ver = ''
-    sweep = 'parameter_sweeps_10_20_2016_post_best_like_fix_narrow_random_0.95sim'
-    bins = '100'
-    typ = 'ft'
-    correct = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct.hist'
-    f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
-    
-    values = []
-    likes  = []
-    for line in f:
-        ss = line.split("\t")
-        value = float(ss[0])
-        like  = float(ss[1])
-        values.append(value)
-        likes.append(like)
-    
-    ns = []
-    for i in range(0, len(values)):
-        hist_name = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2.hist'
-        hist = open(hist_name, 'r')
-        for line in hist:
-            if(line.startswith("n = ")):
-                ss = line.split("n = ")
-                n_values = float(ss[1])
-                print n_values
-                print values[i]
-                ns.append(n_values)
-                
-    plt.plot(values, ns, color='r', label= 'n vs ft')
-    plt.title('number of bodies in histogram vs ft')
-    #plt.xlim((values[0], xupper))
-    #plt.ylim((0.0, ylimit))
-    plt.ylabel('n')
-    plt.legend()
-    plt.savefig('n_vs_ft.png', format='png')
-    plt.show()
-    plt.clf()           
-    
-    print n
-    
-    return 0
-# # 
-def check_hist_likes():
-    redo_likes = n
-    plot_components = y
-    ver = ''
-    sweep = 'parameter_sweeps_10_20_2016_post_best_like_fix_narrow_random_0.95sim'
-    bins = '100'
-    typ = 'ft'
-    correct = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-    
-    f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
-    values = []
-    likes  = []
-    for line in f:
-        ss = line.split("\t")
-        value = float(ss[0])
-        like  = float(ss[1])
-        values.append(value)
-        likes.append(like)
-    
-    if(redo_likes):
-        for i in range(0, len(values)):
-            hist_name = 'like_surface/' + sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
-            match_hists_pipe(correct, hist_name, ver, sweep)
-            
-    f.close()
-    
-    if(plot_components):
-        g = open(sweep, 'r')
-        emds = []
-        costs = []
-        likes = []
-        for line in g:
-            if(line.startswith("log(CostComponent) = ")):
-                ss = line.split("log(CostComponent) = ")
-                cost = float(ss[1])
-                costs.append(cost)
-            if(line.startswith("log(EMDComponent) = ")):
-                ss = line.split("log(EMDComponent) = ")
-                emd = float(ss[1])
-                emds.append(emd)
-            if(line.startswith("<search_likelihood>")):
-                   ss = line.split("<search_likelihood>")
-                   dd = ss[1].split("</search_likelihood>")
-                   like = float(dd[0])
-                   likes.append(like)
-        g.close()
-        
-        plt.plot(values, emds, color='r', label= 'emd')
-        plt.plot(values, costs, color='g', label= 'cost')
-        plt.plot(values, likes, color='k', label= 'like')
-        plt.title('number of bodies in histogram vs ft')
-        #plt.xlim((values[0], xupper))
-        plt.ylim((-50.0, 0.0))
-        plt.ylabel('likelihood')
-        plt.legend()
-        plt.savefig('n_vs_ft.png', format='png')
-        plt.show()
-        plt.clf()
-# # 
-def orbit_location():         
-    lua_file = "EMD_v162_malleable.lua"
-    hist =  'orbit_test2'
-    run = n
-    plot = n
-    sweep_radii = y
-    trash = n
-    #os.system('mv nbody_test/bin/forward_orbit.out quick_plots/')
-    #os.system('mv nbody_test/bin/reverse_orbit.out quick_plots/')
-    #lb_plot(hist)
-    
-    if(trash):
-        trash = trash
-        #args = [3.945, 0.98, 0.2, 0.2, 12, 0.2]#rad: 33.746497660125655
-        #nbody(args, lua_file, hist, hist, version, False)
-        #args = [3.945, 0.8, 0.2, 0.2, 12, 0.2]#rad: 87.116406835446654
-        #nbody(args, lua_file, hist, hist, version, False)
-
-        #args = [3.945, 1.2, 0.2, 0.2, 12, 0.2]#rad: 78.866571119221959
-        #nbody(args, lua_file, hist, hist, version, False)
-        
-        #args = [3.0, 0.98, 0.2, 0.2, 12, 0.2]#rad: 87.233271740740818
-        #nbody(args, lua_file, hist, hist, version, False)
-
-        #args = [3.0, 0.8, 0.2, 0.2, 12, 0.2]#rad: 31.251401116618435
-        #nbody(args, lua_file, hist, hist, version, False)
-
-        #args = [3.0, 1.2, 0.2, 0.2, 12, 0.2]#rad: 72.026652594362531
-        #nbody(args, lua_file, hist, hist, version, False)
-        
-        
-        #args = [5.0, 0.98, 0.2, 0.2, 12, 0.2]#rad: 81.563026239076436
-        #nbody(args, lua_file, hist, hist, version, False)
-
-        #args = [5.0, 0.8, 0.2, 0.2, 12, 0.2]#rad: 72.956494004603883
-        #nbody(args, lua_file, hist, hist, version, False)
-
-        #args = [5.0, 1.2, 0.2, 0.2, 12, 0.2]#rad: 52.676752723856929
-        #nbody(args, lua_file, hist, hist, version, False)
-        trash = trash
-    
-    
-    if(run):#runs possible combos of paras to get distance from GC
-        ft = 3.0
-        bt = 0.8
-        NN = 50
-        MM = 50
-        intv_ft = (5.0 - 3.0) / NN
-        intv_bt = (1.2 - 0.8) / MM
-        f = open('radii_paras.txt', 'w')
-        for i in range(0, NN):
-            bt = 0.8
-            for j in range(0, MM):
-                args = [ft, bt, 0.2, 0.2, 12, 0.2]
-                f.write("%0.15f\t%0.15f\t%0.15f\n" % (ft, bt, ft / bt))
-                #nbody(args, lua_file, hist, hist, version, False)
-                bt += intv_bt
-            ft += intv_ft
-        f.close()
-    
-    os.system("mv nbody_test/bin/radii.out ./")
-    if(plot):#this plots the radii from the GC it goes through
-        f = open('radii_para.gnuplot', 'w')
-        f.write("reset\n")
-        f.write("set terminal wxt persist\n")
-        #size 6000,2000\n")
-        f.write("set key off\n")
-        f.write("set xlabel 'forward time (Gyr)'\n")
-        f.write("set ylabel 'reverse time ratio'\n")
-        f.write("set zlabel 'radius GC (kpc)'\n")
-        f.write("set xrange[2.9:5.4]\n")
-        f.write("set yrange[0.78:1.24]\n")
-        f.write("set zrange[0.0:100]\n\n\n")
-        
-        f.write("set output \"~/Desktop/research/quick_plots/radius_fromGC_vs_FT_BT.jpeg\" \n")
-        p = "<paste radii_paras.txt radii.out"
-        f.write("set title '' \n")
-        f.write("splot '" + p + "' using 1:2:4  with points\n\n") 
-                
-        f.close()
-    os.system("gnuplot radii_para.gnuplot 2>>piped_output.txt")
-    os.system("rm radii_para.gnuplot")
-    
-    
-    if(sweep_radii):
-        get_radii = n
-        if(get_radii):
-            bins = '25'
-            typ = 'ft'
-            f = open('like_surface/parameter_sweeps_10_6_2016_narrow_random_sweep/25bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
-            vals = []
-            for line in f:
-                ss = line.split("\t")
-                value = float(ss[0])
-                like  = float(ss[1])
-                vals.append(value)
-            for i in range(0, len(vals)):
-                args = [3.95, vals[i], 0.2, 0.2, 12, 0.2]
-                nbody(args, lua_file, hist, hist, version, False)
-                
-            os.system("mv nbody_test/bin/radii_sweep.out ./")
-        
-        f = open('radii_sweep.out', 'r')
-        radii = []
-        for line in f:
-            value = float(line)
-            radii.append(value)
-        
-        plot_all_hists()
-    
-    return 0
-# # 
 def check_timestep():
     rl = [0.05, 0.5]
     rr = [0.1, 0.5]
@@ -1692,156 +1382,6 @@ def check_timestep():
                     
                    
     f.close()
-# # 
-def pots_dens_plot():
-    f = open('pots_dens_plt.gnuplot', 'w')
-    names = ["NFW", "PL", "GH"]
-    if(n):    
-        os.system("mv ./nbody_test/bin/dens_potsNFW.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/dist_funcNFW.out ./quick_plots/")
-        
-        os.system("mv ./nbody_test/bin/dens_potsGH.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/dist_funcGH.out ./quick_plots/")
-        
-        os.system("mv ./nbody_test/bin/dens_potsPL.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/dist_funcPL.out ./quick_plots/")
-        
-        f.write("reset\n")
-        f.write("set terminal png size 900,1000 enhanced\n")
-        f.write("set output './quick_plots/pots_dens.png' \n")
-        f.write("set multiplot layout 3,4 rowsfirst\n")
-        for i in range(0, len(names)):
-            f.write("set key off\n")
-            
-            
-            p = "./quick_plots/dens_pots" + names[i] + ".out"
-            f.write("set title 'dens " + names[i] + " ' \n")
-            f.write("set xlabel 'r'\n")
-            f.write("set ylabel 'r^2 rho'\n")
-            #f.write("set yrange [0:4]\n")
-            #f.write("set xrange [0:10]\n")
-            f.write("plot '" + p + "' using 1:2  with lines, \n\n") 
-            
-            f.write("set title 'potentials " + names[i] + " ' \n")
-            f.write("set xlabel 'r'\n")
-            f.write("set ylabel 'potential'\n")
-            #f.write("set yrange [0:140]\n")
-            #f.write("set xrange [0 :10 ]\n")
-            f.write("plot '" + p + "' using 1:3  with lines, \n\n")
-            f.write("# # # # # # # # # # # # # # # # # #\n")
-            
-            f.write("set title 'dist fun " + names[i] + " f(r)' \n")
-            f.write("set xlabel 'r'\n")
-            f.write("set ylabel 'v^2 f'\n")
-            #f.write("set yrange[0:17]\n")
-            #f.write("set xrange [0 : 1.2]\n")
-            p = "./quick_plots/dist_func" + names[i] + ".out"
-            f.write("plot '" + p + "' using 1:5  with lines, '" + p + "' using 7:5  with dots\n\n")
-            
-            f.write("set title 'dist fun " + names[i] + " f(v)' \n")
-            f.write("set xlabel 'v'\n")
-            f.write("set ylabel 'v^2 f'\n")
-            #f.write("set yrange [0:4]\n")
-            #f.write("set xrange [0:10]\n")
-            p = "./quick_plots/dist_func" + names[i] + ".out"
-            f.write("plot '" + p + "' using 4:6  with dots\n\n")
-            
-            #f.write("unset multiplot\n")
-    
-    if(n):
-        os.system("mv ./nbody_test/bin/dist_func2D.out ./quick_plots/")
-        f.write("reset\n")
-        f.write("set terminal wxt persist\n")
-        f.write("set key off\n")
-        f.write("set xlabel 'r'\n")
-        f.write("set ylabel 'v'\n")
-        f.write("set zlabel 'v^2 f'\n")
-        f.write("set xrange [0.8:1.0]\n")
-        f.write("set yrange [0:10]\n")
-        f.write("set zrange [0:]\n")
-        #f.write("set cbrange [0 :0.001]\n")
-        #f.write("set output './quick_plots/distfunc.png' \n")
-        p = "./quick_plots/dist_func2D.out"
-        f.write("splot '" + p + "' using 1:2:3  with dots \n\n")
-    
-    
-
-    if(n):
-        os.system("mv ./nbody_test/bin/energyNFW.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/energyPL.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/energyGH.out ./quick_plots/")
-        
-        f.write("reset\n")
-        f.write("set terminal png size 900,1000 enhanced\n")
-        f.write("set output './quick_plots/energy.png'\n")
-        f.write("set multiplot layout 3,1 rowsfirst\n")
-        for i in range(0, len(names)):
-            p = "./quick_plots/energy" + names[i] + ".out"
-            f.write("set title 'energy " + names[i] + " ' \n")
-            f.write("set xlabel 'r'\n")
-            f.write("set ylabel 'energy'\n")
-            #f.write("set yrange [0:4]\n")
-            f.write("set xrange [0:50]\n")
-            f.write("plot '" + p + "' using 1:2  with lines title 'potential', '" + p + "' using 1:3  with lines title ' energy' \n\n") 
-
-    
-    if(y):
-        os.system("mv ./nbody_test/bin/integrandNFW.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/integrandPL.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/integrandGH.out ./quick_plots/")
-        
-        f.write("reset\n")
-        f.write("set terminal png size 700,900 enhanced\n")
-        f.write("set output './quick_plots/integrand.png'\n")
-        f.write("set multiplot layout 3,1 rowsfirst\n")
-        ylims = ["-50", "-50", "-1000"]
-        for i in range(0, len(names)):
-            p = "./quick_plots/integrand" + names[i] + ".out"
-            f.write("set title 'integrand " + names[i] + " ' \n")
-            f.write("set xlabel 'r'\n")
-            f.write("set ylabel 'integrand'\n")
-            f.write("set yrange [0:" + ylims[i] + "]\n")
-            f.write("set xrange [0:2]\n")
-            f.write("plot '" + p + "' using 1:2  with lines title 'integrand', '" + p + "' using 8:2  with lines title ' upperlimit',  '" + p + "' using 9:2  with lines title ' lowerlimit' \n\n") 
-
-    if(n):
-        os.system("mv ./nbody_test/bin/NFW.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/PL.out ./quick_plots/")
-        os.system("mv ./nbody_test/bin/GH.out ./quick_plots/")
-        
-        f.write("reset\n")
-        f.write("set terminal png size 900,1000 enhanced\n")
-        f.write("set output './quick_plots/sampling.png'\n")
-        f.write("set multiplot layout 3,1 rowsfirst\n")
-        ylims = ["-1000", "-200", "-1000"]
-        for i in range(0, len(names)):
-            p = "./quick_plots/" + names[i] + ".out"
-            f.write("set title 'sampling" + names[i] + " ' \n")
-            f.write("set xlabel 'n'\n")
-            f.write("set ylabel 'pick'\n")
-            f.write("set yrange [0:1]\n")
-            f.write("set xrange [0:20]\n")
-            f.write("plot '" + p + "' using 0:3  with lines title 'd/dmax', '" + p + "' using 0:4  with lines title ' u' \n\n") 
-            
-        f.write("unset multiplot\n")
-        f.write("reset\n")
-        f.write("set terminal png size 900,1000 enhanced\n")
-        f.write("set output './quick_plots/sampling2.png'\n")
-        f.write("set multiplot layout 3,1 rowsfirst\n")
-        for i in range(0, len(names)):
-            p = "./quick_plots/" + names[i] + ".out"
-            f.write("set title 'sampling" + names[i] + " ' \n")
-            f.write("set xlabel 'n'\n")
-            f.write("set ylabel 'pick'\n")
-            f.write("set yrange [-2:2]\n")
-            f.write("set xrange [0:200]\n")
-            f.write("plot '" + p + "' using 0:5  with lines title ''  \n\n") 
-
-    
-    
-    f.close()
-    os.system("gnuplot pots_dens_plt.gnuplot 2>>piped_output.txt")
-    os.system("rm pots_dens_plt.gnuplot")
 # # 
 def stabity_test():
     args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
