@@ -41,7 +41,6 @@ remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
-make_for_release_switch   = n
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -67,19 +66,13 @@ plot_overlapping          = y                 #
 #              possible tests                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 velocity_disp_switch      = n                 #
-ramp_para_tst_switch      = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-test_mixed_dwarf_switch   = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-pots_dens_plot_switch     = n                 #
+test_vel_theta_binning_switch = y
 plot_all_hists_switch     = n                 #
-orbit_location_switch     = n                 #
-plot_n_ofhist_switch      = n                 #
-check_hist_likes_switch   = n                 #
 check_timestep_switch     = n                 #
 quick_calculator_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -174,45 +167,6 @@ def make_nbody():
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
-
-def make_for_release():
-    linux = n
-    windows = y
-    if(linux):
-        flags = ' '
-        nbody_openmp_sep_opencl = 'ON'
-        cmake_shared_flags = ["-DBOINC_RELEASE_NAMES=OFF", "-DSEPARATION=OFF", "-DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER", "-DNBODY_OPENMP=" + nbody_openmp_sep_opencl, "-DSEPARATION_OPENCL=" + nbody_openmp_sep_opencl]
-        
-        # CMake flags used for windows
-        cmake_static_flag = ["-DNBODY_STATIC=ON",  "-DBOINC_APPLICATION=ON",  "-DCMAKE_BUILD_TYPE=Release"]
-        other_flags = ["-DCMAKE_FIND_ROOT_PATH=/srv/chroot/hardy_amd64", "-DOPENCL_LIBRARIES=/srv/chroot/hardy_amd64/usr/lib/libOpenCL.so", "-DOPENCL_INCLUDE_DIRS=/srv/chroot/hardy_amd64/usr/local/cuda/include/"]
-        
-        for i in other_flags:
-            flags += i 
-            flags += ' '
-        
-        for i in cmake_shared_flags:
-            flags += i 
-            flags += ' '
-        for i in cmake_static_flag:
-            flags += i
-            flags += ' '
-        
-        
-        print flags
-        
-    if(windows):
-        flags = '-DCMAKE_TOOLCHAIN_FILE=cmake_modules/MinGW32-Cross-Toolchain.cmake'
-    
-    
-    
-    os.chdir("./")
-    os.system("rm -r nbody_test")
-    os.system("mkdir nbody_test")
-    os.chdir("nbody_test")
-    os.system("cmake " + flags + path + "milkywayathome_client/")
-    os.system("make -j ")
-    os.chdir("../")
 
 # #    
 def nbody(paras, lua_file, hist, out, ver, should_pipe):
@@ -1157,6 +1111,117 @@ def velocity_dispersion():
 #               MISC                      #
 # # # # # # # # # # # # # # # # # # # # # #
 # #
+def test_vel_theta_binning():
+    pathway = './data_testing/sim_outputs/'
+    file_name = pathway + 'output_plummer_plummer_0gy.out'
+    vxs = []
+    vys = []
+    vzs = []
+    ms = []
+    g = open(file_name, 'r')
+    num = 1
+    for line in g:
+        if (line.startswith("# ignore")):
+            break
+        else:
+            num += 1
+    g.close()
+    
+    line_n = 0
+    lines = open(file_name, 'r')
+    print num
+    for line in lines:
+        if(line_n < num):
+            line_n += 1
+            continue
+        
+        tt = line.split(', ')
+        ty = float(tt[0])
+        vx = float(tt[7])
+        vy = float(tt[8])
+        vz = float(tt[9])
+        m  = float(tt[10])
+        vxs.append(vx)
+        vys.append(vy)
+        vzs.append(vz)
+        ms.append(m)
+        
+    lines.close()
+    N = len(vxs)
+    
+    
+    
+    #cm correction
+    cmx = 0.
+    cmy = 0.
+    cmz = 0.
+    mtot = 0
+    for i in range(0,N):
+        cmx += ms[i] * vxs[i]
+        cmy += ms[i] * vys[i]
+        cmz += ms[i] * vzs[i]
+        mtot += ms[i]
+    cmx = cmx / mtot
+    cmy = cmy / mtot
+    cmz = cmz / mtot
+    
+    for i in range(0, N):
+        vxs[i] -= cmx
+        vys[i] -= cmy
+        vzs[i] -= cmz
+    
+    thetas = []
+    vs = []
+    for i in range(0,len(vxs)):
+        v = mt.sqrt( vxs[i] * vxs[i] + vys[i] * vys[i] + vzs[i] * vzs[i])
+        theta = mt.acos( vzs[i] / v)
+        thetas.append(theta)
+        vs.append(v)
+        
+    print vs
+    
+    
+    #binning
+    binN = 1000
+    binwidth = 0.1
+    upper = binN * binwidth
+    
+    bins = []
+    bin_ranges = []
+    for k in range(0, binN):
+        bins.append(0)
+        bin_ranges.append(0)
+        
+        
+    tmp = thetas
+    #print tmp
+    for i in range(0, N):
+        bin_range = 0
+        
+        for j in range(0, binN):
+            if( (bin_range + binwidth) < upper):
+                if(tmp[i] >= bin_range and tmp[i] < (bin_range + binwidth)):
+                    bins[j] += 1
+                    break
+                bin_range += binwidth
+            elif( ( bin_range + binwidth) == upper):
+                if( tmp[i] >= bin_range and tmp[i] <= (bin_range + binwidth)):
+                    bins[j] += 1
+                    break
+                bin_range += binwidth
+
+        
+    bin_range = 0
+    for k in range(0, binN):
+        bin_ranges[k] = bin_range
+        bin_range += binwidth
+    #print bins
+
+    plt.bar(bin_ranges, bins, width = .05 , color = 'r', edgecolor = 'k')
+    plt.xlim(-3, 5)
+    plt.show()
+
+# #
 def randomize(counts, errors, N):
     for i in range(0, N):
         coor1 = random.randint(0, len(counts) - 1)
@@ -1436,8 +1501,8 @@ def clean():
 def main():
     standard_run()
     
-    if(test_mixed_dwarf_switch):
-        test_mixed_dwarf()
+    if(test_vel_theta_binning_switch):
+        test_vel_theta_binning()
         
     if(make_some_hists_switch):
         make_some_hists()
@@ -1458,30 +1523,13 @@ def main():
     if(plot_all_hists_switch):
         plot_all_hists()
     
-    if(plot_n_ofhist_switch):
-        plot_n_ofhist()
     
-    if(orbit_location_switch):
-        orbit_location()
-        
-    if(check_hist_likes_switch):
-        check_hist_likes()
-    clean()
     
     if(check_timestep_switch):
         check_timestep()
         
-    if(pots_dens_plot_switch):
-        pots_dens_plot();
-    
     if(quick_calculator_switch):
         quick_calculator()
         
-    if(ramp_para_tst_switch):
-        ramp_para_tst()
-        
-    if(make_for_release_switch):
-        make_for_release()
-
 # spark plug #
 main()
