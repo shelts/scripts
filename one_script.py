@@ -71,9 +71,9 @@ make_some_hists_switch    = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-test_vel_theta_binning_switch = y
+test_vel_theta_binning_switch = n
 plot_all_hists_switch     = n                 #
-check_timestep_switch     = n                 #
+check_timestep_switch     = y                 #
 quick_calculator_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1387,7 +1387,7 @@ def check_timestep():
     rl = [0.05, 0.5]
     rr = [0.1, 0.5]
     ml = [1, 50]
-    mr = [0.1, 0.95]
+    mr = [0.01, 0.95]
     f = open("times.txt", 'w')
     rl_inc = 0.1
     rr_inc = 0.05
