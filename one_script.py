@@ -12,6 +12,7 @@ import os
 import subprocess
 from subprocess import call
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import math as mt
 import matplotlib.patches as mpatches
 import random
@@ -25,12 +26,11 @@ y = True
 n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
-#args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-#args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [3.95, 0.98, 0.2, 0.5, 12, 0.5] 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-#<search_likelihood>-168.789794875181201</search_likelihood>
 
 
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -38,7 +38,7 @@ args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = n                 #
-match_histograms          = n                 #
+match_histograms          = y                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -72,8 +72,9 @@ make_some_hists_switch    = n                 #
 stabity_test_switch       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 test_vel_theta_binning_switch = n
+ridge_probe_switch        = n
 plot_all_hists_switch     = n                 #
-check_timestep_switch     = y                 #
+check_timestep_switch     = n                 #
 quick_calculator_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -86,16 +87,17 @@ quick_calculator_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs  #
-correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-test = 'parameter_sweep_test_ft_4.03730890303'
-run_test = 'run_test'
-run_test2 = 'run_test2'
+correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_postchange'
+run_test = 'run_test_postchange'
+
+#correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_postchange'
+#run_test = 'run_test_postchange'
 
 #    hist to match against for compare after run  #
 correct_hist = correct
 
 #    hist name for the nbody run   #
-histogram_for_nbody_run = run_test
+histogram_for_nbody_run = correct
 histogram_for_nbody_run_and_compare = run_test
 
 #    if you are just matching, these are the two hists #
@@ -1220,7 +1222,85 @@ def test_vel_theta_binning():
     plt.bar(bin_ranges, bins, width = .05 , color = 'r', edgecolor = 'k')
     plt.xlim(-3, 5)
     plt.show()
-
+# #
+def ridge_probe():
+    rl = 0.2
+    ml = 12
+    rr_range = [0.1, 0.5]
+    mr_range = [0.01, 0.95]
+    
+    rr = 0.2
+    mr = 0.2
+    
+    rscale_t = rl / (rr)
+    rd = rscale_t * (1.0 - rr)
+    
+    dwarfmass = ml / mr
+    md = dwarfmass * (1.0 - mr)
+    
+    f = open("ridge_data.txt", 'w')
+    print rd, md
+    
+    rr = rr_range[0]
+    mr = mr_range[0]
+    ratios = []
+    density1s = []
+    density2s = []
+    
+    rrs = []
+    mrs = []
+    while(1):
+        mr = mr_range[0]
+        while(1):
+            rscale_t = rl / (rr)
+            rd = rscale_t * (1.0 - rr)
+        
+            dwarfmass = ml / mr
+            md = dwarfmass * (1.0 - mr)
+            
+            ratio = md / rd
+            density1 = md / (4.0 * mt.pi * rd**3)
+            density2 = rd**2 * density1
+            
+            rrs.append(rr)
+            mrs.append(mr)
+            ratios.append(ratio)
+            density1s.append(density1)
+            density2s.append(density2)
+            
+            f.write("%0.15f\t %0.15f\t%0.15f\t%0.15f\t%0.15f\n" % (rr, mr, ratio, density1, density2))
+            
+            
+            if(mr > mr_range[1]):
+                break
+            else:
+                mr += 0.01
+                
+        if(rr > rr_range[1]):
+            break
+        else:
+            rr += 0.001
+    f.close()
+    
+    gnu_args = ['reset',
+                'set terminal wxt persist',
+                'set key off',
+                "set xlabel 'rrs' ",
+                "set ylabel 'mrs' ",
+                "set zlabel 'ratio' ",
+                "set xrange[0.1: 0.5]",
+                "set yrange[0.01:0.95]",
+                "set zrange[0:100]"]
+                
+                
+    g = open("ridge_probe.gnu", 'w')
+    for i in range(0, len(gnu_args)):
+        g.writelines(gnu_args[i] + "\n")
+    g.write("splot 'ridge_data.txt' using 1:2:4 with points palette pointtype 5 ps 0.5\n")
+    g.close()
+    os.system("gnuplot ridge_probe.gnu 2>>piped_output.txt")
+    
+    return 0
 # #
 def randomize(counts, errors, N):
     for i in range(0, N):
@@ -1523,6 +1603,8 @@ def main():
     if(plot_all_hists_switch):
         plot_all_hists()
     
+    if(ridge_probe_switch):
+        ridge_probe()
     
     
     if(check_timestep_switch):
