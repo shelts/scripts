@@ -28,7 +28,7 @@ n = False
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
 args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.95, 0.98, 0.2, 0.5, 12, 0.5] 
+args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
 
@@ -87,8 +87,8 @@ quick_calculator_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs  #
-correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_postchange'
-run_test = 'run_test_postchange'
+correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+run_test = 'arg_3.95_0.98_0.2_0.2_12_0.2'
 
 #correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_postchange'
 #run_test = 'run_test_postchange'
@@ -105,8 +105,6 @@ match_hist_correct = histogram_for_nbody_run
 match_hist_compare = histogram_for_nbody_run_and_compare
 plot_name = histogram_for_nbody_run
 
-match_hist_correct = histogram_for_nbody_run
-match_hist_compare = histogram_for_nbody_run_and_compare
 
 output = histogram_for_nbody_run
 output_run_compare = histogram_for_nbody_run_and_compare
@@ -184,10 +182,10 @@ def nbody(paras, lua_file, hist, out, ver, should_pipe):
         print('running nbody1 ')
         os.chdir("nbody_test/bin/")
         os.system("./milkyway_nbody" + ver + " \
-            -f " + path + "lua/" + lua_file + " \
+            -f "+ path + "lua/" + lua_file + " \
             -z " + path + "quick_plots/hists/" + hist + ".hist \
             -o " + path + "quick_plots/outputs/" + out + ".out \
-            -n 10 -u -b -P  -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+            -n 10 -b -P  -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
      
     if(run_from_checkpoint and should_pipe == False):
         print('running nbody from checkpoint')
@@ -1320,123 +1318,6 @@ def randomize(counts, errors, N):
         errors[coor2] = error_tmp
    
     return counts, errors
-# # 
-def hstalt_binswap():
-    Nchanges = 25
-    folder = "quick_plots/hists/"
-    
-    histogram_mw_1d_v162_20k_25bins = "hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_25bins"
-    histogram_mw_1d_v162_20k_50bins = "hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_50bins"
-    histogram_mw_1d_v162_20k_100bins = "hist_v162_20k_ft3p95_rt0p98_rl0p2_rr0p2_ml12_mrp2__9_19_16_100bins"
-
-    name = "100bins"
-    prestine = folder + histogram_mw_1d_v162_20k_100bins
-    correct = histogram_mw_1d_v162_20k_100bins
-
-    prestinef = open(prestine + ".hist", 'r')
-    
-    header = []
-    counts = []
-    errors = []
-    col1   = []
-    lbins  = []
-    bbins  = []
-    read_data = False
-    read_header = True
-    
-    for line in prestinef:
-        if(read_header):
-            header.append(line)
-        
-        if(line.startswith("betaBins")):
-            read_data = True
-            read_header = False
-            continue
-        
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                col1.append(ss[0])
-                lbins.append(ss[1])
-                bbins.append(ss[2])
-                
-                count = float(ss[3])
-                
-                dd = ss[4].split("\n")
-                error = float(dd[0])
-                
-                counts.append(count)
-                errors.append(error)
-    
-    prestinef.close()
-    counts_tmp = []
-    errors_tmp = []
-    for N in range(0, Nchanges):
-        #print errors[18], errors[16]
-        
-        counts_tmp, errors_tmp = randomize(counts, errors, N)
-        
-        #print errors_tmp[18], errors_tmp[16]
-        
-        copy = prestine + "_" + str(N) + "changes"
-        copyf = open(copy + ".hist", 'w')
-        
-        for i in range(0, len(header)):
-            copyf.write(header[i])
-        for i in range(0, len(col1)):
-            copyf.write("%s %s %s %0.15f %0.15f\n\n" % (col1[i], lbins[i], bbins[i], counts_tmp[i], errors_tmp[i]))
-        
-        copyf.close()
-        
-        compare = correct + "_" + str(N) + "changes"
-        
-        match_hists_pipe(correct, compare, '', name)
-        
-        
-    piped = name
-    g = open(name, 'r')
-    f = open("data_" + name + ".out", 'w')
-    counter = 0
-    for line in g:
-            if (line.startswith("<")):
-                ss = line.split('<search_likelihood>')#splits the line between the two sides the delimiter
-                tt = ss[1].split('</search_likelihood>')#chooses the second of the split parts and resplits
-                f.write("%s\t%i\n" % (tt[0], counter))#writes the first of the resplit lines
-                counter += 1
-    
-    f.close()
-    g.close()
-    
-    f = open('data_' + name + '.gnuplot', 'w')
-    f.write("reset\n")
-    f.write("set terminal jpeg\n")
-    f.write("set key off\n")
-
-    f.write("set xlabel 'number of changes'\n")
-    f.write("set ylabel 'likelihood'\n")
-    f.write("set yrange [-500:0]\n")
-    f.write("set xrange[0:" + str(Nchanges) + "]\n")
-        
-    p = "./" + "data_" + name + ".out"
-    f.write("set output 'quick_plots/plot_" + name + ".jpeg' \n")
-    f.write("set title 'likelihood vs changes in hist with " + name + "' \n")
-    f.write("plot '" + p + "' using 2:1  with lines\n\n") 
-
-    f.write("# # # # # # # # # # # # # # # # # #\n")
-
-    f.close()
-
-    os.system("gnuplot data_" + name + ".gnuplot 2>>piped_output.txt")
-    os.system("rm gnuplot data_" + name + ".gnuplot")
-    os.system("rm data_" + name + ".out")
-    os.system("rm " + name)
-    
-    plot_3(histogram_mw_1d_v162_20k_25bins, histogram_mw_1d_v162_20k_50bins, histogram_mw_1d_v162_20k_100bins, 'same_hist_diff_bins')
-    return 0
 # # 
 def plot_all_hists():
     ver = ''
