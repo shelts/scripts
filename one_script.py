@@ -38,7 +38,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = n                 #
-match_histograms          = y                 #
+match_histograms          = n                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -55,7 +55,7 @@ vlos_plot_switch          = n                 #
 #              Non-Hist Plot Switches         #
 # # # # # # # # # # # # # # # # # # # # # # # #
 lb_plot_switch            = n                 #
-lambda_beta_plot_switch   = n                 #
+lambda_beta_plot_switch   = y                 #
 
 plot_adjacent             = y                 #
 plot_overlapping          = y                 #
@@ -76,6 +76,8 @@ ridge_probe_switch        = n
 plot_all_hists_switch     = n                 #
 check_timestep_switch     = n                 #
 quick_calculator_switch   = n                 #
+half_mass_radius_switch   = n                 #
+proper_motion_check_switch = y
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -128,7 +130,233 @@ path = sid_dir
                 #          Engine Room         #
                 #\# # # # # # # # # # # # # # /#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+class nbody_outputs:#a class that takes in data from nbody output files and makes them available
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.get_data()
+        
+    def get_data(self):
+        self.xs = []; self.ys = []; self.zs = []
+        self.ls = []; self.bs = []; self.rs = []
+        self.vxs = []; self.vys = []; self.vzs = []
+        self.vls = []; self.ms = []; self.tps = []
+        
+        f = open(self.file_name, 'r')
+        read_data = False
 
+        for line in f:
+            if (line.startswith("betaBins")):
+                read_data = True
+                continue
+            if(line.startswith("</bodies>")):
+                break
+            if(read_data):
+                ss = line.split(', ')
+                ty = int(ss[0])
+                x = float(ss[1])
+                y = float(ss[2])
+                z = float(ss[3])
+                
+                l = float(ss[4])
+                b = float(ss[5])
+                r = float(ss[6])
+                
+                vx = float(ss[7])
+                vy = float(ss[8])
+                vz = float(ss[9])
+                
+                m  = float(ss[10])
+                vl = float(ss[11])
+                
+                self.xs.append(x); self.ys.append(y); self.zs.append(z)
+                self.ls.append(l); self.bs.append(b); self.rs.append(r)
+                self.vxs.append(vx); self.vys.append(vy); self.vzs.append(vz)
+                self.tps.append(ty); self.ms.append(m); self.vls.append(vl)
+                
+            
+        f.close()
+        
+    def dark_light_split(self):#splits the data between light and dark
+        self.light_x , self.light_y , self.light_z    = ([] for i in range(3))
+        self.light_l , self.light_b , self.light_r    = ([] for i in range(3))
+        self.light_vx , self.light_vy , self.light_vz = ([] for i in range(3))
+        self.light_vl, self.light_m                   = ([] for i in range(2))
+        
+        self.dark_x , self.dark_y , self.dark_z       = ([] for i in range(3))
+        self.dark_l , self.dark_b , self.dark_r       = ([] for i in range(3))
+        self.dark_vx , self.dark_vy , self.dark_vz    = ([] for i in range(3))
+        self.dark_vl, self.dark_m                     = ([] for i in range(2))
+        
+        for i in range(0, len(self.xs)):
+            if(self.tps[i] == 0):
+                self.light_x.append(self.xs[i])
+                self.light_y.append(self.ys[i])
+                self.light_z.append(self.zs[i])
+                
+                self.light_l.append(self.ls[i])
+                self.light_b.append(self.bs[i])
+                self.light_r.append(self.rs[i])
+                
+                self.light_vx.append(self.vxs[i])
+                self.light_vy.append(self.vys[i])
+                self.light_vz.append(self.vzs[i])
+                
+                self.light_vl.append(self.vls[i])
+                self.light_m.append(self.ms[i])
+                
+            if(self.tps[i] == 1):
+                self.dark_x.append(self.xs[i])
+                self.dark_y.append(self.ys[i])
+                self.dark_z.append(self.zs[i])
+                
+                self.dark_l.append(self.ls[i])
+                self.dark_b.append(self.bs[i])
+                self.dark_r.append(self.rs[i])
+                
+                self.dark_vx.append(self.vxs[i])
+                self.dark_vy.append(self.vys[i])
+                self.dark_vz.append(self.vzs[i])
+                
+                self.dark_vl.append(self.vls[i])
+                self.dark_m.append(self.ms[i])    
+                
+    def rescale_l(self):#to change l range from [0:360] to [-180:180]
+        for i in range(0, len(self.ls)):
+            if(self.ls[i] > 180.0):
+                self.ls[i] = self.ls[i] - 360.0
+    
+    def convert_lambda_beta(self, split):#to convert l,b to lambda, beta
+        if(split):#if the data was split between light and dark
+            self.light_lambda = []; self.light_beta = []
+            self.dark_lambda  = []; self.dark_beta = []
+        else:
+            self.betas   = []
+            self.lambdas = []
+        
+        for i in range(0, len(self.ls)):
+            if(split):
+                lmbda_tmp, beta_tmp = self.convert_to_Lambda_Beta(self.ls[i], self.bs[i], self.rs[i], False)
+                
+                if(self.tps[i] == 0):
+                    self.light_lambda.append(lmbda_tmp)
+                    self.light_beta.append(beta_tmp)
+                    
+                if(self.tps[i] == 1):
+                    self.dark_lambda.append(lmbda_tmp)
+                    self.dark_beta.append(beta_tmp)
+            else:
+                self.lambdas.append(lmbda_tmp)
+                self.betas.append(beta_tmp)
+            
+        
+        
+    def convert_to_Lambda_Beta(self, x1, x2, x3, cartesian):#can convert l,b or x,y,z to lambda beta
+        phi   = mt.radians(128.79)
+        theta = mt.radians(54.39)
+        psi   = mt.radians(90.70)
+        
+        if(cartesian):
+            x_coor = x1
+            y_coor = x2
+            z_coor = x3
+            x_coor += 8.0 #convert to solar centric
+        else:
+            l = mt.radians(x1)
+            b = mt.radians(x2)
+            r = x3
+            
+            x_coor = r * mt.cos(l) * mt.cos(b) #this is solar centered x
+            y_coor = r * mt.sin(l) * mt.cos(b)
+            z_coor = r * mt.sin(b)
+        
+        #A = MB
+        B = [x_coor, y_coor, z_coor]
+        M_row1 = [mt.cos(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.sin(psi),
+                mt.cos(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.sin(psi),
+                mt.sin(psi) * mt.sin(theta)]
+        
+        M_row2 = [-mt.sin(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.cos(psi),
+                -mt.sin(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.cos(psi),
+                mt.cos(psi) * mt.sin(theta)]
+        
+        M_row3 = [mt.sin(theta) * mt.sin(phi), 
+                -mt.sin(theta) * mt.cos(phi),
+                mt.cos(theta)]
+        
+        A1 = M_row1[0] * B[0] + M_row1[1] * B[1] + M_row1[2] * B[2]
+        A2 = M_row2[0] * B[0] + M_row2[1] * B[1] + M_row2[2] * B[2]
+        A3 = M_row3[0] * B[0] + M_row3[1] * B[1] + M_row3[2] * B[2]
+        
+        beta = mt.asin(-A3 / mt.sqrt(A1 * A1 + A2 * A2 + A3 * A3))
+        lamb = mt.atan2(A2, A1)
+        
+        beta = mt.degrees(beta)
+        lamb = mt.degrees(lamb)
+        
+        return lamb, beta
+    
+    
+    def binner_vlos(self, angle_cuttoffs):
+        self.binned_vlos = []
+        self.which_bin   = []
+        
+        bin_size = abs(angle_cuttoffs[0] - angle_cuttoffs[1]) / angle_cuttoffs[2]
+        mid_bins = []
+        which_lambda = []
+        which_beta = []
+        #setting up the mid bin coordinates
+        for i in range(0, angle_cuttoffs[2]):
+            mid_bin = angle_cuttoffs[0] + i * bin_size + bin_size / 2.0
+            mid_bins.append(mid_bin)
+            
+        #transform to lambda beta coordinates from lbr
+        self.convert_lambda_beta(False)
+        
+        for i in range(0, len(self.lambdas)):#go through the different lambda coordinates
+            if(self.betas[i] >= angle_cuttoffs[3] and self.betas[i] <= angle_cuttoffs[4]):#if it is between the beta cuttoffs
+                for j in range(0, len(mid_bins)):#go through the bin coordinates
+                    left_edge  = mid_bins[j] - bin_size / 2.0 #edges of the bin
+                    right_edge = mid_bins[j] + bin_size / 2.0 #edges of the bin
+                    
+                    if(self.lambdas[i] >= left_edge and self.lambdas[i] <= right_edge):#check if the lambda coor falls in the bin
+                        self.which_bin.append(mid_bins[j])#which mid bin it should be 
+                        self.binned_vlos.append(self.vls[i])#the line of sight vel
+                        
+                        which_lambda.append(self.lambdas[i])#the coordinate that was put there
+                        which_beta.append(self.betas[i])
+                        break 
+
+class nbody_histograms:#a class that takes in data from nbody histogram files and makes them available
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.get_data()
+        
+    def get_data(self):
+        self.lbins = []; self.counts = []; self.count_err = []; self.vd = []; self.vd_error = []
+        read_data = False
+
+        lines = open(self.file_name, 'r')
+        for line in lines:
+            if (line.startswith("betaBins")):
+                read_data = True
+                continue
+            if(line.startswith("</histogram>")):
+                break
+            
+            if(read_data):
+                if(line.startswith("\n")):
+                    continue
+                else:
+                    ss = line.split(' ')
+                    self.lbins.append(    float(ss[1]))
+                    self.counts.append(   float(ss[3]))
+                    self.count_err.append(float(ss[4]))
+                    self.vd.append(       float(ss[5]))
+                    self.vd_error.append( float(ss[6]))
+                    
+        lines.close()
+        
+        
 # # # # # # # # # # # # # # # # # # # # # #
 #    standard nbody running functions     #
 # # # # # # # # # # # # # # # # # # # # # #
@@ -280,49 +508,14 @@ def plot(hist1, hist2, name, label1, label2):
 
     
     print("plotting histograms\n")
-    read_data = False
-    lbins1 = []
-    counts1 = []
-    lines = open(folder + plot_hist1, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins1.append(float(ss[1]))
-                counts1.append(float(ss[3]))
-
-
-    read_data = False
-    lbins2 = []
-    counts2 = []
-    lines = open(folder + plot_hist2, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins2.append(float(ss[1]))
-                counts2.append(float(ss[3]))
-            
+    hist1 = nbody_histograms(folder + plot_hist1)
+    hist2 = nbody_histograms(folder + plot_hist2)
             
     if(plot_overlapping):
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         #plt.subplot(211)
-        plt.bar(lbins1, counts1, width = w_overlap, color='k', alpha=1,    label= label1)
-        plt.bar(lbins2, counts2, width = w_overlap, color='r', alpha=0.75, label= label2)
+        plt.bar(hist1.lbins, hist1.counts, width = w_overlap, color='k', alpha=1,    label= label1)
+        plt.bar(hist2.lbins, hist2.counts, width = w_overlap, color='r', alpha=0.75, label= label2)
         plt.title('Histogram of Light Matter Distribution After 4 Gy')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -336,7 +529,7 @@ def plot(hist1, hist2, name, label1, label2):
     if(plot_adjacent):
         plt.subplot(211)
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
+        plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='b')
         plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
         plt.title('Histogram of Light Matter Distribution After 4 Gy')
         plt.xlim((xlower, xupper))
@@ -345,7 +538,7 @@ def plot(hist1, hist2, name, label1, label2):
         plt.xlabel('Lambda')
 
         plt.subplot(212)
-        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
+        plt.bar(hist2.lbins, hist2.counts, width = w_adjacent, color='k')
         plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -373,56 +566,17 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
     plot_hist1 = hist1 + ".hist"
     plot_hist2 = hist2 + ".hist"
 
-    
     print("plotting histograms\n")
-    read_data = False
-    lbins1 = []
-    velD1 = []
-    #Ncount1 = []
-    lines = open(folder + plot_hist1, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins1.append(float(ss[1]))
-                velD1.append(float(ss[5]))
-                #Ncount1.append(float(ss[4]))
-
-
-    read_data = False
-    lbins2 = []
-    velD2 = []
-    #Ncount2 = []
-    lines = open(folder + plot_hist2, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins2.append(float(ss[1]))
-                velD2.append(float(ss[5]))
-                #Ncount2.append(float(ss[4]))
+    hist1 = nbody_histograms(folder + plot_hist1)
+    hist2 = nbody_histograms(folder + plot_hist2)
             
     if(plot_overlapping):
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
         #plt.subplot(211)
-        plt.bar(lbins1, velD1, width = w_overlap, color='k', alpha=1,    label= label1)
-        plt.bar(lbins2, velD2, width = w_overlap, color='r', alpha=0.75, label= label2)
-        #plt.bar(lbins2, Ncount1, width = w_overlap, color='black', alpha=0.75, label= label2)
-        #plt.bar(lbins2, Ncount2, width = w_overlap, color='b', alpha=0.75, label= label2)
+        plt.bar(hist1.lbins, hist1.vd, width = w_overlap, color='k', alpha=1,    label= label1)
+        plt.bar(hist2.lbins, hist2.vd, width = w_overlap, color='r', alpha=0.75, label= label2)
+        #plt.bar(hist1.lbins, hist1.count_err, width = w_overlap, color='black', alpha=0.75, label= label2)
+        #plt.bar(hist2.lbins, hist2.count_err, width = w_overlap, color='b', alpha=0.75, label= label2)
         plt.title('Line of Sight Vel Disp Distribution')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -435,7 +589,7 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
     if(plot_adjacent):
         plt.subplot(211)
         #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-        plt.bar(lbins1, velD1, width = w_adjacent, color='b')
+        plt.bar(hist1.lbins, hist1.vd, width = w_adjacent, color='b')
         plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
         plt.title('Line of Sight Vel Disp Distribution')
         plt.xlim((xlower, xupper))
@@ -444,7 +598,7 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
         plt.xlabel('Lambda')
 
         plt.subplot(212)
-        plt.bar(lbins2, velD2, width = w_adjacent, color='k')
+        plt.bar(hist2.lbins, hist2.vd, width = w_adjacent, color='k')
         plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, ylimit))
@@ -461,91 +615,6 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
 #        NON-histogram plot               #
 # # # # # # # # # # # # # # # # # # # # # #
 # #
-def convert_to_Lambda_Beta(x1, x2, x3, cartesian):
-    phi   = mt.radians(128.79)
-    theta = mt.radians(54.39)
-    psi   = mt.radians(90.70)
-    
-    if(cartesian):
-        x_coor = x1
-        y_coor = x2
-        z_coor = x3
-        x_coor += 8.0 #convert to solar centric
-    else:
-        l = mt.radians(x1)
-        b = mt.radians(x2)
-        r = x3
-        
-        x_coor = r * mt.cos(l) * mt.cos(b) #this is solar centered x
-        y_coor = r * mt.sin(l) * mt.cos(b)
-        z_coor = r * mt.sin(b)
-    
-    #A = MB
-    B = [x_coor, y_coor, z_coor]
-    M_row1 = [mt.cos(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.sin(psi),
-               mt.cos(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.sin(psi),
-               mt.sin(psi) * mt.sin(theta)]
-    
-    M_row2 = [-mt.sin(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.cos(psi),
-               -mt.sin(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.cos(psi),
-               mt.cos(psi) * mt.sin(theta)]
-    
-    M_row3 = [mt.sin(theta) * mt.sin(phi), 
-               -mt.sin(theta) * mt.cos(phi),
-               mt.cos(theta)]
-    
-    A1 = M_row1[0] * B[0] + M_row1[1] * B[1] + M_row1[2] * B[2]
-    A2 = M_row2[0] * B[0] + M_row2[1] * B[1] + M_row2[2] * B[2]
-    A3 = M_row3[0] * B[0] + M_row3[1] * B[1] + M_row3[2] * B[2]
-    
-    beta = mt.asin(-A3 / mt.sqrt(A1 * A1 + A2 * A2 + A3 * A3))
-    lamb = mt.atan2(A2, A1)
-    
-    beta = mt.degrees(beta)
-    lamb = mt.degrees(lamb)
-    
-    return lamb, beta
-
-def binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs):
-    lambda_coors = []
-    beta_coors   = []
-    
-    bin_size = abs(angle_cuttoffs[0] - angle_cuttoffs[1]) / angle_cuttoffs[2]
-    mid_bins = []
-    which_bin = []
-    which_lambda = []
-    which_vlos = []
-    which_beta = []
-    #setting up the mid bin coordinates
-    for i in range(0, angle_cuttoffs[2]):
-        mid_bin = angle_cuttoffs[0] + i * bin_size + bin_size / 2.0
-        mid_bins.append(mid_bin)
-        
-    #transform to lambda beta coordinates from lbr
-    for i in range(0, len(lcoors)):
-        lambda_tmp, beta_tmp = convert_to_Lambda_Beta(lcoors[i], bcoors[i], rcoors[i], False)
-        lambda_coors.append(lambda_tmp)
-        beta_coors.append(beta_tmp)
-        
-
-    for i in range(0, len(lambda_coors)):#go through the different lambda coordinates
-        if(beta_coors[i] >= angle_cuttoffs[3] and beta_coors[i] <= angle_cuttoffs[4]):#if it is between the beta cuttoffs
-            for j in range(0, len(mid_bins)):#go through the bin coordinates
-                left_edge  = mid_bins[j] - bin_size / 2.0 #edges of the bin
-                right_edge = mid_bins[j] + bin_size / 2.0 #edges of the bin
-                
-                if(lambda_coors[i] >= left_edge and lambda_coors[i] <= right_edge):#check if the lambda coor falls in the bin
-                    which_bin.append(mid_bins[j])#which mid bin it should be 
-                    which_lambda.append(lambda_coors[i])#the coordinate that was put there
-                    which_vlos.append(vloss[i])#the line of sight vel
-                    which_beta.append(beta_coors[i])
-                    break 
-                
-    
-    #for i in range(0, len(which_bin)):
-        #if(which_bin[i] == 15.0):
-            #print which_bin[i], which_vlos[i], which_lambda[i], which_beta[i]
-    return which_bin, which_vlos
 
 def vlos_plot(file1, file2):
     ylimit = 100
@@ -553,7 +622,8 @@ def vlos_plot(file1, file2):
     xupper = -180
     w_overlap = 2.5
     w_adjacent = 1.5
-    folder = 'quick_plots/hists/'
+    folder_hist = 'quick_plots/hists/'
+    folder_outs = 'quick_plots/outputs/'
     save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
     save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
     
@@ -563,119 +633,25 @@ def vlos_plot(file1, file2):
     plot_hist1 = file1 + ".hist"
     plot_hist2 = file2 + ".hist"
     
+    output1 = file1 + ".out"
+    output2 = file2 + ".out"
+    
     label1 = '1'
     label2 = '2'
     
     name = 'vlos_plots'
     print("plotting histograms\n")
     
-    #this is the reading of the of the counts, raw counts, vel disp from hist 1
-    read_data = False
-    lbins1 = []
-    velD1 = []
-    Ncount1 = []
-    counts1 = []
-    lines = open(folder + plot_hist1, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins1.append(float(ss[1]))
-                counts1.append(float(ss[3]))
-                Ncount1.append(float(ss[4]))
-                velD1.append(float(ss[5]))
-
-
-
-    #this is the reading of the of the counts, raw counts, vel disp from hist 2
-    read_data = False
-    lbins2 = []
-    velD2 = []
-    Ncount2 = []
-    counts2 = []
-    lines = open(folder + plot_hist2, 'r')
-    for line in lines:
-        if (line.startswith("betaBins")):
-            read_data = True
-            continue
-        if(read_data):
-            if(line.startswith("</histogram>")):
-                break
-            elif(line.startswith("\n")):
-                continue
-            else:
-                ss = line.split(' ')
-                lbins2.append(float(ss[1]))
-                counts2.append(float(ss[3]))
-                Ncount2.append(float(ss[4]))
-                velD2.append(float(ss[5]))
+    hist1 = nbody_histograms(folder_hist + plot_hist1)
+    hist2 = nbody_histograms(folder_hist + plot_hist2)
      
-     
-    #reading the vLOS and lbr from the output files. 
     angle_cuttoffs = [-150.0, 150.0, 50, -15.0, 15.0, 1]
-    folder = 'quick_plots/outputs/'
-    output1 = file1 + ".out"
-    output2 = file2 + ".out"
-    read_data = False
-    lcoors = []
-    bcoors = []
-    rcoors = []
-    vloss  = []
-    lines = open(folder + output1, 'r')
-    for line in lines:
-        if (line.startswith("# ignore")):
-            read_data = True
-            continue
-        if(read_data):
-            ss = line.split(',')
-            if(line.startswith("\n")):
-                continue
-            elif(float(ss[0]) == 0):
-                lcoors.append(float(ss[4]))
-                bcoors.append(float(ss[5]))
-                rcoors.append(float(ss[6]))
-                vloss.append(float(ss[11]))     
-     
-    which_bin1 = []
-    which_vlos1 = []
-    which_bin1, which_vlos1 = binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs)
-
-    read_data = False
-    lcoors = []
-    bcoors = []
-    rcoors = []
-    vloss  = []
-    lines = open(folder + output2, 'r')
-    for line in lines:
-        if (line.startswith("# ignore")):
-            read_data = True
-            continue
-        if(read_data):
-            ss = line.split(',')
-            if(line.startswith("\n")):
-                continue
-            elif(float(ss[0]) == 0):
-                lcoors.append(float(ss[4]))
-                bcoors.append(float(ss[5]))
-                rcoors.append(float(ss[6]))
-                vloss.append(float(ss[11]))     
-     
-    which_bin2 = []
-    which_vlos2 = []
-    vel_disps2 = []
-    which_bin2, which_vlos2 = binner_vlos(lcoors, bcoors, rcoors, vloss, angle_cuttoffs)
     
-    vel_disps1 = []
-    vel_disps2 = []
-    #vel_disps1 = calc_vel_disps(which_bin1, which_vlos1)
-    #vel_disps2 = calc_vel_disps(which_bin2, which_vlos2)
+    out1 = nbody_outputs(folder_outs + output1)
+    out2 = nbody_outputs(folder_outs + output2)
+    
+    out1.binner_vlos(angle_cuttoffs)#bin the line of sight vels
+    out2.binner_vlos(angle_cuttoffs)
     
     
     if(plot_adjacent):
@@ -688,27 +664,27 @@ def vlos_plot(file1, file2):
         f.subplots_adjust(wspace=0)
         #plt.subplots(4, sharex = True, sharey = True)
         ax1 = plt.subplot(421)
-        plt.bar(lbins1, counts1, width = w_adjacent, color='b')
+        plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='b')
         plt.title('Line of Sight Vel Disp Distribution')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, count_y_limit))
         plt.ylabel('counts')
 
         ax2 = plt.subplot(422)
-        plt.bar(lbins2, counts2, width = w_adjacent, color='k')
+        plt.bar(hist2.lbins, hist2.counts, width = w_adjacent, color='k')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, count_y_limit))
         plt.yticks([])
 
         ax5 = plt.subplot(423)
-        plt.bar(lbins1, Ncount1, width = w_adjacent, color='b')
+        plt.bar(hist1.lbins, hist1.count_err, width = w_adjacent, color='b')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, rawcount_y_limit))
         plt.ylabel('raw count')
         #plt.xlabel('Lambda')
 
         ax6 = plt.subplot(424)
-        plt.bar(lbins2, Ncount2, width = w_adjacent, color='k')
+        plt.bar(hist2.lbins, hist2.count_err, width = w_adjacent, color='k')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, rawcount_y_limit))
         plt.yticks([])
@@ -716,26 +692,26 @@ def vlos_plot(file1, file2):
         
         ax3 = plt.subplot(425)
         #plt.subplots(2, sharex = True, sharey = False)
-        plt.bar(lbins1, velD1, width = w_adjacent, color='b')
+        plt.bar(hist1.lbins, hist1.vd, width = w_adjacent, color='b')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, vel_disp_ylimit))
         plt.ylabel('vel disp')
 
         ax4 = plt.subplot(426)
-        plt.bar(lbins2, velD2, width = w_adjacent, color='k')
+        plt.bar(hist2.lbins, hist2.vd, width = w_adjacent, color='k')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, vel_disp_ylimit))
         plt.yticks([])
         
         ax3 = plt.subplot(427)
         #plt.subplots(2, sharex = True, sharey = False)
-        plt.scatter(which_bin1, which_vlos1, color='b', s=.5, marker= 'o')
+        plt.scatter(out1.which_bin, out1.binned_vlos, color='b', s=.5, marker= 'o')
         plt.xlim((xlower, xupper))
         #plt.ylim((0.0, vel_disp_ylimit))
         plt.ylabel('vel disp')
 
         ax4 = plt.subplot(428)
-        plt.scatter(which_bin2, which_vlos2, color='k', s=.5, marker= 'o', )
+        plt.scatter(out2.which_bin, out2.binned_vlos, color='k', s=.5, marker= 'o', )
         plt.xlim((xlower, xupper))
         #plt.ylim((0.0, vel_disp_ylimit))
         plt.yticks([])
@@ -752,8 +728,8 @@ def vlos_plot(file1, file2):
         f.subplots_adjust(wspace=0)
 
         ax1 = plt.subplot(411)
-        plt.bar(lbins1, counts1, width = w_adjacent, color='k', alpha=1,    label= label1)
-        plt.bar(lbins2, counts2, width = w_adjacent, color='r', alpha=0.75, label= label2)
+        plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='k', alpha=1,    label= label1)
+        plt.bar(hist2.lbins, hist2.counts, width = w_adjacent, color='r', alpha=0.75, label= label2)
         plt.title('Line of Sight Vel Disp Distribution')
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, count_y_limit))
@@ -761,8 +737,8 @@ def vlos_plot(file1, file2):
         plt.legend()
         
         ax3 = plt.subplot(412)
-        plt.bar(lbins1, Ncount1, width = w_adjacent, color='k', alpha=1,    label= label1)
-        plt.bar(lbins2, Ncount2, width = w_adjacent, color='r', alpha=0.75, label= label2)
+        plt.bar(hist1.lbins, hist1.count_err, width = w_adjacent, color='k', alpha=1,    label= label1)
+        plt.bar(hist2.lbins, hist2.count_err, width = w_adjacent, color='r', alpha=0.75, label= label2)
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, rawcount_y_limit))
         plt.ylabel('raw count')
@@ -770,16 +746,16 @@ def vlos_plot(file1, file2):
         plt.legend()
         
         ax2 = plt.subplot(413)
-        plt.bar(lbins1, velD1, width = w_adjacent, color='k', alpha=1,    label= label1)
-        plt.bar(lbins2, velD2, width = w_adjacent, color='r', alpha=0.75, label= label2)
+        plt.bar(hist1.lbins, hist1.vd, width = w_adjacent, color='k', alpha=1,    label= label1)
+        plt.bar(hist2.lbins, hist2.vd, width = w_adjacent, color='r', alpha=0.75, label= label2)
         plt.xlim((xlower, xupper))
         plt.ylim((0.0, vel_disp_ylimit))
         plt.ylabel('vel disp')
         plt.legend()
         
         ax2 = plt.subplot(414)
-        plt.scatter(which_bin1, which_vlos1, s=1, marker= '.',  color='red', alpha=1,label= label1, edgecolors='none')
-        plt.scatter(which_bin2, which_vlos2, s=1, marker= '.', color='blue', alpha=1, label= label2, edgecolors='none')
+        plt.scatter(out1.which_bin, out1.binned_vlos, s=1, marker= '.',  color='red', alpha=1,label= label1, edgecolors='none')
+        plt.scatter(out2.which_bin, out2.binned_vlos, s=1, marker= '.', color='blue', alpha=1, label= label2, edgecolors='none')
         plt.xlim((xlower, xupper))
         #plt.ylim((0.0, vel_disp_ylimit))
         plt.ylabel('vel disp')
@@ -787,9 +763,6 @@ def vlos_plot(file1, file2):
         plt.savefig(save_folder_ove + name + '_overlapping.png', format='png', dpi=1000)
         #plt.clf()
         #plt.show()
-        
-        
-        
         
         return 1
  
@@ -801,45 +774,10 @@ def lambda_beta_plot(file_name):
     plot_light_and_dark = n
     plot_dm_alone = n
     
-    f = open(path_charles + file_name + '.out')
-    lines = []
-    lines = f.readlines()
-    num = 1
-    for line in lines:
-        if (line.startswith("# ignore")):
-            break
-        else:
-            num += 1
+    out = nbody_outputs(path_charles + file_name + '.out')
+    out.dark_light_split()
+    out.convert_lambda_beta(True)
     
-    lines = lines[num:len(lines)]
-    light_l , light_b , light_r = ([] for i in range(3))
-    dark_l , dark_b , dark_r = ([] for i in range(3))
-
-    for line in lines:
-        if(line.startswith("</bodies>")):
-            break
-        tokens = line.split(', ')
-        isDark = int(tokens[0])
-        l = float(tokens[4])
-        #if(l > 180.0):
-            #l = l - 360.0
-        b = float(tokens[5])
-        r = float(tokens[6])
-        if(isDark == 0):
-            light_l.append(l)
-            light_b.append(b)
-            light_r.append(r)
-        if(isDark == 1):
-            dark_l.append(l)
-            dark_b.append(b)
-            dark_r.append(r)
-    
-
-    #converting to lambda beta
-    for i in range(0, len(light_l)):
-        light_l[i], light_b[i] = convert_to_Lambda_Beta(light_l[i], light_b[i], light_r[i], False)
-        dark_l[i], dark_b[i]   = convert_to_Lambda_Beta(dark_l[i],  dark_b[i],  dark_r[i],  False)
-
     fig = plt.figure()
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     # # # # # # # # # #
@@ -855,9 +793,9 @@ def lambda_beta_plot(file_name):
         plt.ylabel('beta')
         plt.title('lambda vs beta')
         #default to just plot lm
-        plt.plot(light_l, light_b, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
+        plt.plot(out.light_lambda, out.light_beta, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta', format='png')
-        print "plotting:", len(light_l), " points"
+        print "plotting:", len(out.light_l), " points"
         # # # # # # # # # #
         if(plot_light_and_dark):#plot lm and dm overlapping
             plt.xlim((xlower, xupper))
@@ -865,7 +803,7 @@ def lambda_beta_plot(file_name):
             plt.xlabel('lambda')
             plt.ylabel('beta')
             plt.title('lambda vs beta')
-            plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
+            plt.plot(out.dark_lambda, out.dark_beta, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta', format='png')
             print "plotting:", len(light_l) + len(dark_l), " points"
         # # # # # # # # # #
@@ -877,7 +815,7 @@ def lambda_beta_plot(file_name):
             plt.xlabel('lambda')
             plt.ylabel('beta')
             plt.title('lambda vs beta')
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.plot(out.dark_lambda, out.dark_beta, '.', markersize = 1, color = 'b', marker = '+')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lambdabeta_dark', format='png')
             
     return 0 
@@ -892,64 +830,9 @@ def lb_plot(file_name):
     plot_xyz = n
     plot_orbit = n
     
-    f = open(path_charles + file_name + '.out')
-    lines = []
-    lines = f.readlines()
-    num = 1
-    for line in lines:
-        if (line.startswith("# ignore")):
-            break
-        else:
-            num += 1
-    
-    lines = lines[num:len(lines)]
-    #print num
-    light_x , light_y , light_z = ([] for i in range(3))
-    light_l , light_b , light_r = ([] for i in range(3))
-    light_vx , light_vy , light_vz = ([] for i in range(3))
-    
-    dark_x , dark_y , dark_z = ([] for i in range(3))
-    dark_l , dark_b , dark_r = ([] for i in range(3))
-    dark_vx , dark_vy , dark_vz = ([] for i in range(3))
-
-    for line in lines:
-        if(line.startswith("</bodies>")):
-            break
-        tokens = line.split(', ')
-        isDark = int(tokens[0])
-        X = float(tokens[1])
-        Y = float(tokens[2])
-        Z = float(tokens[3])
-        l = float(tokens[4])
-        if(l > 180.0):
-            l = l - 360.0
-        b = float(tokens[5])
-        r = float(tokens[6])
-        vx = float(tokens[7])
-        vy = float(tokens[8])
-        vz = float(tokens[9])
-        if(isDark == 0):
-            light_x.append(X)
-            light_y.append(Y)
-            light_z.append(Z)
-            light_l.append(l)
-            light_b.append(b)
-            light_r.append(r)
-            light_vx.append(vx)
-            light_vy.append(vy)
-            light_vz.append(vz)
-        if(isDark == 1):
-            dark_x.append(X)
-            dark_y.append(Y)
-            dark_z.append(Z)
-            dark_l.append(l)
-            dark_b.append(b)
-            dark_r.append(r)
-            dark_vx.append(vx)
-            dark_vy.append(vy)
-            dark_vz.append(vz)    
-    #print(len(light_l))
-    #print(len(dark_l))
+    out = nbody_outputs(path_charles + file_name + '.out')
+    out.dark_light_split()
+    out.rescale_l()
     
     fig = plt.figure()
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
@@ -966,9 +849,9 @@ def lb_plot(file_name):
         plt.ylabel('b')
         plt.title('l vs b')
         #default to just plot lm
-        plt.plot(light_l, light_b, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
+        plt.plot(out.light_l, out.light_b, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
         plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
-        print "plotting:", len(light_l), " points"
+        print "plotting:", len(out.light_l), " points"
         # # # # # # # # # #
         if(plot_light_and_dark):#plot lm and dm overlapping
             plt.xlim((xlower, xupper))
@@ -976,70 +859,34 @@ def lb_plot(file_name):
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(dark_l, dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
+            plt.plot(out.dark_l, out.dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
-            print "plotting:", len(light_l) + len(dark_l), " points"
+            print "plotting:", len(out.light_l) + len(out.dark_l), " points"
         # # # # # # # # # #
         if(plot_orbit):
-            f = open(path + 'reverse_orbit.out')
-            lines = []
-            lines = f.readlines()
-            orb_l , orb_b , orb_r = ([] for i in range(3))
-            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
-            for line in lines:
-                tokens = line.split('\t')
-                orbX = float(tokens[0])
-                if(orbX > 180.0):
-                    orbX = orbX - 360.0
-                orbY = float(tokens[1])
-                orbZ = float(tokens[2])
-                orbVx = float(tokens[3])
-                orbVy = float(tokens[4])
-                orbVz = float(tokens[5])
-                orb_l.append(orbX)
-                orb_b.append(orbY)
-                orb_r.append(orbZ)
-                orb_vx.append(orbVx)
-                orb_vy.append(orbVy)
-                orb_vz.append(orbVz)
-                
+            orb = nbody_outputs(path + 'reverse_orbit.out')
+            orb.rescale_l()
+            orb.dark_light_split()
+            
             plt.xlim((xlower, xupper))
             plt.ylim((ylower, yupper))
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'g', alpha=1.0, marker = '.')
+            plt.plot(orb.ls, orb.bs, '.', markersize = .15, color = 'g', alpha=1.0, marker = '.')
             #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
             
             
-            f = open(path + 'forward_orbit.out')
-            lines = []
-            lines = f.readlines()
-            orb_l , orb_b , orb_r = ([] for i in range(3))
-            orb_vx , orb_vy , orb_vz = ([] for i in range(3))
-            for line in lines:
-                tokens = line.split('\t')
-                orbX = float(tokens[0])
-                if(orbX > 180.0):
-                    orbX = orbX - 360.0
-                orbY = float(tokens[1])
-                orbZ = float(tokens[2])
-                orbVx = float(tokens[3])
-                orbVy = float(tokens[4])
-                orbVz = float(tokens[5])
-                orb_l.append(orbX)
-                orb_b.append(orbY)
-                orb_r.append(orbZ)
-                orb_vx.append(orbVx)
-                orb_vy.append(orbVy)
-                orb_vz.append(orbVz)
+            orb = nbody_outputs(path + 'forward_orbit.out')
+            orb.rescale_l()
+            orb.dark_light_split()
                 
             plt.xlim((xlower, xupper))
             plt.ylim((ylower, yupper))
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(orb_l, orb_b, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
+            plt.plot(orb.ls, orb.bs, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
             plt.show()
 
@@ -1052,7 +899,7 @@ def lb_plot(file_name):
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.plot(out.dark_l, out.dark_b, '.', markersize = 1, color = 'b', marker = '+')
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_dark', format='png')
             
     if(plot_xyz):
@@ -1061,9 +908,11 @@ def lb_plot(file_name):
         fig.tight_layout()
         plt.axes().set_aspect('equal')
         plt.subplot(131, aspect='equal')
-        plt.plot(light_x, light_y, '.', markersize = 1, color = 'r', marker = 'o')
+        plt.plot(out.light_x, out.light_y, '.', markersize = 1, color = 'r', marker = 'o')
+        
         if(plot_light_and_dark == True):
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.plot(out.dark_x, out.dark_y, '.', markersize = 1, color = 'b', marker = '+')
+        
         plt.xlim((xlower, xupper))
         plt.ylim((-80, 80))
         plt.xlabel('x')
@@ -1071,9 +920,12 @@ def lb_plot(file_name):
         plt.title('x vs y')
         
         plt.subplot(132,aspect='equal')
-        plt.plot(light_x, light_z, '.', markersize = 1, color = 'r', marker = 'o')
+        
+        plt.plot(out.light_x, out.light_z, '.', markersize = 1, color = 'r', marker = 'o')
+        
         if(plot_light_and_dark == True):
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.plot(out.dark_x, out.dark_z, '.', markersize = 1, color = 'b', marker = '+')
+        
         plt.xlim((xlower, xupper))
         plt.ylim((-80, 80))
         plt.xlabel('x')
@@ -1081,9 +933,11 @@ def lb_plot(file_name):
         plt.title('x vs z')
         
         plt.subplot(133, aspect='equal')
-        plt.plot(light_z, light_y, '.', markersize = 1, color = 'r', marker = 'o')
+        
+        plt.plot(out.light_z, out.light_y, '.', markersize = 1, color = 'r', marker = 'o')
         if(plot_light_and_dark == True):
-            plt.plot(dark_l, dark_b, '.', markersize = 1, color = 'b', marker = '+')
+            plt.plot(out.dark_z, out.dark_y, '.', markersize = 1, color = 'b', marker = '+')
+        
         plt.xlim((xlower, xupper))
         plt.ylim((-80, 80))
         plt.xlabel('z')
@@ -1110,6 +964,77 @@ def velocity_dispersion():
 # # # # # # # # # # # # # # # # # # # # # #
 #               MISC                      #
 # # # # # # # # # # # # # # # # # # # # # #
+# #
+def proper_motion_check():
+    name1 = 'proper_motion1'
+    name2 = 'proper_motion2'
+    folder = 'quick_plots/outputs/'
+    name1 = folder + 'arg_3.95_0.98_0.2_0.2_12_0.2_correct.out'
+    
+    output1 = nbody_outputs(name1)
+    output2 = nbody_outputs(name1)
+    name1 =  'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+
+
+# #
+def half_mass_radius():
+    #found
+    #-5.274575416,
+    paras = [3.92936973371562, 1, 0.207910965711911, 0.295960733507015, 12.0120839736256, 0.632718403210685]
+    
+    #-1.628862634, 
+    paras = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
+    
+    #-2.017973168, 
+    paras = [3.94791258079938, 1, 0.209888722689345, 0.237645947560661, 12.218431949382, 0.318558828332454]
+    
+    #-2.105469375, 
+    paras = [3.94119850266711, 1, 0.20808218702441, 0.240524291805915, 12.0369010486177, 0.303651066818279]
+    
+    #-2.128633377, 
+    paras = [3.93725511804223, 1, 0.209352829691495, 0.248126046080144, 12.1556158897001, 0.350097152269437]
+
+    rl_f = paras[2]
+    rr_f = paras[3]
+    ml_f = paras[4]
+    mr_f = paras[5]
+    
+    rd_f = (rl_f / rr_f) * (1.0 - rr_f)
+    md_f = (ml_f / mr_f) * (1.0 - mr_f)
+    
+    print "found rd, md:\t", rd_f, md_f
+    
+    #correct
+    ml_c = 12.0
+    rl_c = 0.2
+    rr_c = 0.2
+    mr_c = 0.2
+    rd_c = (rl_c / rr_c) * (1.0 - rr_c)
+    md_c = (ml_c / mr_c) * (1.0 - mr_c)
+    print "correct rd, md:\t", rd_c, md_c
+    
+    cut = .5 * ml_c
+    
+    r = 0.001
+    while(1):
+        m_enc_l = ml_c * r**3.0 / (r * r + rl_c * rl_c )**(3.0 / 2.0)
+        
+        m_enc_d_c = md_c * r**3.0 / (r * r + rd_c * rd_c )**(3.0 / 2.0)
+        m_enc_d_f = md_f * r**3.0 / (r * r + rd_f * rd_f )**(3.0 / 2.0)
+        
+        
+        plummer_den_d_c = (3.0 / (4.0 * mt.pi * rd_c**3.0)) * md_c / (1.0 + (r * r)/ (rd_c * rd_c))**(5.0 / 2.0)
+        plummer_den_d_f = (3.0 / (4.0 * mt.pi * rd_f**3.0)) * md_f / (1.0 + (r * r)/ (rd_f * rd_f))**(5.0 / 2.0)
+        if(m_enc_l >= cut):
+            break
+        else:
+            r += 0.001
+
+    print 'plum den correct, found:\t', plummer_den_d_c, plummer_den_d_f   #density of DM within correct baryon extent     
+    print 'DM enc correct, DM enc found :\t', m_enc_d_c, m_enc_d_f
+    
+    print 'BM enc, r:\t', m_enc_l, r
+    
 # #
 def test_vel_theta_binning():
     pathway = './data_testing/sim_outputs/'
@@ -1300,25 +1225,6 @@ def ridge_probe():
     
     return 0
 # #
-def randomize(counts, errors, N):
-    for i in range(0, N):
-        coor1 = random.randint(0, len(counts) - 1)
-        coor2 = random.randint(0, len(counts) - 1)
-        while(coor1 == coor2):
-            coor1 = random.randint(0, len(counts) - 1)
-            coor2 = random.randint(0, len(counts) - 1)
-        
-        #print coor1, coor2, len(counts)
-        count_tmp = counts[coor1]
-        counts[coor1] = counts[coor2]
-        counts[coor2] = count_tmp
-    
-        error_tmp = errors[coor1]
-        errors[coor1] = errors[coor2]
-        errors[coor2] = error_tmp
-   
-    return counts, errors
-# # 
 def plot_all_hists():
     ver = ''
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
@@ -1494,5 +1400,10 @@ def main():
     if(quick_calculator_switch):
         quick_calculator()
         
+    if(half_mass_radius_switch):
+        half_mass_radius()
+        
+    if(proper_motion_check_switch):
+        proper_motion_check()
 # spark plug #
 main()
