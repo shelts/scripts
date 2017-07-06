@@ -992,12 +992,19 @@ def proper_motion_check():
     diff_sum1 = 0
     diff_sum2 = 0
     
+    max_diff1 = 0.0
+    max_diff2 = 0.0
     for i in range(0, len(out1.lambdas)):
         diff1 = out1.lambdas[i] - out2.lambdas[i]
         diff_sum1 += diff1
         
         diff2 = output3.lambdas[i] - output4.lambdas[i]
         diff_sum2 += diff2
+        
+        if(diff1 > max_diff1):
+            max_diff1 = diff1
+        if(diff2 > max_diff2):
+            max_diff2 = diff2
         
     N = float(len(out1.lambdas))
     print N
@@ -1007,7 +1014,7 @@ def proper_motion_check():
     ave2 = diff_sum2 / N
     
     print ave1, ave2
-    
+    print max_diff1, max_diff2
     #name1 =  'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
 
 
