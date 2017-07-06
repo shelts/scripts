@@ -55,7 +55,7 @@ vlos_plot_switch          = n                 #
 #              Non-Hist Plot Switches         #
 # # # # # # # # # # # # # # # # # # # # # # # #
 lb_plot_switch            = n                 #
-lambda_beta_plot_switch   = y                 #
+lambda_beta_plot_switch   = n                 #
 
 plot_adjacent             = y                 #
 plot_overlapping          = y                 #
@@ -143,9 +143,9 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
         
         f = open(self.file_name, 'r')
         read_data = False
-
+        
         for line in f:
-            if (line.startswith("betaBins")):
+            if (line.startswith("# ignore")):
                 read_data = True
                 continue
             if(line.startswith("</bodies>")):
@@ -167,12 +167,10 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
                 
                 m  = float(ss[10])
                 vl = float(ss[11])
-                
                 self.xs.append(x); self.ys.append(y); self.zs.append(z)
                 self.ls.append(l); self.bs.append(b); self.rs.append(r)
                 self.vxs.append(vx); self.vys.append(vy); self.vzs.append(vz)
                 self.tps.append(ty); self.ms.append(m); self.vls.append(vl)
-                
             
         f.close()
         
@@ -234,9 +232,8 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
             self.lambdas = []
         
         for i in range(0, len(self.ls)):
+            lmbda_tmp, beta_tmp = self.convert_to_Lambda_Beta(self.ls[i], self.bs[i], self.rs[i], False)
             if(split):
-                lmbda_tmp, beta_tmp = self.convert_to_Lambda_Beta(self.ls[i], self.bs[i], self.rs[i], False)
-                
                 if(self.tps[i] == 0):
                     self.light_lambda.append(lmbda_tmp)
                     self.light_beta.append(beta_tmp)
@@ -966,14 +963,52 @@ def velocity_dispersion():
 # # # # # # # # # # # # # # # # # # # # # #
 # #
 def proper_motion_check():
+    args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+    folder = './quick_plots/outputs/'
     name1 = 'proper_motion1'
     name2 = 'proper_motion2'
-    folder = 'quick_plots/outputs/'
-    name1 = folder + 'arg_3.95_0.98_0.2_0.2_12_0.2_correct.out'
+    name3 = 'proper_motion_bestfit_1'
+    name4 = 'proper_motion_bestfit_2'
+    #nbody(args_run, lua, name1, name1, version, False)
+    #nbody(args_run, lua, name2, name2, version, False)
+    #name1 = folder + 'arg_3.95_0.98_0.2_0.2_12_0.2_correct.out'
     
-    output1 = nbody_outputs(name1)
-    output2 = nbody_outputs(name1)
-    name1 =  'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+    #args_run = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
+    #nbody(args_run, lua, name3, name3, version, False)
+    #nbody(args_run, lua, name4, name4, version, False)
+    #print os.path.isfile(folder + name1 + '.out')
+    
+    out1 = nbody_outputs(folder + name1 + '.out')
+    out1.convert_lambda_beta(False)
+    
+    out2 = nbody_outputs(folder + name2 + '.out')
+    out2.convert_lambda_beta(False)
+    output3 = nbody_outputs(folder + name3 + '.out')
+    output4 = nbody_outputs(folder + name4 + '.out')
+    
+    #print len(output1.xs)
+    output3.convert_lambda_beta(False)
+    output4.convert_lambda_beta(False)
+    diff_sum1 = 0
+    diff_sum2 = 0
+    
+    for i in range(0, len(out1.lambdas)):
+        diff1 = out1.lambdas[i] - out2.lambdas[i]
+        diff_sum1 += diff1
+        
+        diff2 = output3.lambdas[i] - output4.lambdas[i]
+        diff_sum2 += diff2
+        
+    N = float(len(out1.lambdas))
+    print N
+    ave1 = diff_sum1 / N
+    
+    N = float(len(output3.lambdas))
+    ave2 = diff_sum2 / N
+    
+    print ave1, ave2
+    
+    #name1 =  'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
 
 
 # #
