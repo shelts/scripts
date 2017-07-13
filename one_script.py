@@ -1365,8 +1365,6 @@ def check_timestep():
         else:
             irl += rl_inc
                     
-                    
-                    
                    
     f.close()
 # # 
