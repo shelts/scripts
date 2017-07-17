@@ -26,7 +26,8 @@ y = True
 n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
-args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
 args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
@@ -36,7 +37,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
+run_nbody                 = y                 #
 remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
@@ -1045,9 +1046,23 @@ def half_mass_radius():
     #-2.783683116
     #paras = [3.94241225402383, 1, 0.20874204818164, 0.234103694371879, 12.0684867434258, 0.305167746809311] 
     
-
-
-
+    #-4.223705409, inertia 0.95  3  july 15
+    #paras = [3.94212310440862, 1, 0.209754488329843, 0.149297963920578, 12.0025209937495, 0.118499907769452]
+    #-3.340390704, , inertia 0.95  3  july 17
+    #paras = [3.93319756659488, 1, 0.20650733573981, 0.231213550145698, 12.0500276364552, 0.253555598702015]
+    
+    
+    #-2.962097993, inertia 0.85  2 july 15
+    paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
+    #-2.962097993,  inertia 0.85  2 july 17
+    paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
+    
+    
+    #-2.576449645 inertia 0.75  1 july 15
+    paras = [3.95022573221887, 1, 0.211005207741159, 0.234158545905685, 12.1524913389464, 0.322044096100095]
+    #-2.451020931, inertia 0.75  1 july 17
+    paras = [3.94304172966898, 1, 0.207005794187862, 0.239074661015308, 12.1004122721036, 0.305314401157284]
+    
 
     rl_f = paras[2]
     rr_f = paras[3]
@@ -1071,6 +1086,7 @@ def half_mass_radius():
     cut = .5 * ml_c
     
     r = 0.001
+    #calculates the density of the dm within the half mass radius of the correct baryon component
     while(1):
         m_enc_l = ml_c * r**3.0 / (r * r + rl_c * rl_c )**(3.0 / 2.0)
         
@@ -1090,6 +1106,35 @@ def half_mass_radius():
     
     print 'BM enc, r:\t', m_enc_l, r
     
+    #rr_c = 0.2
+    #rd_c = (rl_c / rr_c) * (1.0 - rr_c)
+    #m_enc_d_c = md_c * r**3.0 / (r * r + rd_c * rd_c )**(3.0 / 2.0)
+    
+    f = open('cons_den.txt', 'w')
+    
+    threshold = 0.2
+    mr = 0.05
+    while(1):
+        rr = 0.05
+        while(1):
+            rd_f = (rl_c / rr) * (1.0 - rr)
+            md_f = (ml_c / mr) * (1.0 - mr)
+            #mdenc = (3.0 / (4.0 * mt.pi * rd_f**3.0)) * md_f / (1.0 + (r * r)/ (rd_f * rd_f))**(5.0 / 2.0)
+            mdenc = md_f * r**3.0 / (r * r + rd_f * rd_f )**(3.0 / 2.0)
+            #print mdenc, m_enc_d_c
+            if(mdenc > (m_enc_d_c - threshold) and mdenc < (m_enc_d_c + threshold) ):
+                f.write("%0.15f\t%0.15f\t%0.15f\n" % (rr, mr, mdenc))
+            
+            if(rr > 0.5):
+                break
+            else:
+                rr += 0.001
+        if(mr > 0.95):
+            break
+        else:
+            mr += 0.001
+    
+    #print m_enc_d_c
 # #
 def test_vel_theta_binning():
     pathway = './data_testing/sim_outputs/'
