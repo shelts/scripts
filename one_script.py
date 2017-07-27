@@ -29,7 +29,9 @@ n = False
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run_comp = [3.2641084608, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run_comp = [3.28828657813, 0.98, 0.2, 0.2, 12, 0.2]
+
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
 
@@ -57,7 +59,7 @@ vlos_plot_switch          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 lb_plot_switch            = n                 #
 lambda_beta_plot_switch   = n                 #
-
+                                              #
 plot_adjacent             = y                 #
 plot_overlapping          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -66,19 +68,9 @@ plot_overlapping          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              possible tests                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-velocity_disp_switch      = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-make_some_hists_switch    = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-stabity_test_switch       = n                 #
-# # # # # # # # # # # # # # # # # # # # # # # #
-test_vel_theta_binning_switch = n
-ridge_probe_switch        = n
-plot_all_hists_switch     = n                 #
-check_timestep_switch     = n                 #
-quick_calculator_switch   = n                 #
-half_mass_radius_switch   = y                 #
-proper_motion_check_switch = n
+plot_all_hists_switch     = y                 #
+half_mass_radius_switch   = n                 #
+chi_sq_dist_plot_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -91,22 +83,26 @@ histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs  #
 correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-run_test = 'arg_3.95_0.98_0.2_0.2_12_0.2'
-
-#correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_postchange'
-#run_test = 'run_test_postchange'
+correct1 = 'arg_3.95_0.98_0.2_0.2_12_1.43_correct'
+sweep_test1 = 'sweep_test1'
+sweep_test2 = 'sweep_test2'
+sweep_test3 = 'sweep_test3'#same as 1
+sweep_test4 = 'sweep_test4'#same as 2
 
 #    hist to match against for compare after run  #
-correct_hist = correct
+correct_hist = '3'
+compare_hist = '3'
+
+
 
 #    hist name for the nbody run   #
-histogram_for_nbody_run = correct
-histogram_for_nbody_run_and_compare = run_test
+histogram_for_nbody_run = correct_hist
+histogram_for_nbody_run_and_compare = compare_hist
 
 #    if you are just matching, these are the two hists #
 match_hist_correct = histogram_for_nbody_run
 match_hist_compare = histogram_for_nbody_run_and_compare
-plot_name = histogram_for_nbody_run
+plot_name = compare_hist
 
 
 output = histogram_for_nbody_run
@@ -366,7 +362,7 @@ def standard_run():
         nbody(args_run, lua, histogram_for_nbody_run, histogram_for_nbody_run, version, False)
     
     if(run_and_compare):
-        compare_after_run(args_run_comp, lua, correct_hist, histogram_for_nbody_run_and_compare, output_run_compare, version)
+        compare_after_run(args_run_comp, lua, histogram_for_nbody_run, histogram_for_nbody_run_and_compare, output_run_compare, version)
     
     if(match_histograms):
         match_hists(match_hist_correct, match_hist_compare, version)
@@ -381,6 +377,7 @@ def standard_run():
     
     if(vlos_plot_switch):
         vlos_plot(match_hist_correct, match_hist_compare)
+        vlos_plot_single(match_hist_correct)
         
     return 0
 # #        
@@ -613,6 +610,80 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
 #        NON-histogram plot               #
 # # # # # # # # # # # # # # # # # # # # # #
 # #
+def vlos_plot_single(file1):
+    ylimit = 100
+    xlower = 180 
+    xupper = -180
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    folder_hist = 'quick_plots/hists/'
+    folder_outs = 'quick_plots/outputs/'
+    save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
+    save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
+    
+    print "plot histogram 1: ", file1
+    
+    plot_hist1 = file1 + ".hist"
+    
+    output1 = file1 + ".out"
+    
+    label1 = '1'
+    
+    name = 'vlos_plots'
+    print("plotting histograms\n")
+    
+    hist1 = nbody_histograms(folder_hist + plot_hist1)
+     
+    angle_cuttoffs = [-150.0, 150.0, 50, -15.0, 15.0, 1]
+    
+    out1 = nbody_outputs(folder_outs + output1)
+    
+    out1.binner_vlos(angle_cuttoffs)#bin the line of sight vels
+    
+    if(plot_overlapping):
+        count_y_limit = 0.4
+        rawcount_y_limit = 2000
+        vel_disp_ylimit = 50
+        
+        f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+        f.subplots_adjust(hspace=0)
+        f.subplots_adjust(wspace=0)
+
+        ax1 = plt.subplot(311)
+        plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='k', alpha=1)
+        #plt.title(r'Line of Sight $\sigma_{line of sight}$ Distribution')
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, count_y_limit))
+        plt.ylabel('counts')
+        plt.legend()
+        
+        #ax3 = plt.subplot(412)
+        #plt.bar(hist1.lbins, hist1.count_err, width = w_adjacent, color='k', alpha=1)
+        #plt.xlim((xlower, xupper))
+        #plt.ylim((0.0, count_y_limit**0.5))
+        #plt.ylabel('Count error')
+        #plt.xlabel('Lambda')
+        #plt.legend()
+        
+        ax2 = plt.subplot(312)
+        plt.bar(hist1.lbins, hist1.vd, width = w_adjacent, color='k', alpha=1)
+        plt.xlim((xlower, xupper))
+        plt.ylim((0.0, vel_disp_ylimit))
+        plt.ylabel(r'$\sigma$ (km/s)')
+        #plt.legend()
+        
+        ax2 = plt.subplot(313)
+        plt.scatter(out1.which_bin, out1.binned_vlos, s=2, marker= '.',  color='k', alpha=1, edgecolors='none')
+        plt.xlim((xlower, xupper))
+        #plt.ylim((0.0, vel_disp_ylimit))
+        plt.ylabel(r'${v_{los}}$ (km/s)')
+        #plt.legend()
+        plt.xlabel(r'$\Lambda$')
+        plt.savefig(save_folder_ove + name + '_overlapping_single.png', format='png', dpi=500)
+        #plt.clf()
+        #plt.show()
+        
+        return 1
 
 def vlos_plot(file1, file2):
     ylimit = 100
@@ -769,7 +840,7 @@ def lambda_beta_plot(file_name):
     path = 'quick_plots/'
     print file_name
     plot_lbr = y
-    plot_light_and_dark = n
+    plot_light_and_dark = y
     plot_dm_alone = n
     
     out = nbody_outputs(path_charles + file_name + '.out')
@@ -780,40 +851,43 @@ def lambda_beta_plot(file_name):
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     # # # # # # # # # #
     if(plot_lbr):
-        plt.figure(figsize=(20, 20))
-        xlower = -360.0
-        xupper = 360.0
+        plt.figure(figsize=(10, 10))
+        xlower = -180.0
+        xupper = 180.0
         ylower = -80
         yupper = 80
         plt.xlim((xlower, xupper))
         plt.ylim((ylower, yupper))
-        plt.xlabel('lambda')
-        plt.ylabel('beta')
-        plt.title('lambda vs beta')
+        plt.xlabel(r'$\Lambda$')
+        plt.ylabel(r'$\beta$')
+        plt.title(r'$\Lambda$ vs $\beta$')
         #default to just plot lm
-        plt.plot(out.light_lambda, out.light_beta, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
-        plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta', format='png')
+        plt.plot(out.light_lambda, out.light_beta, '.', markersize = .75, color = 'b', alpha=1.0, marker = '.',label = 'baryons')
+        plt.legend()
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta_nodark', format='png')
         print "plotting:", len(out.light_l), " points"
         # # # # # # # # # #
         if(plot_light_and_dark):#plot lm and dm overlapping
             plt.xlim((xlower, xupper))
             plt.ylim((ylower, yupper))
-            plt.xlabel('lambda')
-            plt.ylabel('beta')
-            plt.title('lambda vs beta')
-            plt.plot(out.dark_lambda, out.dark_beta, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
+            plt.xlabel(r'$\Lambda$')
+            plt.ylabel(r'$\beta$')
+            plt.title(r'$\Lambda$ vs $\beta$')
+            plt.plot(out.dark_lambda, out.dark_beta, '.', markersize = .5, color = 'black', alpha=.75, marker = '.', label = 'dark matter')
+            plt.legend()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name + '_lambdabeta', format='png')
-            print "plotting:", len(light_l) + len(dark_l), " points"
+            print "plotting:", len(out.light_l) + len(out.dark_l), " points"
         # # # # # # # # # #
         if(plot_dm_alone):#to plot just dm
             plt.clf()
             plt.figure(figsize=(20, 20))
             plt.xlim((xlower, xupper))
             plt.ylim((ylower, yupper))
-            plt.xlabel('lambda')
-            plt.ylabel('beta')
-            plt.title('lambda vs beta')
+            plt.xlabel(r'$\Lambda$')
+            plt.ylabel(r'$\beta$')
+            plt.title(r'$\Lambda$ vs $\beta$')
             plt.plot(out.dark_lambda, out.dark_beta, '.', markersize = 1, color = 'b', marker = '+')
+            plt.legend()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lambdabeta_dark', format='png')
             
     return 0 
@@ -829,14 +903,14 @@ def lb_plot(file_name):
     plot_orbit = n
     
     out = nbody_outputs(path_charles + file_name + '.out')
-    out.dark_light_split()
     out.rescale_l()
+    out.dark_light_split()
     
     fig = plt.figure()
     fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
     # # # # # # # # # #
     if(plot_lbr):
-        plt.figure(figsize=(20, 20))
+        plt.figure(figsize=(10, 10))
         xlower = -180.0
         xupper = 180.0
         ylower = -80
@@ -847,7 +921,8 @@ def lb_plot(file_name):
         plt.ylabel('b')
         plt.title('l vs b')
         #default to just plot lm
-        plt.plot(out.light_l, out.light_b, '.', markersize = 1.75, color = 'b', alpha=1.0, marker = '.')
+        plt.plot(out.light_l, out.light_b, '.', markersize = 1., color = 'b', alpha=1.0, marker = '.', label = 'baryons')
+        plt.legend()
         plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
         print "plotting:", len(out.light_l), " points"
         # # # # # # # # # #
@@ -857,7 +932,8 @@ def lb_plot(file_name):
             plt.xlabel('l')
             plt.ylabel('b')
             plt.title('l vs b')
-            plt.plot(out.dark_l, out.dark_b, '.', markersize = 1.5, color = 'purple', alpha=1.0, marker = '.')
+            plt.plot(out.dark_l, out.dark_b, '.', markersize = 1, color = 'red', alpha=.25, marker = '.', label = 'dark matter')
+            plt.legend()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
             print "plotting:", len(out.light_l) + len(out.dark_l), " points"
         # # # # # # # # # #
@@ -949,93 +1025,62 @@ def lb_plot(file_name):
 #        different test functions         #
 # # # # # # # # # # # # # # # # # # # # # #
 # #
-def velocity_dispersion():
-    args = [3.95, 1.0, 0.2, 0.8, 12, 48]
-    file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
-    file_name = 'nbody1'
-    #l = 'Null.lua'
-    l = 'EMD_v160_direct_fit.lua'
-    nbody(args, l, file_name, file_name, version, False)
-    #lb_plot(file_name)
-    os.system("./scripts/velocity_dispersion.py " + file_name)
-# # 
+
 # # # # # # # # # # # # # # # # # # # # # #
 #               MISC                      #
 # # # # # # # # # # # # # # # # # # # # # #
 # #
-def proper_motion_check():
-    args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-    folder = './quick_plots/outputs/'
-    name1 = 'proper_motion1'
-    name2 = 'proper_motion2'
-    name3 = 'proper_motion_bestfit_1'
-    name4 = 'proper_motion_bestfit_2'
-    #nbody(args_run, lua, name1, name1, version, False)
-    #nbody(args_run, lua, name2, name2, version, False)
-    #name1 = folder + 'arg_3.95_0.98_0.2_0.2_12_0.2_correct.out'
-    
-    #args_run = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
-    #nbody(args_run, lua, name3, name3, version, False)
-    #nbody(args_run, lua, name4, name4, version, False)
-    #print os.path.isfile(folder + name1 + '.out')
-    
-    out1 = nbody_outputs(folder + name1 + '.out')
-    out1.convert_lambda_beta(False)
-    
-    out2 = nbody_outputs(folder + name2 + '.out')
-    out2.convert_lambda_beta(False)
-    output3 = nbody_outputs(folder + name3 + '.out')
-    output4 = nbody_outputs(folder + name4 + '.out')
-    
-    #print len(output1.xs)
-    output3.convert_lambda_beta(False)
-    output4.convert_lambda_beta(False)
-    diff_sum1 = 0
-    diff_sum2 = 0
-    
-    max_diff1 = 0.0
-    max_diff2 = 0.0
-    for i in range(0, len(out1.lambdas)):
-        diff1 = out1.lambdas[i] - out2.lambdas[i]
-        diff_sum1 += diff1
-        
-        diff2 = output3.lambdas[i] - output4.lambdas[i]
-        diff_sum2 += diff2
-        
-        if(diff1 > max_diff1):
-            max_diff1 = diff1
-        if(diff2 > max_diff2):
-            max_diff2 = diff2
-        
-    N = float(len(out1.lambdas))
-    print N
-    ave1 = diff_sum1 / N
-    
-    N = float(len(output3.lambdas))
-    ave2 = diff_sum2 / N
-    
-    print ave1, ave2
-    print max_diff1, max_diff2
-    #name1 =  'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
 
-
+def chi_sq_dist_plot():
+    k = 50.0
+    cf = (k / 2.0) - 1.0
+    x = 0.1
+    xs = []
+    func1s = []
+    func2s = []
+    func3s = []
+    while(1):
+        func1 = cf * mt.log(x) - x / 2.0
+        func2 = func1 - cf * (mt.log(2.0 * cf) - 1.0) 
+        if(x < 2.0 * cf):
+            func3 = 0.0
+        else:
+            func3 = func2
+            
+        xs.append(x)
+        func1s.append(func1)
+        func2s.append(func2)
+        func3s.append(func3)
+        if(x > 1000):
+            break
+        else:
+            x += 0.1
+    plt.ylim((-200, 100))
+    plt.xlim((0, 400))
+    plt.xlabel(r'N$_{\sigma}$$^{2}$')
+    plt.ylabel('Probability')
+    #plt.plot(xs, func1s)
+    #plt.plot(xs, func2s)
+    plt.plot(xs, func3s)
+    plt.savefig('/home/sidd/Desktop/research/quick_plots/chi_sq_func3', format='png')
+    #plt.show()
 # #
 def half_mass_radius():
     #found
     #-5.274575416,
-    paras = [3.92936973371562, 1, 0.207910965711911, 0.295960733507015, 12.0120839736256, 0.632718403210685]
+    #paras = [3.92936973371562, 1, 0.207910965711911, 0.295960733507015, 12.0120839736256, 0.632718403210685]
     
     #-1.628862634, 
-    paras = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
+    #paras = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
     
     #-2.017973168, 
-    paras = [3.94791258079938, 1, 0.209888722689345, 0.237645947560661, 12.218431949382, 0.318558828332454]
+    #paras = [3.94791258079938, 1, 0.209888722689345, 0.237645947560661, 12.218431949382, 0.318558828332454]
     
     #-2.105469375, 
-    paras = [3.94119850266711, 1, 0.20808218702441, 0.240524291805915, 12.0369010486177, 0.303651066818279]
+    #paras = [3.94119850266711, 1, 0.20808218702441, 0.240524291805915, 12.0369010486177, 0.303651066818279]
     
     #-2.128633377, 
-    paras = [3.93725511804223, 1, 0.209352829691495, 0.248126046080144, 12.1556158897001, 0.350097152269437]
+    #paras = [3.93725511804223, 1, 0.209352829691495, 0.248126046080144, 12.1556158897001, 0.350097152269437]
     
     #-3.463901109
     #paras = [3.94256860087439, 1, 0.206455972523872, 0.252297658380121, 12.0365623332094, 0.372225859672762]
@@ -1047,21 +1092,33 @@ def half_mass_radius():
     #paras = [3.94241225402383, 1, 0.20874204818164, 0.234103694371879, 12.0684867434258, 0.305167746809311] 
     
     #-4.223705409, inertia 0.95  3  july 15
-    #paras = [3.94212310440862, 1, 0.209754488329843, 0.149297963920578, 12.0025209937495, 0.118499907769452]
+    paras = [3.94212310440862, 1, 0.209754488329843, 0.149297963920578, 12.0025209937495, 0.118499907769452]
     #-3.340390704, , inertia 0.95  3  july 17
-    #paras = [3.93319756659488, 1, 0.20650733573981, 0.231213550145698, 12.0500276364552, 0.253555598702015]
+    paras = [3.93319756659488, 1, 0.20650733573981, 0.231213550145698, 12.0500276364552, 0.253555598702015]
+    #-3.259024291 3 july 19
+    paras =  [3.9336334482373, 1, 0.207990122635552, 0.106294048112, 12.2616054285078, 0.0476065538218]
+    #-2.485412179, 3, july 25
+    paras = [3.92986741357062, 1, 0.198291118789933, 0.106294048112, 12.0940980827287,  0.0476065538218]
     
     
     #-2.962097993, inertia 0.85  2 july 15
-    paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
+    #paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
     #-2.962097993,  inertia 0.85  2 july 17
-    paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
-    
-    
+    #paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
+    #-2.893468048 2  july 19
+    #paras =  [3.95309677360586, 1, 0.203955994957639, 0.150740069568347, 12.0295576783773, 0.113673581853117]
+    #-2.835807667, 2, july 25
+    #paras = [3.96084001571367, 1, 0.19883172037272,   0.140806663089422,  12.0399970584733,  0.0988578701643179]
+
     #-2.576449645 inertia 0.75  1 july 15
-    paras = [3.95022573221887, 1, 0.211005207741159, 0.234158545905685, 12.1524913389464, 0.322044096100095]
+    #paras = [3.95022573221887, 1, 0.211005207741159, 0.234158545905685, 12.1524913389464, 0.322044096100095]
     #-2.451020931, inertia 0.75  1 july 17
-    paras = [3.94304172966898, 1, 0.207005794187862, 0.239074661015308, 12.1004122721036, 0.305314401157284]
+    #paras = [3.94304172966898, 1, 0.207005794187862, 0.239074661015308, 12.1004122721036, 0.305314401157284]
+    #-1.982544008, 1   july 19
+    #paras = [3.94374191868974, 1, 0.209527551031424, 0.238111030876674, 12.0851791020405, 0.313628795395889]
+    #-1.798167375, 1 july 25
+    #paras = [3.94294089367003, 1, 0.208056824928637, 0.23901808287037,    12.0978099829844,  0.300798394769984]
+    
     
 
     rl_f = paras[2]
@@ -1106,224 +1163,60 @@ def half_mass_radius():
     
     print 'BM enc, r:\t', m_enc_l, r
     
+    
+    r = 0.001
+    #calculates the density of the dm within the half mass radius of the correct baryon component
+    while(1):
+        m_enc_l = ml_f * r**3.0 / (r * r + rl_f * rl_f )**(3.0 / 2.0)
+        
+        m_enc_d_c = md_c * r**3.0 / (r * r + rd_c * rd_c )**(3.0 / 2.0)
+        m_enc_d_f = md_f * r**3.0 / (r * r + rd_f * rd_f )**(3.0 / 2.0)
+        
+        
+        plummer_den_d_c = (3.0 / (4.0 * mt.pi * rd_c**3.0)) * md_c / (1.0 + (r * r)/ (rd_c * rd_c))**(5.0 / 2.0)
+        plummer_den_d_f = (3.0 / (4.0 * mt.pi * rd_f**3.0)) * md_f / (1.0 + (r * r)/ (rd_f * rd_f))**(5.0 / 2.0)
+        if(m_enc_l >= cut):
+            break
+        else:
+            r += 0.001
+
+    print 'plum den correct, found:\t', plummer_den_d_c, plummer_den_d_f   #density of DM within correct baryon extent     
+    print 'DM enc correct, DM enc found :\t', m_enc_d_c, m_enc_d_f
+    
+    print 'BM enc, r:\t', m_enc_l, r
+    
+    
+    
     #rr_c = 0.2
     #rd_c = (rl_c / rr_c) * (1.0 - rr_c)
     #m_enc_d_c = md_c * r**3.0 / (r * r + rd_c * rd_c )**(3.0 / 2.0)
-    
-    f = open('cons_den.txt', 'w')
-    
-    threshold = 0.2
-    mr = 0.05
-    while(1):
-        rr = 0.05
+    if(False):
+        f = open('cons_den.txt', 'w')
+        
+        threshold = 0.2
+        mr = 0.05
         while(1):
-            rd_f = (rl_c / rr) * (1.0 - rr)
-            md_f = (ml_c / mr) * (1.0 - mr)
-            #mdenc = (3.0 / (4.0 * mt.pi * rd_f**3.0)) * md_f / (1.0 + (r * r)/ (rd_f * rd_f))**(5.0 / 2.0)
-            mdenc = md_f * r**3.0 / (r * r + rd_f * rd_f )**(3.0 / 2.0)
-            #print mdenc, m_enc_d_c
-            if(mdenc > (m_enc_d_c - threshold) and mdenc < (m_enc_d_c + threshold) ):
-                f.write("%0.15f\t%0.15f\t%0.15f\n" % (rr, mr, mdenc))
-            
-            if(rr > 0.5):
+            rr = 0.05
+            while(1):
+                rd_f = (rl_c / rr) * (1.0 - rr)
+                md_f = (ml_c / mr) * (1.0 - mr)
+                #mdenc = (3.0 / (4.0 * mt.pi * rd_f**3.0)) * md_f / (1.0 + (r * r)/ (rd_f * rd_f))**(5.0 / 2.0)
+                mdenc = md_f * r**3.0 / (r * r + rd_f * rd_f )**(3.0 / 2.0)
+                #print mdenc, m_enc_d_c
+                if(mdenc > (m_enc_d_c - threshold) and mdenc < (m_enc_d_c + threshold) ):
+                    f.write("%0.15f\t%0.15f\t%0.15f\n" % (rr, mr, mdenc))
+                
+                if(rr > 0.5):
+                    break
+                else:
+                    rr += 0.001
+            if(mr > 0.95):
                 break
             else:
-                rr += 0.001
-        if(mr > 0.95):
-            break
-        else:
-            mr += 0.001
-    
+                mr += 0.001
+        f.close()
     #print m_enc_d_c
-# #
-def test_vel_theta_binning():
-    pathway = './data_testing/sim_outputs/'
-    file_name = pathway + 'output_plummer_plummer_0gy.out'
-    vxs = []
-    vys = []
-    vzs = []
-    ms = []
-    g = open(file_name, 'r')
-    num = 1
-    for line in g:
-        if (line.startswith("# ignore")):
-            break
-        else:
-            num += 1
-    g.close()
-    
-    line_n = 0
-    lines = open(file_name, 'r')
-    print num
-    for line in lines:
-        if(line_n < num):
-            line_n += 1
-            continue
-        
-        tt = line.split(', ')
-        ty = float(tt[0])
-        vx = float(tt[7])
-        vy = float(tt[8])
-        vz = float(tt[9])
-        m  = float(tt[10])
-        vxs.append(vx)
-        vys.append(vy)
-        vzs.append(vz)
-        ms.append(m)
-        
-    lines.close()
-    N = len(vxs)
-    
-    
-    
-    #cm correction
-    cmx = 0.
-    cmy = 0.
-    cmz = 0.
-    mtot = 0
-    for i in range(0,N):
-        cmx += ms[i] * vxs[i]
-        cmy += ms[i] * vys[i]
-        cmz += ms[i] * vzs[i]
-        mtot += ms[i]
-    cmx = cmx / mtot
-    cmy = cmy / mtot
-    cmz = cmz / mtot
-    
-    for i in range(0, N):
-        vxs[i] -= cmx
-        vys[i] -= cmy
-        vzs[i] -= cmz
-    
-    thetas = []
-    vs = []
-    for i in range(0,len(vxs)):
-        v = mt.sqrt( vxs[i] * vxs[i] + vys[i] * vys[i] + vzs[i] * vzs[i])
-        theta = mt.acos( vzs[i] / v)
-        thetas.append(theta)
-        vs.append(v)
-        
-    print vs
-    
-    
-    #binning
-    binN = 1000
-    binwidth = 0.1
-    upper = binN * binwidth
-    
-    bins = []
-    bin_ranges = []
-    for k in range(0, binN):
-        bins.append(0)
-        bin_ranges.append(0)
-        
-        
-    tmp = thetas
-    #print tmp
-    for i in range(0, N):
-        bin_range = 0
-        
-        for j in range(0, binN):
-            if( (bin_range + binwidth) < upper):
-                if(tmp[i] >= bin_range and tmp[i] < (bin_range + binwidth)):
-                    bins[j] += 1
-                    break
-                bin_range += binwidth
-            elif( ( bin_range + binwidth) == upper):
-                if( tmp[i] >= bin_range and tmp[i] <= (bin_range + binwidth)):
-                    bins[j] += 1
-                    break
-                bin_range += binwidth
 
-        
-    bin_range = 0
-    for k in range(0, binN):
-        bin_ranges[k] = bin_range
-        bin_range += binwidth
-    #print bins
-
-    plt.bar(bin_ranges, bins, width = .05 , color = 'r', edgecolor = 'k')
-    plt.xlim(-3, 5)
-    plt.show()
-# #
-def ridge_probe():
-    rl = 0.2
-    ml = 12
-    rr_range = [0.1, 0.5]
-    mr_range = [0.01, 0.95]
-    
-    rr = 0.2
-    mr = 0.2
-    
-    rscale_t = rl / (rr)
-    rd = rscale_t * (1.0 - rr)
-    
-    dwarfmass = ml / mr
-    md = dwarfmass * (1.0 - mr)
-    
-    f = open("ridge_data.txt", 'w')
-    print rd, md
-    
-    rr = rr_range[0]
-    mr = mr_range[0]
-    ratios = []
-    density1s = []
-    density2s = []
-    
-    rrs = []
-    mrs = []
-    while(1):
-        mr = mr_range[0]
-        while(1):
-            rscale_t = rl / (rr)
-            rd = rscale_t * (1.0 - rr)
-        
-            dwarfmass = ml / mr
-            md = dwarfmass * (1.0 - mr)
-            
-            ratio = md / rd
-            density1 = md / (4.0 * mt.pi * rd**3)
-            density2 = rd**2 * density1
-            
-            rrs.append(rr)
-            mrs.append(mr)
-            ratios.append(ratio)
-            density1s.append(density1)
-            density2s.append(density2)
-            
-            f.write("%0.15f\t %0.15f\t%0.15f\t%0.15f\t%0.15f\n" % (rr, mr, ratio, density1, density2))
-            
-            
-            if(mr > mr_range[1]):
-                break
-            else:
-                mr += 0.01
-                
-        if(rr > rr_range[1]):
-            break
-        else:
-            rr += 0.001
-    f.close()
-    
-    gnu_args = ['reset',
-                'set terminal wxt persist',
-                'set key off',
-                "set xlabel 'rrs' ",
-                "set ylabel 'mrs' ",
-                "set zlabel 'ratio' ",
-                "set xrange[0.1: 0.5]",
-                "set yrange[0.01:0.95]",
-                "set zrange[0:100]"]
-                
-                
-    g = open("ridge_probe.gnu", 'w')
-    for i in range(0, len(gnu_args)):
-        g.writelines(gnu_args[i] + "\n")
-    g.write("splot 'ridge_data.txt' using 1:2:4 with points palette pointtype 5 ps 0.5\n")
-    g.close()
-    os.system("gnuplot ridge_probe.gnu 2>>piped_output.txt")
-    
-    return 0
 # #
 def plot_all_hists():
     ver = ''
@@ -1350,111 +1243,8 @@ def plot_all_hists():
         plot(correct, hist_name, str(i), label1, label2)
     return 0
 # #
-def check_timestep():
-    rl = [0.05, 0.5]
-    rr = [0.1, 0.5]
-    ml = [1, 50]
-    mr = [0.01, 0.95]
-    f = open("times.txt", 'w')
-    rl_inc = 0.1
-    rr_inc = 0.05
-    ml_inc = 1
-    mr_inc = 0.05
-    
-    irl = rl[0]
-    while(1):
-        irr = rr[0]
-        while(1):
-            iml = ml[0]
-            while(1):
-                imr = mr[0]
-                while(1):
-                    dwarfMass = iml / imr
-                    rscale_t  = irl / irr
-                    rd  = rscale_t *  (1.0 - irr)
-                    md    = dwarfMass * (1.0 - imr)
-                    
-                    
-                    mass_enc_d = md * (irl)**3 * ( (irl)**2 + (rd)**2  )**(-3.0/2.0)
 
-                    mass_enc_l = iml * (rd)**3 * ( (irl)**2 + (rd)**2  )**(-3.0/2.0)
 
-                    s1 = (irl)**3 / (mass_enc_d + iml)
-                    s2 = (rd)**3 / (mass_enc_l + md)
-                    
-                    if(s1 < s2):
-                        s = s1
-                    else:
-                        s = s2
-                    
-                    t = (1 / 100.0) * ( mt.pi * (4.0 / 3.0) * s)**(1.0/2.0)
-                    f.write("%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\n" % (t, irl, irr, iml, imr, rd, md))
-                    
-                    if(imr > mr[1]):
-                        break
-                    else:
-                        imr += mr_inc
-                
-                if(iml > ml[1]):
-                    break
-                else:
-                    iml += ml_inc
-            
-            if(irr > rr[1]):
-                break
-            else:
-                irr += rr_inc
-                
-        if(irl > rl[1]):
-            break
-        else:
-            irl += rl_inc
-                    
-                   
-    f.close()
-# # 
-def stabity_test():
-    args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
-    #args = [0.0001, 0.9862, 0.2, 0.2, 24, .2]
-    sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
-    ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
-    N               = 1
-    M               = 0
-    
-    make_nbody()
-    
-    b_t = str(args[1])
-    r_l = str(args[2])
-    r_r = str(args[3])
-    m_l = str(args[4])
-    m_r = str(args[5])
-    
-    
-    ver = ''
-    lua_file = "mixeddwarf.lua"
-    
-    nfw  = 'output_nfw_nfw_0gy'
-    plum = 'output_plummer_plummer_0gy'
-    hern = 'output_hern_hern_0gy'
-    plum_nfw = 'output_plummer_nfw_0gy'
-
-    fn = nfw
-    #args = [sim_time[0], 0.9862, 0.8, 0.5, 24, .5]
-    #nbody(args, lua_file, fn, fn, ver, False)
-    
-    for i in range(M, N):
-        args[0] = sim_time[i]
-        nfw  = 'output_nfw_nfw_' + ext[i] + 'gy'
-        plum = 'output_plummer_plummer_' + ext[i] + 'gy'
-        hern = 'output_hern_hern_' + ext[i] + 'gy'
-        plum_nfw = 'output_plummer_nfw_' + ext[i] + 'gy'
-        fn = nfw
-        nbody(args, lua_file, fn, fn, ver, False)
-    
-    
-    os.chdir("data_testing")    
-    os.system("./stability_test.py " + b_t + " " + r_l + " " + r_r + " " + m_l + " " + m_r)
-# # 
 def clean():
     os.system("rm boinc_*")
 # #      
@@ -1469,14 +1259,10 @@ def main():
     if(test_vel_theta_binning_switch):
         test_vel_theta_binning()
         
-    if(make_some_hists_switch):
-        make_some_hists()
     
     if(stabity_test_switch):
         stabity_test()
     
-    if(velocity_disp_switch):
-        velocity_dispersion()
     
     if(lb_plot_switch):
         lb_plot(output)
@@ -1488,20 +1274,12 @@ def main():
     if(plot_all_hists_switch):
         plot_all_hists()
     
-    if(ridge_probe_switch):
-        ridge_probe()
-    
-    
-    if(check_timestep_switch):
-        check_timestep()
-        
-    if(quick_calculator_switch):
-        quick_calculator()
         
     if(half_mass_radius_switch):
         half_mass_radius()
         
-    if(proper_motion_check_switch):
-        proper_motion_check()
+        
+    if(chi_sq_dist_plot_switch):
+        chi_sq_dist_plot()
 # spark plug #
 main()

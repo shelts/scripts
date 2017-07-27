@@ -269,3 +269,378 @@ def for_charles():
         
     return 0
 # # # # # # # # # # # # # # # # # # # # # #
+
+
+
+# #
+def test_vel_theta_binning():
+    pathway = './data_testing/sim_outputs/'
+    file_name = pathway + 'output_plummer_plummer_0gy.out'
+    vxs = []
+    vys = []
+    vzs = []
+    ms = []
+    g = open(file_name, 'r')
+    num = 1
+    for line in g:
+        if (line.startswith("# ignore")):
+            break
+        else:
+            num += 1
+    g.close()
+    
+    line_n = 0
+    lines = open(file_name, 'r')
+    print num
+    for line in lines:
+        if(line_n < num):
+            line_n += 1
+            continue
+        
+        tt = line.split(', ')
+        ty = float(tt[0])
+        vx = float(tt[7])
+        vy = float(tt[8])
+        vz = float(tt[9])
+        m  = float(tt[10])
+        vxs.append(vx)
+        vys.append(vy)
+        vzs.append(vz)
+        ms.append(m)
+        
+    lines.close()
+    N = len(vxs)
+    
+    
+    
+    #cm correction
+    cmx = 0.
+    cmy = 0.
+    cmz = 0.
+    mtot = 0
+    for i in range(0,N):
+        cmx += ms[i] * vxs[i]
+        cmy += ms[i] * vys[i]
+        cmz += ms[i] * vzs[i]
+        mtot += ms[i]
+    cmx = cmx / mtot
+    cmy = cmy / mtot
+    cmz = cmz / mtot
+    
+    for i in range(0, N):
+        vxs[i] -= cmx
+        vys[i] -= cmy
+        vzs[i] -= cmz
+    
+    thetas = []
+    vs = []
+    for i in range(0,len(vxs)):
+        v = mt.sqrt( vxs[i] * vxs[i] + vys[i] * vys[i] + vzs[i] * vzs[i])
+        theta = mt.acos( vzs[i] / v)
+        thetas.append(theta)
+        vs.append(v)
+        
+    print vs
+    
+    
+    #binning
+    binN = 1000
+    binwidth = 0.1
+    upper = binN * binwidth
+    
+    bins = []
+    bin_ranges = []
+    for k in range(0, binN):
+        bins.append(0)
+        bin_ranges.append(0)
+        
+        
+    tmp = thetas
+    #print tmp
+    for i in range(0, N):
+        bin_range = 0
+        
+        for j in range(0, binN):
+            if( (bin_range + binwidth) < upper):
+                if(tmp[i] >= bin_range and tmp[i] < (bin_range + binwidth)):
+                    bins[j] += 1
+                    break
+                bin_range += binwidth
+            elif( ( bin_range + binwidth) == upper):
+                if( tmp[i] >= bin_range and tmp[i] <= (bin_range + binwidth)):
+                    bins[j] += 1
+                    break
+                bin_range += binwidth
+
+        
+    bin_range = 0
+    for k in range(0, binN):
+        bin_ranges[k] = bin_range
+        bin_range += binwidth
+    #print bins
+
+    plt.bar(bin_ranges, bins, width = .05 , color = 'r', edgecolor = 'k')
+    plt.xlim(-3, 5)
+    plt.show()
+# #
+
+
+
+def ridge_probe():
+    rl = 0.2
+    ml = 12
+    rr_range = [0.1, 0.5]
+    mr_range = [0.01, 0.95]
+    
+    rr = 0.2
+    mr = 0.2
+    
+    rscale_t = rl / (rr)
+    rd = rscale_t * (1.0 - rr)
+    
+    dwarfmass = ml / mr
+    md = dwarfmass * (1.0 - mr)
+    
+    f = open("ridge_data.txt", 'w')
+    print rd, md
+    
+    rr = rr_range[0]
+    mr = mr_range[0]
+    ratios = []
+    density1s = []
+    density2s = []
+    
+    rrs = []
+    mrs = []
+    while(1):
+        mr = mr_range[0]
+        while(1):
+            rscale_t = rl / (rr)
+            rd = rscale_t * (1.0 - rr)
+        
+            dwarfmass = ml / mr
+            md = dwarfmass * (1.0 - mr)
+            
+            ratio = md / rd
+            density1 = md / (4.0 * mt.pi * rd**3)
+            density2 = rd**2 * density1
+            
+            rrs.append(rr)
+            mrs.append(mr)
+            ratios.append(ratio)
+            density1s.append(density1)
+            density2s.append(density2)
+            
+            f.write("%0.15f\t %0.15f\t%0.15f\t%0.15f\t%0.15f\n" % (rr, mr, ratio, density1, density2))
+            
+            
+            if(mr > mr_range[1]):
+                break
+            else:
+                mr += 0.01
+                
+        if(rr > rr_range[1]):
+            break
+        else:
+            rr += 0.001
+    f.close()
+    
+    gnu_args = ['reset',
+                'set terminal wxt persist',
+                'set key off',
+                "set xlabel 'rrs' ",
+                "set ylabel 'mrs' ",
+                "set zlabel 'ratio' ",
+                "set xrange[0.1: 0.5]",
+                "set yrange[0.01:0.95]",
+                "set zrange[0:100]"]
+                
+                
+    g = open("ridge_probe.gnu", 'w')
+    for i in range(0, len(gnu_args)):
+        g.writelines(gnu_args[i] + "\n")
+    g.write("splot 'ridge_data.txt' using 1:2:4 with points palette pointtype 5 ps 0.5\n")
+    g.close()
+    os.system("gnuplot ridge_probe.gnu 2>>piped_output.txt")
+    
+    return 0
+# #
+
+
+def proper_motion_check():
+    args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+    folder = './quick_plots/outputs/'
+    name1 = 'proper_motion1'
+    name2 = 'proper_motion2'
+    name3 = 'proper_motion_bestfit_1'
+    name4 = 'proper_motion_bestfit_2'
+    #nbody(args_run, lua, name1, name1, version, False)
+    #nbody(args_run, lua, name2, name2, version, False)
+    #name1 = folder + 'arg_3.95_0.98_0.2_0.2_12_0.2_correct.out'
+    
+    #args_run = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
+    #nbody(args_run, lua, name3, name3, version, False)
+    #nbody(args_run, lua, name4, name4, version, False)
+    #print os.path.isfile(folder + name1 + '.out')
+    
+    out1 = nbody_outputs(folder + name1 + '.out')
+    out1.convert_lambda_beta(False)
+    
+    out2 = nbody_outputs(folder + name2 + '.out')
+    out2.convert_lambda_beta(False)
+    output3 = nbody_outputs(folder + name3 + '.out')
+    output4 = nbody_outputs(folder + name4 + '.out')
+    
+    #print len(output1.xs)
+    output3.convert_lambda_beta(False)
+    output4.convert_lambda_beta(False)
+    diff_sum1 = 0
+    diff_sum2 = 0
+    
+    max_diff1 = 0.0
+    max_diff2 = 0.0
+    for i in range(0, len(out1.lambdas)):
+        diff1 = out1.lambdas[i] - out2.lambdas[i]
+        diff_sum1 += diff1
+        
+        diff2 = output3.lambdas[i] - output4.lambdas[i]
+        diff_sum2 += diff2
+        
+        if(diff1 > max_diff1):
+            max_diff1 = diff1
+        if(diff2 > max_diff2):
+            max_diff2 = diff2
+        
+    N = float(len(out1.lambdas))
+    print N
+    ave1 = diff_sum1 / N
+    
+    N = float(len(output3.lambdas))
+    ave2 = diff_sum2 / N
+    
+    print ave1, ave2
+    print max_diff1, max_diff2
+    #name1 =  'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+# #
+
+
+
+def check_timestep():
+    rl = [0.05, 0.5]
+    rr = [0.1, 0.5]
+    ml = [1, 50]
+    mr = [0.01, 0.95]
+    f = open("times.txt", 'w')
+    rl_inc = 0.1
+    rr_inc = 0.05
+    ml_inc = 1
+    mr_inc = 0.05
+    
+    irl = rl[0]
+    while(1):
+        irr = rr[0]
+        while(1):
+            iml = ml[0]
+            while(1):
+                imr = mr[0]
+                while(1):
+                    dwarfMass = iml / imr
+                    rscale_t  = irl / irr
+                    rd  = rscale_t *  (1.0 - irr)
+                    md    = dwarfMass * (1.0 - imr)
+                    
+                    
+                    mass_enc_d = md * (irl)**3 * ( (irl)**2 + (rd)**2  )**(-3.0/2.0)
+
+                    mass_enc_l = iml * (rd)**3 * ( (irl)**2 + (rd)**2  )**(-3.0/2.0)
+
+                    s1 = (irl)**3 / (mass_enc_d + iml)
+                    s2 = (rd)**3 / (mass_enc_l + md)
+                    
+                    if(s1 < s2):
+                        s = s1
+                    else:
+                        s = s2
+                    
+                    t = (1 / 100.0) * ( mt.pi * (4.0 / 3.0) * s)**(1.0/2.0)
+                    f.write("%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\t%0.15f\n" % (t, irl, irr, iml, imr, rd, md))
+                    
+                    if(imr > mr[1]):
+                        break
+                    else:
+                        imr += mr_inc
+                
+                if(iml > ml[1]):
+                    break
+                else:
+                    iml += ml_inc
+            
+            if(irr > rr[1]):
+                break
+            else:
+                irr += rr_inc
+                
+        if(irl > rl[1]):
+            break
+        else:
+            irl += rl_inc
+                    
+                   
+    f.close()
+# # 
+
+
+def velocity_dispersion():
+    args = [3.95, 1.0, 0.2, 0.8, 12, 48]
+    file_name = 'velocity_dispersion_test_pot_lbr_xyz_3.95gy'
+    file_name = 'nbody1'
+    #l = 'Null.lua'
+    l = 'EMD_v160_direct_fit.lua'
+    nbody(args, l, file_name, file_name, version, False)
+    #lb_plot(file_name)
+    os.system("./scripts/velocity_dispersion.py " + file_name)
+# # 
+
+
+def stabity_test():
+    args = [0.0001, 0.9862, 0.2, 0.5, 24, .5]
+    #args = [0.0001, 0.9862, 0.2, 0.2, 24, .2]
+    sim_time        = [0.0001, 0.25, 0.50, 0.75, 1.0, 2.0, 3.0, 4.0]
+    ext             = [ "0", "p25", "p50", "p75", "1", "2", "3", "4"]
+    N               = 1
+    M               = 0
+    
+    make_nbody()
+    
+    b_t = str(args[1])
+    r_l = str(args[2])
+    r_r = str(args[3])
+    m_l = str(args[4])
+    m_r = str(args[5])
+    
+    
+    ver = ''
+    lua_file = "mixeddwarf.lua"
+    
+    nfw  = 'output_nfw_nfw_0gy'
+    plum = 'output_plummer_plummer_0gy'
+    hern = 'output_hern_hern_0gy'
+    plum_nfw = 'output_plummer_nfw_0gy'
+
+    fn = nfw
+    #args = [sim_time[0], 0.9862, 0.8, 0.5, 24, .5]
+    #nbody(args, lua_file, fn, fn, ver, False)
+    
+    for i in range(M, N):
+        args[0] = sim_time[i]
+        nfw  = 'output_nfw_nfw_' + ext[i] + 'gy'
+        plum = 'output_plummer_plummer_' + ext[i] + 'gy'
+        hern = 'output_hern_hern_' + ext[i] + 'gy'
+        plum_nfw = 'output_plummer_nfw_' + ext[i] + 'gy'
+        fn = nfw
+        nbody(args, lua_file, fn, fn, ver, False)
+    
+    
+    os.chdir("data_testing")    
+    os.system("./stability_test.py " + b_t + " " + r_l + " " + r_r + " " + m_l + " " + m_r)
+# # 
