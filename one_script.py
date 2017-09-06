@@ -27,9 +27,9 @@ n = False
 #args_run_comp = [3.764300006400000, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
-#args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
-#args_run_comp = [3.2641084608, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
+args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [3.95, 0.98, 0.2, 0.170053817392000, 12, 0.203131549162000] 
 #args_run_comp = [3.28828657813, 0.98, 0.2, 0.2, 12, 0.2]
 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
@@ -40,9 +40,9 @@ args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43]
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = y                 #
-remake                    = n                 #
-match_histograms          = n                 #
-run_and_compare           = n                 #
+remake                    = y                 #
+match_histograms          = y                 #
+run_and_compare           = y                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -59,7 +59,7 @@ vlos_plot_switch          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 lb_plot_switch            = n                 #
 lambda_beta_plot_switch   = n                 #
-                                              #
+
 plot_adjacent             = y                 #
 plot_overlapping          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -68,7 +68,7 @@ plot_overlapping          = y                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              possible tests                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_all_hists_switch     = y                 #
+plot_all_hists_switch     = n                 #
 half_mass_radius_switch   = n                 #
 chi_sq_dist_plot_switch   = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -82,7 +82,7 @@ chi_sq_dist_plot_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs  #
-correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct'
+correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_mw'
 correct1 = 'arg_3.95_0.98_0.2_0.2_12_1.43_correct'
 sweep_test1 = 'sweep_test1'
 sweep_test2 = 'sweep_test2'
@@ -90,8 +90,8 @@ sweep_test3 = 'sweep_test3'#same as 1
 sweep_test4 = 'sweep_test4'#same as 2
 
 #    hist to match against for compare after run  #
-correct_hist = '3'
-compare_hist = '3'
+correct_hist = correct
+compare_hist = '2D_hist_checking_mw'
 
 
 
@@ -113,8 +113,8 @@ output2 = match_hist_correct + ".out"
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-lua = "full_control.lua"
-#lua = "EMD_v164.lua"
+#lua = "full_control.lua"
+lua = "EMD_v164.lua"
 
 #    pathways  #
 #I am tired of constantly adapting it for the servers
@@ -492,6 +492,7 @@ def plot(hist1, hist2, name, label1, label2):
     w_overlap = 2.5
     w_adjacent = 1.5
     folder = 'quick_plots/hists/'
+    #folder = ''
     #folder = 'like_surface/'
     save_folder_ove = 'quick_plots/comp_hist_plots/overlap/'
     save_folder_adj = 'quick_plots/comp_hist_plots/adj/'
@@ -1067,39 +1068,21 @@ def chi_sq_dist_plot():
 # #
 def half_mass_radius():
     #found
-    #-5.274575416,
-    #paras = [3.92936973371562, 1, 0.207910965711911, 0.295960733507015, 12.0120839736256, 0.632718403210685]
-    
-    #-1.628862634, 
-    #paras = [3.93673991552041, 1, 0.208862028335965, 0.247442889353978, 12.0777105127247, 0.350410837056286]
-    
-    #-2.017973168, 
-    #paras = [3.94791258079938, 1, 0.209888722689345, 0.237645947560661, 12.218431949382, 0.318558828332454]
-    
-    #-2.105469375, 
-    #paras = [3.94119850266711, 1, 0.20808218702441, 0.240524291805915, 12.0369010486177, 0.303651066818279]
-    
-    #-2.128633377, 
-    #paras = [3.93725511804223, 1, 0.209352829691495, 0.248126046080144, 12.1556158897001, 0.350097152269437]
-    
-    #-3.463901109
-    #paras = [3.94256860087439, 1, 0.206455972523872, 0.252297658380121, 12.0365623332094, 0.372225859672762]
-    #-3.622963436 
-    #paras = [3.93355105434544, 1, 0.209191889511683, 0.23118108259514, 12.0577139347663, 0.307140060416423]
-    #-3.237566942 
-    #paras = [3.93711682423856, 1, 0.209691066770417, 0.253259351849556, 12.072108229451, 0.330662214732729]
-    #-2.783683116
-    #paras = [3.94241225402383, 1, 0.20874204818164, 0.234103694371879, 12.0684867434258, 0.305167746809311] 
     
     #-4.223705409, inertia 0.95  3  july 15
     paras = [3.94212310440862, 1, 0.209754488329843, 0.149297963920578, 12.0025209937495, 0.118499907769452]
     #-3.340390704, , inertia 0.95  3  july 17
     paras = [3.93319756659488, 1, 0.20650733573981, 0.231213550145698, 12.0500276364552, 0.253555598702015]
     #-3.259024291 3 july 19
-    paras =  [3.9336334482373, 1, 0.207990122635552, 0.106294048112, 12.2616054285078, 0.0476065538218]
+    paras = [3.9336334482373, 1, 0.207990122635552, 0.106294048112, 12.2616054285078, 0.0476065538218]
     #-2.485412179, 3, july 25
     paras = [3.92986741357062, 1, 0.198291118789933, 0.106294048112, 12.0940980827287,  0.0476065538218]
-    
+    #-2.485412179, july 28
+    paras = [3.92986741357062, 1, 0.198291118789933, 0.106294048112, 12.0940980827287, 0.0476065538218]
+    #-2.485412179, july 31
+    paras = [3.92986741357062, 1, 0.198291118789933, 0.106294048112, 12.0940980827287, 0.0476065538218]
+    #-2.48437641, aug 24
+    paras = [3.93358712305859, 1, 0.193580571037933, 0.106294048112117, 12.1442123356541, 0.0476065538221611]
     
     #-2.962097993, inertia 0.85  2 july 15
     #paras = [3.95378378434514, 1, 0.206041086218832, 0.147924308923534, 12.0409239373066, 0.114081112087091]
@@ -1109,7 +1092,14 @@ def half_mass_radius():
     #paras =  [3.95309677360586, 1, 0.203955994957639, 0.150740069568347, 12.0295576783773, 0.113673581853117]
     #-2.835807667, 2, july 25
     #paras = [3.96084001571367, 1, 0.19883172037272,   0.140806663089422,  12.0399970584733,  0.0988578701643179]
+    #-2.835807667, july 28
+    #paras = [3.96084001571367, 1, 0.19883172037272, 0.140806663089422, 12.0399970584733, 0.0988578701643179]
+    #-2.661055117, july 31
+    #paras = [3.95717575453962, 1, 0.210073040269674, 0.199759136098848, 11.9732300009029, 0.244745393286548]
+    #-2.293246408, aug 24
+    #paras = [3.95994520654452, 1, 0.19801199565748, 0.141151236595692, 12.0768629690798, 0.0974371019908495]
 
+    
     #-2.576449645 inertia 0.75  1 july 15
     #paras = [3.95022573221887, 1, 0.211005207741159, 0.234158545905685, 12.1524913389464, 0.322044096100095]
     #-2.451020931, inertia 0.75  1 july 17
@@ -1118,8 +1108,15 @@ def half_mass_radius():
     #paras = [3.94374191868974, 1, 0.209527551031424, 0.238111030876674, 12.0851791020405, 0.313628795395889]
     #-1.798167375, 1 july 25
     #paras = [3.94294089367003, 1, 0.208056824928637, 0.23901808287037,    12.0978099829844,  0.300798394769984]
-    
-    
+    #-1.749000907, july 28
+    #paras = [3.9424274169478, 1, 0.207665139519991, 0.239300095615801, 12.1021511215072, 0.298475763045956]
+    #-1.749000907, july 31
+    #paras = [3.9424274169478, 1, 0.207665139519991, 0.239300095615801, 12.1021511215072, 0.298475763045956]
+    #-1.400173185, aug 24
+    #paras = [3.94401142150537, 1, 0.207723248253692, 0.234680526248199, 12.086396585287, 0.294652083874054]
+    paras = [3.94295443594432, 1, 0.208874690835381, 0.234263961296537, 12.0917409199754, 0.300065912129365]
+    paras = [3.94119850266711, 1, 0.207553234347138, 0.241321487352245, 12.1486052311932, 0.306685105049991]
+    paras = [3.93649841565613, 1, 0.208372119674464, 0.235151860862976, 12.0055674149201, 0.306476628533526]
 
     rl_f = paras[2]
     rr_f = paras[3]
@@ -1166,6 +1163,7 @@ def half_mass_radius():
     
     r = 0.001
     #calculates the density of the dm within the half mass radius of the correct baryon component
+    cut = 0.5 * ml_f
     while(1):
         m_enc_l = ml_f * r**3.0 / (r * r + rl_f * rl_f )**(3.0 / 2.0)
         
@@ -1219,14 +1217,11 @@ def half_mass_radius():
 
 # #
 def plot_all_hists():
-    ver = ''
     paras = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
-    lua_file = 'EMD_v162.lua'
-    sweep = 'parameter_sweeps_10_21_2016_post_best_like_fix_narrow_random_0.9sim'
-    bins = '100'
+    sweep = 'parameter_sweeps_7_20_2017_new_fitting_functions'
     typ = 'ft'
-    correct = sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/arg_3.95_0.98_0.2_0.2_12_0.2_correct'
-    f = open('like_surface/' + sweep + '/' + bins + 'bins/likelihood_data_rand_iter_' + bins + 'bins/' + typ + '_data_vals.txt', 'r')
+    correct = 'parameter_sweeps/' + sweep + '/tel/hists/arg_3.95_0.98_0.2_0.2_12_1.43_correct'
+    f = open('like_surface/' + sweep + '/likelihood_data_7_20_2017_new_fitting_functions_tel/' + typ + '_data_vals.txt', 'r')
     values = []
     likes  = []
     for line in f:
@@ -1237,9 +1232,9 @@ def plot_all_hists():
         likes.append(like)
     
     for i in range(0, len(values)):
-        hist_name = sweep + '/' + bins + 'bins/hists_' + bins + 'bins_tight/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_0.2'
+        hist_name = 'parameter_sweeps/' + sweep + '/tel/hists/' + typ + '_hists/arg_' + str(values[i]) + '_0.98_0.2_0.2_12_1.43'
         label1 = '3.95gy'
-        label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i]) + "% sim" + str(values[i]/3.95)
+        label2 = "ft = " + str(values[i]) + " likel =    " + str(likes[i]) + "  % sim" + str(values[i]/3.95)
         plot(correct, hist_name, str(i), label1, label2)
     return 0
 # #
@@ -1255,13 +1250,6 @@ def clean():
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #    
 def main():
     standard_run()
-    
-    if(test_vel_theta_binning_switch):
-        test_vel_theta_binning()
-        
-    
-    if(stabity_test_switch):
-        stabity_test()
     
     
     if(lb_plot_switch):
