@@ -39,7 +39,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.170053817392000, 12, 0.203131549162000]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
+run_nbody                 = n                 #
 remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
