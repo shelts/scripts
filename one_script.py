@@ -41,8 +41,8 @@ args_run_comp = [3.95, 0.98, 0.2, 0.170053817392000, 12, 0.203131549162000]
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = y                 #
 remake                    = y                 #
-match_histograms          = y                 #
-run_and_compare           = y                 #
+match_histograms          = n                 #
+run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -82,15 +82,15 @@ chi_sq_dist_plot_switch   = n                 #
 histogram_mw_1d_v162 = 'hist_v162_ft3p945_rt0p98_rl0p2_rr0p2_ml12_mrp2__6_9_16'
 
 #    histograms for runs  #
-correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_mw'
-correct1 = 'arg_3.95_0.98_0.2_0.2_12_1.43_correct'
+#correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_mw'
+correct1 = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_diff_seed'
 sweep_test1 = 'sweep_test1'
 sweep_test2 = 'sweep_test2'
 sweep_test3 = 'sweep_test3'#same as 1
 sweep_test4 = 'sweep_test4'#same as 2
 
 #    hist to match against for compare after run  #
-correct_hist = correct
+correct_hist = correct1
 compare_hist = '2D_hist_checking_mw'
 
 
