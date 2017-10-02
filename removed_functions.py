@@ -644,3 +644,107 @@ def stabity_test():
     os.chdir("data_testing")    
     os.system("./stability_test.py " + b_t + " " + r_l + " " + r_r + " " + m_l + " " + m_r)
 # # 
+
+
+
+
+def make_nbody():
+        os.chdir("./")
+        #-DCMAKE_C_COMPILER=/usr/bin/cc 
+        os.system("rm -r nbody_test")
+        os.system("mkdir nbody_test")
+        os.chdir("nbody_test")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + path + "milkywayathome_client/")
+        os.system("make  ")
+        os.chdir("../")
+
+#    
+def nbody(paras, lua_file, hist, out, ver, should_pipe):
+    sim_time      = str(paras[0])
+    back_time     = str(paras[1])
+    r0            = str(paras[2])
+    light_r_ratio = str(paras[3])
+    mass_l        = str(paras[4])
+    mass_ratio    = str(paras[5])
+        #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
+    
+    if(not run_from_checkpoint and should_pipe == False):
+        print('running nbody1 ')
+        os.chdir("nbody_test/bin/")
+        os.system("./milkyway_nbody" + ver + " \
+            -f "+ path + "lua/" + lua_file + " \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b -P  -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+     
+    if(run_from_checkpoint and should_pipe == False):
+        print('running nbody from checkpoint')
+        os.chdir("nbody_test/bin/")
+        os.system("./milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b  -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_correct_parameter_sweep " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio)
+     
+    
+    if(should_pipe == True):
+        print('running nbody')
+        os.chdir("nbody_test/bin/")
+        os.system("./milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 12 -b -P  -i " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio + " \
+         2>> " + out + "_piped.out")
+     
+     
+     
+    #os.chdir("../")
+    os.chdir(path)
+# #     
+def match_hists(hist1, hist2, ver):
+    print "matching histograms: "
+    #using call here instead so the format of using it is on record
+    call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
+          + " -h " + path + "quick_plots/hists/" + hist1 + '.hist'
+          + " -S " + path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
+    print hist1, "\n", hist2
+    print "\n"
+    return 0
+# # 
+def match_hists_pipe(hist1, hist2, ver, pipe_name):
+    print "matching histograms: "
+    #using call here instead so the format of using it is on record
+    call([" " + path + "nbody_test/bin/milkyway_nbody" + ver  
+          + " -h " + path + "" + hist1 + '.hist'
+          + " -S " + path + "" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
+    print hist1, "\n", hist2
+    print "\n"
+    return 0
+# 
+def compare_after_run(paras, lua_file, correct, hist, out, ver):
+    sim_time      = str(paras[0])
+    back_time     = str(paras[1])
+    r0            = str(paras[2])
+    light_r_ratio = str(paras[3])
+    mass_l        = str(paras[4])
+    mass_ratio    = str(paras[5])
+        #-h " + path + "quick_plots/hists/" + match_hist_correct + ".hist \
+    if(not run_from_checkpoint):
+        print('running nbody 2')
+        os.system(" " + path + "nbody_test/bin/milkyway_nbody_1.66_x86_64-pc-linux-gnu__mt" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -h " + path + "quick_plots/hists/" + correct + ".hist \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b -P -i --no-clean-checkpoint " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+    
+    if(run_from_checkpoint):#this is the version that will run from a checkpoint
+        print 'running from checkpoint'
+        os.system(" " + path + "nbody_test/bin/milkyway_nbody" + ver + " \
+            -f " + path + "lua/" + lua_file + " \
+            -h " + path + "quick_plots/hists/" + correct + ".hist \
+            -z " + path + "quick_plots/hists/" + hist + ".hist \
+            -o " + path + "quick_plots/outputs/" + out + ".out \
+            -n 10 -b -P --no-clean-checkpoint --checkpoint=nbody_checkpoint_parameter_sweep_ft_4p03730890303 " + (sim_time) + " " + back_time + " " + r0 + " " + light_r_ratio + " " + mass_l + " " + mass_ratio )
+# # 
