@@ -245,8 +245,8 @@ class nbody_running_env:
         os.system("rm -r nbody_test")
         os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=ON -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + self.path + "milkywayathome_client/")
-        os.system("make  ")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + self.path + "milkywayathome_client/")
+        os.system("make -j ")
         os.chdir("../")
     
     
@@ -257,13 +257,19 @@ class nbody_running_env:
         rr    = str(parameters[3])
         ml    = str(parameters[4])
         mr    = str(parameters[5])
-        print('running nbody from checkpoint')
+        print('running nbody')
         os.chdir("nbody_test/bin/")
         os.system("./milkyway_nbody" + self.version + " \
             -f " + self.path + "lua/" + self.lua_file + " \
             -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
             -o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            -n 10 -b -P  -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr)
+            -n 10 -b   -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr)
+        
+        #os.system("./milkyway_nbody" + self.version + " \
+            #-f " + self.path + "lua/" + self.lua_file + " \
+            #-z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
+            #-o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
+            #-n 10 -b -u -i 4.0 test_input2.out" )
         
     
     def run_and_compare(self, parameters, correctans_hist, comparison_hist):

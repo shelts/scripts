@@ -40,8 +40,8 @@ args_run_comp = [3.97, 0.98, 0.3, 0.3, 13, 0.3]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = n                 #
+run_nbody                 = y                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
@@ -50,7 +50,7 @@ run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Hist Plot Switches             #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_hists                = y                 #
+plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
 vlos_plot_switch          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -87,7 +87,7 @@ histogram_v166 = 'hist_v166_3p95_0p98_0p2_0p2_12_0p2__9_27_17'
 correct1 = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_diff_seed'
 
 #    hist to match against for compare after run  #
-correct_hist = histogram_v166
+correct_hist = 'test2'
 compare_hist = 'test2'
 
 
@@ -108,6 +108,7 @@ plot_name = compare_hist
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
 lua = "full_control.lua"
+#lua = "manual_body_input.lua"
 #lua = "EMD_v164.lua"
 
 #    pathways  #
