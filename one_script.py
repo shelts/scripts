@@ -41,7 +41,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = y                 #
-remake                    = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
@@ -107,8 +107,8 @@ plot_name = compare_hist
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-lua = "full_control.lua"
-#lua = "manual_body_input.lua"
+#lua = "full_control.lua"
+lua = "manual_body_input.lua"
 #lua = "EMD_v164.lua"
 
 #    pathways  #

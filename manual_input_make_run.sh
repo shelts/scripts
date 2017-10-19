@@ -1,10 +1,10 @@
 #!/bin/bash          
 #/* Copyright (c) 2016 Siddhartha Shelton */
-    rm -r nbody_test
-    mkdir nbody_test
-    cd nbody_test
-    cmake  -DCMAKE_BUILD_TYPE=Release  -DNBODY_GL=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    milkywayathome_client/
-    make -j 
+#     rm -r nbody_test
+#     mkdir nbody_test
+#     cd nbody_test
+#     cmake  -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DNBODY_GL=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    milkywayathome_client/
+#     make -j 
     cd nbody_test/bin
     
 
