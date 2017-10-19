@@ -30,7 +30,7 @@ n = False
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
 args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.97, 0.98, 0.3, 0.3, 13, 0.3] 
+args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [3.28828657813, 0.98, 0.2, 0.2, 12, 0.2]
 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
@@ -41,7 +41,7 @@ args_run_comp = [3.97, 0.98, 0.3, 0.3, 13, 0.3]
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = y                 #
-remake                    = y                 #
+remake                    = n                 #
 match_histograms          = n                 #
 run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
@@ -87,7 +87,7 @@ histogram_v166 = 'hist_v166_3p95_0p98_0p2_0p2_12_0p2__9_27_17'
 correct1 = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_diff_seed'
 
 #    hist to match against for compare after run  #
-correct_hist = 'test2'
+correct_hist = 'test'
 compare_hist = 'test2'
 
 

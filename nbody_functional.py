@@ -231,7 +231,7 @@ class nbody_histograms:#a class that takes in data from nbody histogram files an
                     
         lines.close()
         
-        
+
         
 class nbody_running_env:
     def __init__(self, lua_file, version, path):
@@ -242,10 +242,10 @@ class nbody_running_env:
     def build(self):
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        os.system("rm -r nbody_test")
-        os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")
+        #os.system("mkdir nbody_test")
         os.chdir("nbody_test")
-        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=OFF -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + self.path + "milkywayathome_client/")
+        os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + self.path + "milkywayathome_client/")
         os.system("make -j ")
         os.chdir("../")
     
@@ -263,13 +263,13 @@ class nbody_running_env:
             -f " + self.path + "lua/" + self.lua_file + " \
             -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
             -o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            -n 10 -b   -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr)
+            -n 10 -b  -P -u -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr)
         
         #os.system("./milkyway_nbody" + self.version + " \
             #-f " + self.path + "lua/" + self.lua_file + " \
             #-z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
             #-o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            #-n 10 -b -u -i 4.0 test_input2.out" )
+            #-n 10 -b -u -i 4.0 ~/Desktop/research/test2.out" )
         
     
     def run_and_compare(self, parameters, correctans_hist, comparison_hist):
@@ -280,8 +280,8 @@ class nbody_running_env:
         ml    = str(parameters[4])
         mr    = str(parameters[5])
         print('running nbody 2')
-        os.system(" " + self.path + "nbody_test/bin/milkyway_nbody_1.66_x86_64-pc-linux-gnu__mt" + self.version + " \
-            -f " + self.path + "lua/" + lua_file + " \
+        os.system(" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version + " \
+            -f " + self.path + "lua/" + self.lua_file + " \
             -h " + self.path + "quick_plots/hists/" + correctans_hist + ".hist \
             -z " + self.path + "quick_plots/hists/" + comparison_hist + ".hist \
             -o " + self.path + "quick_plots/outputs/" + comparison_hist + ".out \
