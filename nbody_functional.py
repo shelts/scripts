@@ -259,17 +259,17 @@ class nbody_running_env:
         mr    = str(parameters[5])
         print('running nbody')
         os.chdir("nbody_test/bin/")
-        #os.system("./milkyway_nbody" + self.version + " \
-            #-f " + self.path + "lua/" + self.lua_file + " \
-            #-z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
-            #-o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            #-n 10 -b -u -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr)
-        
         os.system("./milkyway_nbody" + self.version + " \
             -f " + self.path + "lua/" + self.lua_file + " \
             -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
             -o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            -n 10 -b -u -i 100.0 ~/Desktop/research/test2.out" )
+            -n 10 -b -u --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr + " ~/Desktop/research/test2.out")
+        
+        #os.system("./milkyway_nbody" + self.version + " \
+            #-f " + self.path + "lua/" + self.lua_file + " \
+            #-z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
+            #-o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
+            #-n 10 -b -u -i 100.0 ~/Desktop/research/test2.out" )
         
     
     def run_and_compare(self, parameters, correctans_hist, comparison_hist):
