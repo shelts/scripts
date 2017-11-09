@@ -4,29 +4,6 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 
-args = [4, 1, 0.2, .2, 60, 0.2]
-
-counts = [150, 0, 0, 0, 275, 150, 100, 75, 110, 110, 100, 110, 100, 120, 110, 150, 130, 75, 150, 100, 50, 50, 0, 20, 20]
-
-
-data2 = "Orphan_Data_September_2014.hist"
-data = "data.hist"
-#####################################################################
-
-#if(make_data_hist == True):
-    #g = open("histograms/" + data, 'w')
-    #lamb = 32 + 5
-    #total = 0.0
-    #for i in range(0, len(counts)):
-        #total = total + counts[i]
-    #total = total * 5.0 / 222288.24  #each count is fturn off star which reps about a cluster of 5 solar masses
-    #for i in range(0, len(counts)):
-        #bodies = counts[i] * 5.0 / 222288.24
-        #g.write("%f \t %f\n" % (lamb, bodies / total ))
-        #lamb = lamb - 3
-    #g.close()
-
-
 class data:#class system for reading in data and making a data histogram
     def __init__(self, vgsr_file, counts_file):
         self.vgsr_file = vgsr_file
@@ -77,10 +54,10 @@ class data:#class system for reading in data and making a data histogram
 
                 ss = line.split(" ")
                 str_N_lbda  = float(ss[0])
-                str_N       = float(ss[3])
+                #str_N       = float(ss[3])
                 #str_N_err   = float(ss[2])
                 
-                self.star_N.append(str_N); 
+                #self.star_N.append(str_N); 
                 self.star_N_lbda.append(str_N_lbda)
                 #self.star_N_err.append(str_N_err)
                 
@@ -158,7 +135,7 @@ class data:#class system for reading in data and making a data histogram
     
 def main():
     vgsr_file = "my16lambet2bg.specbhb.dist.lowmet.stream"
-    counts_file = "l270soxlbfgcxNTbcorr.newon"
+    counts_file = "l270soxlbfgcxNTbcorr.newonR"
     dat = data(vgsr_file, counts_file)
     #print dat.vel_disp, '\n'
     #print dat.vel_disp_lda, '\n'
