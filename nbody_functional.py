@@ -52,7 +52,7 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
             
         f.close()
         
-    def dark_light_split(self):#splits the data between light and dark
+    def dark_light_split(self):#splits the data between baryonic and dark matter
         self.light_x , self.light_y , self.light_z    = ([] for i in range(3))
         self.light_l , self.light_b , self.light_r    = ([] for i in range(3))
         self.light_vx , self.light_vy , self.light_vz = ([] for i in range(3))
@@ -231,26 +231,26 @@ class nbody_histograms:#a class that takes in data from nbody histogram files an
                     
         lines.close()
         
-
-        
 class nbody_running_env:
     def __init__(self, lua_file, version, path):
         self.lua_file      = lua_file
         self.version       = version
         self.path          = path
     
-    def build(self):
+    def build(self):#function for rebuilding nbody. it will build it in a seperate folder from the client directory
         os.chdir("./")
         #-DCMAKE_C_COMPILER=/usr/bin/cc 
-        #os.system("rm -r nbody_test")
-        #os.system("mkdir nbody_test")
+        #os.system("rm -r nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
+        #os.system("mkdir nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
         os.chdir("nbody_test")
+        #following are fairly standard cmake commands
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + self.path + "milkywayathome_client/")
+        #making the binaries. the -j is for multithreaded build/
         os.system("make -j ")
         os.chdir("../")
     
     
-    def single_run(self, parameters, simulation_hist):
+    def single_run(self, parameters, simulation_hist):#this willl produce a single run of nbody, without comparing the end result to anything
         ft    = str(parameters[0])
         bt    = str(parameters[1])
         rl    = str(parameters[2])
@@ -259,6 +259,7 @@ class nbody_running_env:
         mr    = str(parameters[5])
         print('running nbody')
         os.chdir("nbody_test/bin/")
+        #below is a standard example of running nbody's binary
         os.system("./milkyway_nbody" + self.version + " \
             -f " + self.path + "lua/" + self.lua_file + " \
             -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
@@ -272,7 +273,7 @@ class nbody_running_env:
             #-n 10 -b -u -i 100.0 ~/Desktop/research/test2.out" )
         
     
-    def run_and_compare(self, parameters, correctans_hist, comparison_hist):
+    def run_and_compare(self, parameters, correctans_hist, comparison_hist):#will run an nbody and compare the output hist to a given data hist
         ft    = str(parameters[0])
         bt    = str(parameters[1])
         rl    = str(parameters[2])
@@ -288,7 +289,7 @@ class nbody_running_env:
             -n 10 -b -P -i  " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr )
         
         
-    def match_hists(self, hist1, hist2):
+    def match_hists(self, hist1, hist2):#will compare to hist without running nbody simulation.
         print "matching histograms: "
         #using call here instead so the format of using it is on record
         call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
@@ -300,7 +301,7 @@ class nbody_running_env:
     
     
     
-    def match_hists_pipe_output(hist1, hist2, pipe_name):
+    def match_hists(hist1, hist2, pipe_name):#in case you want to pipe your comparison to some file
         print "matching histograms: "
         #using call here instead so the format of using it is on record
         call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
@@ -311,7 +312,7 @@ class nbody_running_env:
         return 0
     
 
-    def single_piping_output(self, parameters, simulation_hist, output):
+    def single_piping_output(self, parameters, simulation_hist, output):#same as single run, but pipes the output
         ft    = str(parameters[0])
         bt    = str(parameters[1])
         rl    = str(parameters[2])
@@ -328,7 +329,7 @@ class nbody_running_env:
         2>> " + out + "_piped.out")
         
         
-    def run_from_checkpoint(self, parameters, simulation_hist, output):
+    def run_from_checkpoint(self, parameters, simulation_hist, output):#runs a sim using some provided checkpoint file
         ft    = str(parameters[0])
         bt    = str(parameters[1])
         rl    = str(parameters[2])
@@ -372,7 +373,7 @@ class nbody_running_env:
 # # # # # # # # # # # # # # # # # # # # # #
 # # 
 
-def plot(hist1, hist2, name, label1, label2):
+def plot(hist1, hist2, name, label1, label2): #plots two histograms. 
     ylimit = 1.0
     xlower = 180 
     xupper = -180
@@ -434,7 +435,7 @@ def plot(hist1, hist2, name, label1, label2):
     #plt.show()
     return 1
 # # 
-def plot_veldisp(hist1, hist2, name, label1, label2):
+def plot_veldisp(hist1, hist2, name, label1, label2):#plots the velocity dispersion from the histograms
     ylimit = 100
     xlower = 180 
     xupper = -180
@@ -500,7 +501,7 @@ def plot_veldisp(hist1, hist2, name, label1, label2):
 #        NON-histogram plot               #
 # # # # # # # # # # # # # # # # # # # # # #
 # #
-def vlos_plot_single(file1):
+def vlos_plot_single(file1):#plots the line of sight velocity from outputs with hist counts
     ylimit = 100
     xlower = 180 
     xupper = -180
@@ -574,7 +575,7 @@ def vlos_plot_single(file1):
     
     return 1
 
-def vlos_plot(file1, file2):
+def vlos_plot(file1, file2): 
     ylimit = 100
     xlower = 180 
     xupper = -180
@@ -722,7 +723,7 @@ def vlos_plot(file1, file2):
     
     return 1
 
-def lambda_beta_plot(file_name):
+def lambda_beta_plot(file_name):#plots the outputs in lambda beta. uses the nbody output class to convert lb to lambda beta
     path_charles = 'quick_plots/outputs/'
     path = 'quick_plots/'
     print file_name
@@ -779,7 +780,7 @@ def lambda_beta_plot(file_name):
             
     return 0 
  
-def lb_plot(file_name):
+def lb_plot(file_name): #plots lb from output
     path_charles = 'quick_plots/outputs/'
     path = 'quick_plots/'
     print file_name
