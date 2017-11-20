@@ -237,11 +237,12 @@ class nbody_running_env:
         self.version       = version
         self.path          = path
     
-    def build(self):#function for rebuilding nbody. it will build it in a seperate folder from the client directory
+    def build(self, scratch = None):#function for rebuilding nbody. it will build it in a seperate folder from the client directory
         os.chdir("./")
         
-        #os.system("rm -r nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
-        #os.system("mkdir nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
+        if(scratch):
+            os.system("rm -r nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
+            os.system("mkdir nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
         
         os.chdir("nbody_test")
         #following are fairly standard cmake commands
@@ -251,7 +252,7 @@ class nbody_running_env:
         os.chdir("../")
     
     
-    def run(self, parameters, simulation_hist, comparison_hist = None, pipe = None):
+    def run(self, parameters, simulation_hist, comparison_hist = None, pipe = None):#running function. 2 optional parameters. 
         ft    = str(parameters[0])
         bt    = str(parameters[1])
         rl    = str(parameters[2])

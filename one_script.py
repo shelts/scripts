@@ -40,10 +40,10 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
-remake                    = n                 #
+run_nbody                 = n                 #
+remake                    = y                 #
 match_histograms          = n                 #
-run_and_compare           = y                 #
+run_and_compare           = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -131,7 +131,7 @@ def standard_run():
     nbody = nbody_running_env(lua, version, path)
     
     if(remake):
-        nbody.build()
+        nbody.build(True)
         
     if(run_nbody):
         nbody.run(args_run, correctans_hist)
