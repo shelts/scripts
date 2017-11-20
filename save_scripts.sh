@@ -6,7 +6,7 @@ cp *.sh ./scripts
 cd scripts
 git status
 git add --all
-git commit -m "removed some unwanted functions from one_script"
+git commit -m "update"
 git status
 git push
 

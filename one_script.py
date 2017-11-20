@@ -43,7 +43,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 run_nbody                 = y                 #
 remake                    = n                 #
 match_histograms          = n                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -107,9 +107,9 @@ plot_name = compare_hist
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-#lua = "full_control.lua"
+lua = "full_control.lua"
 #lua = "manual_body_input.lua"
-lua = "halo_object_dev.lua"
+#lua = "halo_object_dev.lua"
 #lua = "EMD_v164.lua"
 
 #    pathways  #
@@ -134,10 +134,10 @@ def standard_run():
         nbody.build()
         
     if(run_nbody):
-        nbody.single_run(args_run, correctans_hist)
+        nbody.run(args_run, correctans_hist)
     
     if(run_and_compare):
-        nbody.run_and_compare(args_run_comp, correctans_hist, comparison_hist)
+        nbody.run(args_run_comp, correctans_hist, comparison_hist)
     
     if(match_histograms):
         nbody.match_hists(correctans_hist, comparison_hist)

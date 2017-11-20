@@ -239,9 +239,10 @@ class nbody_running_env:
     
     def build(self):#function for rebuilding nbody. it will build it in a seperate folder from the client directory
         os.chdir("./")
-        #-DCMAKE_C_COMPILER=/usr/bin/cc 
+        
         #os.system("rm -r nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
         #os.system("mkdir nbody_test")  #UNCOMMENT FOR A COMPLETE REBUILD
+        
         os.chdir("nbody_test")
         #following are fairly standard cmake commands
         os.system("cmake -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DBOINC_RELEASE_NAMES=OFF -DNBODY_GL=ON -DNBODY_STATIC=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    " + self.path + "milkywayathome_client/")
@@ -250,7 +251,7 @@ class nbody_running_env:
         os.chdir("../")
     
     
-    def single_run(self, parameters, simulation_hist):#this willl produce a single run of nbody, without comparing the end result to anything
+    def run(self, parameters, simulation_hist, comparison_hist = None, pipe = None):
         ft    = str(parameters[0])
         bt    = str(parameters[1])
         rl    = str(parameters[2])
@@ -258,116 +259,51 @@ class nbody_running_env:
         ml    = str(parameters[4])
         mr    = str(parameters[5])
         print('running nbody')
-        os.chdir("nbody_test/bin/")
+        os.chdir(self.path + "nbody_test/bin/")
         #below is a standard example of running nbody's binary
-        os.system("./milkyway_nbody" + self.version + " \
-            -f " + self.path + "lua/" + self.lua_file + " \
-            -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
-            -o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            -n 10 -b -u --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr + " ~/Desktop/research/test2.out")
+        #it is incomplete. It has the lua file flag, the output hist flag, and outfile flag
+        run_command  = "./milkyway_nbody" + self.version + " \
+                         -f " + self.path + "lua/" + self.lua_file + " \
+                         -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
+                         -o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out "
         
-        #os.system("./milkyway_nbody" + self.version + " \
-            #-f " + self.path + "lua/" + self.lua_file + " \
-            #-z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
-            #-o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out \
-            #-n 10 -b -u -i 100.0 ~/Desktop/research/test2.out" )
+        #final piece to the run command. includes the number of threads, output format, and visualizer args
+        end_piece = "-n 10 -b  --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr
         
-    
-    def run_and_compare(self, parameters, correctans_hist, comparison_hist):#will run an nbody and compare the output hist to a given data hist
-        ft    = str(parameters[0])
-        bt    = str(parameters[1])
-        rl    = str(parameters[2])
-        rr    = str(parameters[3])
-        ml    = str(parameters[4])
-        mr    = str(parameters[5])
-        print('running nbody 2')
-        os.system(" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version + " \
-            -f " + self.path + "lua/" + self.lua_file + " \
-            -h " + self.path + "quick_plots/hists/" + correctans_hist + ".hist \
-            -z " + self.path + "quick_plots/hists/" + comparison_hist + ".hist \
-            -o " + self.path + "quick_plots/outputs/" + comparison_hist + ".out \
-            -n 10 -b -P -i  " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr )
-        
-        
-    def match_hists(self, hist1, hist2):#will compare to hist without running nbody simulation.
+        if(not comparison_hist and  not pipe): ##this willl produce a single run of nbody, without comparing the end result to anything
+            run_command += end_piece #completing the run command
+       
+        elif(comparison_hist and not pipe):#this willl produce a single run of nbody, comparing the end result to given histogram
+            compare_hist_flag = " -h " + self.path + "quick_plots/hists/" + comparison_hist + ".hist  " #adding the input argument flag
+            run_command +=  compare_hist_flag + end_piece
+       
+        elif(comparison_hist and pipe):#this willl produce a single run of nbody, comparing the end result to given histogram, and pipe the result to some file
+            compare_hist_flag = " -h " + self.path + "quick_plots/hists/" + comparison_hist + ".hist  " #adding the input argument flag
+            piping = " 2>> " + pipe + "_piped.out" #adding the piping piece to the command
+            run_command += compare_hist_flag + end_piece + piping
+            
+        os.system(run_command)
+   
+   
+   
+    def match_hists(self, hist1, hist2, pipe = None):#will compare to hist without running nbody simulation.
         print "matching histograms: "
         #using call here instead so the format of using it is on record
-        call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
-            + " -h " + self.path + "quick_plots/hists/" + hist1 + '.hist'
-            + " -S " + self.path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
+        if(not pipe):#produces the comparison to stdout
+            call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
+                + " -h " + self.path + "quick_plots/hists/" + hist1 + '.hist'
+                + " -S " + self.path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
+            
+        elif(pipe):#will pipe the result of the comparison to a file
+            call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
+                + " -h " + self.path + "" + hist1 + '.hist'
+                + " -S " + self.path + "" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
+        
         print hist1, "\n", hist2
         print "\n"
         return 0
     
     
-    
-    def match_hists(hist1, hist2, pipe_name):#in case you want to pipe your comparison to some file
-        print "matching histograms: "
-        #using call here instead so the format of using it is on record
-        call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
-            + " -h " + self.path + "" + hist1 + '.hist'
-            + " -S " + self.path + "" + hist2 + '.hist' + " 2>>" + pipe_name], shell=True)
-        print hist1, "\n", hist2
-        print "\n"
-        return 0
-    
-
-    def single_piping_output(self, parameters, simulation_hist, output):#same as single run, but pipes the output
-        ft    = str(parameters[0])
-        bt    = str(parameters[1])
-        rl    = str(parameters[2])
-        rr    = str(parameters[3])
-        ml    = str(parameters[4])
-        mr    = str(parameters[5])
-        print('running nbody. piping output to file')
-        os.chdir("nbody_test/bin/")
-        os.system("./milkyway_nbody" + self.version + " \
-            -f " + self.path + "lua/" + self.lua_file + " \
-            -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
-            -o " + self.path + "quick_plots/outputs/" + output + ".out \
-            -n 12 -b -P  -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr + " \
-        2>> " + out + "_piped.out")
-        
-        
-    def run_from_checkpoint(self, parameters, simulation_hist, output):#runs a sim using some provided checkpoint file
-        ft    = str(parameters[0])
-        bt    = str(parameters[1])
-        rl    = str(parameters[2])
-        rr    = str(parameters[3])
-        ml    = str(parameters[4])
-        mr    = str(parameters[5])
-        print('running nbody from checkpoint')
-        os.chdir("nbody_test/bin/")
-        os.system("./milkyway_nbody" + self.version + " \
-            -f " + path + "lua/" + self.lua_file + " \
-            -z " + path + "quick_plots/hists/" + simulation_hist + ".hist \
-            -o " + path + "quick_plots/outputs/" + output + ".out \
-            -n 10 -b  -P --no-clean-checkpoint --checkpoint=CHECKPOINT_NAME " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr)
-        
-        
-    
-    def run_and_compare_from_checkpoint(self, parameters, comparison_hist, simulation_hist, output):
-        ft    = str(parameters[0])
-        bt    = str(parameters[1])
-        rl    = str(parameters[2])
-        rr    = str(parameters[3])
-        ml    = str(parameters[4])
-        mr    = str(parameters[5])
-        print('running nbody 2')
-        os.system(" " + self.path + "nbody_test/bin/milkyway_nbody_1.66_x86_64-pc-linux-gnu__mt" + self.version + " \
-            -f " + self.path + "lua/" + lua_file + " \
-            -h " + self.path + "quick_plots/hists/" + comparison_hist + ".hist \
-            -z " + self.path + "quick_plots/hists/" + simulation_hist + ".hist \
-            -o " + self.path + "quick_plots/outputs/" + output + ".out \
-            -n 10 -b -P -i --no-clean-checkpoint --checkpoint=CHECKPOINT_NAME " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr )
-
-     
-        
-        #os.chdir("../")
-    # #     
-
-
-
 # # # # # # # # # # # # # # # # # # # # # #
 #        histogram plot                   #
 # # # # # # # # # # # # # # # # # # # # # #
@@ -788,7 +724,6 @@ def lb_plot(file_name): #plots lb from output
     plot_light_and_dark = y
     plot_dm = n
     plot_xyz = n
-    plot_orbit = n
     
     out = nbody_outputs(path_charles + file_name + '.out')
     out.rescale_l()
@@ -824,34 +759,6 @@ def lb_plot(file_name): #plots lb from output
             plt.legend()
             plt.savefig('/home/sidd/Desktop/research/quick_plots/' + file_name, format='png')
             print "plotting:", len(out.light_l) + len(out.dark_l), " points"
-        # # # # # # # # # #
-        if(plot_orbit):
-            orb = nbody_outputs(path + 'reverse_orbit.out')
-            orb.rescale_l()
-            orb.dark_light_split()
-            
-            plt.xlim((xlower, xupper))
-            plt.ylim((ylower, yupper))
-            plt.xlabel('l')
-            plt.ylabel('b')
-            plt.title('l vs b')
-            plt.plot(orb.ls, orb.bs, '.', markersize = .15, color = 'g', alpha=1.0, marker = '.')
-            #plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
-            
-            
-            orb = nbody_outputs(path + 'forward_orbit.out')
-            orb.rescale_l()
-            orb.dark_light_split()
-                
-            plt.xlim((xlower, xupper))
-            plt.ylim((ylower, yupper))
-            plt.xlabel('l')
-            plt.ylabel('b')
-            plt.title('l vs b')
-            plt.plot(orb.ls, orb.bs, '.', markersize = .15, color = 'r', alpha=1.0, marker = '.')
-            plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_lbr_allmatter_orbit', format='png')
-            plt.show()
-
         # # # # # # # # # #
         if(plot_dm):#to plot just dm
             plt.clf()
