@@ -66,7 +66,6 @@ class data:#class system for reading in data and making a data histogram
                 str_N_lbda  = float(ss[0])
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
-                #str_N_err   = float(ss[2])
                 
                 self.ON_star_N_lbda.append(str_N_lbda)
                 if(len(ss) > 1):
@@ -99,61 +98,77 @@ class data:#class system for reading in data and making a data histogram
         f.close()
         g.close()
     
-    def convert_strN_simN(self):#data is in solar masses. need to convert to simulation units
-        self.N_sim_units = []
-        for i in range(0, len(self.star_N)):
-            n = self.star_N[i] * 5.0 / 222288.24 #each count is fturn off star which reps about a cluster of 5 solar masses
-            self.N_sim_units.append(n)
+    def init_bins(self, file_name = None):#init the data bins.
+        if(file_name):#if there is a data file with bin beginnings and endings then we can use that
+            file_name = open(file_name, "r")
+            self.bin_lowers = []
+            self.bin_uppers = []
+            self.bin_N = []
+            self.bnd_count_lda = []
+            test_l = []
+            test_u = []
+            for line in file_name:
+                ss = line.split(" ")
+                bn_lower = float(ss[0])
+                bn_upper = float(ss[1])
+                bn_n     = float(ss[3])
+                self.bin_lowers.append(bn_lower)
+                self.bin_uppers.append(bn_upper)
+                self.bin_N.append(bn_n)
+                self.bnd_count_lda.append( bn_lower + (bn_upper - bn_lower) / 2.0 )
+                
+            self.Nbins = len(self.bin_lowers) 
             
-    def normalize_counts(self):#need to normalize counts in the mw@home data histogram
-        total = 0.0
-        self.N_normed = []
-        for i in range(0, len(self.N_sim_units)):
-            total = total + self.N_sim_units[i]
-            
-        for i in range(0, len(self.N_sim_units)):
-            self.N_normed.append(self.N_sim_units[i] / total)
-    
-    
-    def init_bins(self):
-        self.bin_size = 4.0
-        self.bin_start = -50.0
-        self.bin_end   = 50.0
-        self.Nbins = int( abs(self.bin_start - self.bin_end) / self.bin_size)
-        self.bnd_count_lda = []
+        else:
+            self.bin_size = 4.0
+            self.bin_start = -50.0
+            self.bin_end   = 50.0
+            self.Nbins = int( abs(self.bin_start - self.bin_end) / self.bin_size)
+            self.bnd_count_lda = []
+            for i in range(0, self.Nbins):
+                self.bnd_count_lda.append(self.bin_start + self.bin_size * (0.5  + i) )#middle bin coordinates
         
-        for i in range(0, self.Nbins):
-            self.bnd_count_lda.append(self.bin_start + self.bin_size * (0.5  + i) )#middle bin coordinates
+        return 0
         
     
     
-    def bin_counts(self, star_N_lbda, field):#need to bin the data into regularly sized bins
+    def bin_counts(self, star_N_lbda, field, bin_lowers = None, bin_uppers = None):#need to bin the data into regularly sized bins
         bnd_counts = []
-        bin_upper = self.bin_start + self.bin_size #initiaze the bin search brackets
-        bin_lower = self.bin_start
         #obs = [[]]#for debugging
+        bin_lower = None
+        bin_upper = None
+        if(bin_lowers):
+            bin_upper_init = bin_uppers[0]
+            bin_lower_init = bin_lowers[0]
+        else:
+            bin_upper_init = self.bin_start + self.bin_size#reinitiaze the bin search brackets
+            bin_lower_init = self.bin_start
+        
         
         for i in range(0, self.Nbins):
             bnd_counts.append(0.0)
             #obs.append([])#for debugging
-        
-        for i in range(0, len(star_N_lbda)):
-            bin_upper = self.bin_start + self.bin_size#reinitiaze the bin search brackets
-            bin_lower = self.bin_start
             
+        for i in range(0, len(star_N_lbda)):#go through all the stars
+            bin_upper = bin_upper_init#restart at the beginning of the histogram
+            bin_lower = bin_lower_init
+            
+            #print bin_lower, bin_upper
             for j in range(0, self.Nbins):
+                if(bin_lowers):
+                    bin_lower = bin_lowers[j]#current lower bin
+                    bin_upper = bin_uppers[j]#current upper bin
+                
                 if(star_N_lbda[i] >= bin_lower and star_N_lbda[i] < bin_upper):
-                    #print bin_lower, bin_upper
                     #print star_N_lbda[i]
                     bnd_counts[j] += 1.0
-                    
                     #obs[j].append(star_N_lbda[i]) #for debugging
-                    #self.bnd_counts[j] += self.star_N[i]
-                    
-                    break
-                
-                bin_lower = bin_upper#shift the search brackets by 1 bin
-                bin_upper = bin_lower + self.bin_size
+                    break#if bin found no need to keep searching
+
+                if(not bin_lowers):#if it is standard binning, advance the bins
+                    bin_lower = bin_upper#shift the search brackets by 1 bin
+                    bin_upper = bin_lower + self.bin_size
+                #print bin_lower, bin_upper
 
         if(field == "ON"):
             self.bnd_counts_ON = bnd_counts
@@ -165,13 +180,18 @@ class data:#class system for reading in data and making a data histogram
         return 0
     
     
-    def bin_vgsr(self):#need to bin the data into regularly sized bins
+    def bin_vgsr(self, bin_lowers = None, bin_uppers = None):#need to bin the data into regularly sized bins
         bnd_vel_sum     = []
         bnd_vel_sqsum   = []
         bnd_vgsr_counts = []
         
-        bin_upper = self.bin_start + self.bin_size #initiaze the bin search brackets
-        bin_lower = self.bin_start
+        if(bin_lowers):
+            bin_upper_init = bin_uppers[0]
+            bin_lower_init = bin_lowers[0]
+        else:
+            bin_upper_init = self.bin_start + self.bin_size#reinitiaze the bin search brackets
+            bin_lower_init = self.bin_start
+        
         #obs = [[]]#for debugging
         
         for i in range(0, self.Nbins):
@@ -182,10 +202,13 @@ class data:#class system for reading in data and making a data histogram
             #obs.append([])#for debugging
         
         for i in range(0, len(self.vel_los_lda)):
-            bin_upper = self.bin_start + self.bin_size#reinitiaze the bin search brackets
-            bin_lower = self.bin_start
+            bin_upper = bin_upper_init#restart at the beginning of the histogram
+            bin_lower = bin_lower_init
             
             for j in range(0, self.Nbins):
+                if(bin_lowers):
+                    bin_lower = bin_lowers[j]#current lower bin
+                    bin_upper = bin_uppers[j]#current upper bin
                 if(self.vel_los_lda[i] >= bin_lower and self.vel_los_lda[i] < bin_upper):
                     bnd_vel_sum[j]     += self.vel_los[i]
                     bnd_vel_sqsum[j]   += self.vel_los[i] * self.vel_los[i]
@@ -194,10 +217,11 @@ class data:#class system for reading in data and making a data histogram
                     #obs[j].append(self.vel_los[i]) #for debugging
                     #self.bnd_counts[j] += self.star_N[i]
                     
-                    break
+                    break #if bin found no need to keep searching
 
-                bin_lower = bin_upper#shift the search brackets by 1 bin
-                bin_upper = bin_lower + self.bin_size
+                if(not bin_lowers):#if it is standard binning, advance the bins
+                    bin_lower = bin_upper#shift the search brackets by 1 bin
+                    bin_upper = bin_lower + self.bin_size
 
         
         for i in range(0, self.Nbins):
@@ -257,53 +281,75 @@ class data:#class system for reading in data and making a data histogram
         
     def plot_counts(self):
         plt.xlim(50, -50)
-        plt.ylim(0, 2000)
+        plt.ylim(0, 1500)
         plt.xlabel("$\Lambda_{Orphan}$")
         plt.ylabel("N")
         plt.xticks( [50, 40, 30, 20, 10, 0, -10, -20, -30, -40, -50])
         #plt.tick_params(which='minor', length=4, color='r')
+        w = 2.6
         if(len(self.bnd_counts_ON) > 0):
-            plt.bar(self.bnd_count_lda, self.bnd_counts_ON, width = 4, color = "w", edgecolor = "k", alpha = 1)
+            plt.bar(self.bnd_count_lda, self.bnd_counts_ON, width = w, color = "w", edgecolor = "k", alpha = 1)
         if(len(self.bnd_counts_OFF) > 0):
-            plt.bar(self.bnd_count_lda, self.bnd_counts_OFF, width = 4, color = "w", edgecolor = "r", alpha = 0.5)
+            plt.bar(self.bnd_count_lda, self.bnd_counts_OFF, width = w, color = "w", edgecolor = "r", alpha = 0.5)
         
         if(len(self.bnd_diff) > 0):
-            plt.bar(self.bnd_count_lda, self.bnd_diff, width = 4, color = "b", edgecolor = "b", alpha = 0.5)
+            plt.bar(self.bnd_count_lda, self.bnd_diff, width = w, color = "b", edgecolor = "b", alpha = 0.5)
+            plt.bar(self.bnd_count_lda, self.bin_N, width = w, color = "k", edgecolor = "b", alpha = 0.5)
         plt.savefig('figure5_recreation.png', format='png')
         plt.clf()
         #plt.show()
     
     
+    def convert_strN_simN(self):#data is in solar masses. need to convert to simulation units
+        self.N_sim_units = []
+        for i in range(0, len(self.star_N)):
+            n = self.star_N[i] * 5.0 / 222288.24 #each count is fturn off star which reps about a cluster of 5 solar masses
+            self.N_sim_units.append(n)
+            
+    def normalize_counts(self):#need to normalize counts in the mw@home data histogram
+        total = 0.0
+        self.N_normed = []
+        for i in range(0, len(self.N_sim_units)):
+            total = total + self.N_sim_units[i]
+            
+        for i in range(0, len(self.N_sim_units)):
+            self.N_normed.append(self.N_sim_units[i] / total)
+    
+    
     def data_clear(self):
         del self.ON_star_N_lbda
         del self.OFF_star_N_lbda
+        
     
 def main():
     vgsr_file = "my16lambet2bg.specbhb.dist.lowmet.stream"
     on_field_counts_file = "l270soxlbfgcxNTbcorr.newonR"
     off_field_counts_file = "l270soxlbfgcxNTbcorr.newoffR"
-
+    bin_data = "data_from_yanny.dat"
     # get the data #
     dat = data(vgsr_file, on_field_counts_file, off_field_counts_file)
     
     # initiaze bins #
-    dat.init_bins()
+    dat.init_bins(bin_data)
     
     # bin the on field #
-    #dat.bin_counts(dat.ON_star_N_lbda, "ON")
+    dat.bin_counts(dat.ON_star_N_lbda, "ON", dat.bin_lowers, dat.bin_uppers)
+    
     # bin the off field #
-    #dat.bin_counts(dat.OFF_star_N_lbda, "OFF")
+    dat.bin_counts(dat.OFF_star_N_lbda, "OFF", dat.bin_lowers, dat.bin_uppers)
     
     #clears the data lists, only need binned #
     dat.data_clear()
 
     # get the binned diff #
     dat.binned_diff()
+    #print dat.bnd_count_lda
+    #print dat.bnd_diff
+    #print dat.bin_N
     
     # plot the binned counts #
-    #dat.plot_counts()
-    
-    dat.bin_vgsr()
+    dat.plot_counts()
+    dat.bin_vgsr(dat.bin_lowers, dat.bin_uppers)
     
     # plot the vgsr points #
     dat.plot_vgsr()
