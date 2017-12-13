@@ -4,7 +4,7 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.patches as mpatches
-
+import math as mt
 # # # # # # # # # # # # # # # # # # # # # #
 #        USEFUL CLASSES                   #
 # # # # # # # # # # # # # # # # # # # # # #
@@ -31,20 +31,20 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
             if(read_data):
                 ss = line.split(', ')
                 ty = int(ss[0])
-                x = float(ss[1])
-                y = float(ss[2])
-                z = float(ss[3])
+                x = float(ss[2])
+                y = float(ss[3])
+                z = float(ss[4])
+            
+                l = float(ss[5])
+                b = float(ss[6])
+                r = float(ss[7])
                 
-                l = float(ss[4])
-                b = float(ss[5])
-                r = float(ss[6])
+                vx = float(ss[8])
+                vy = float(ss[9])
+                vz = float(ss[10])
                 
-                vx = float(ss[7])
-                vy = float(ss[8])
-                vz = float(ss[9])
-                
-                m  = float(ss[10])
-                vl = float(ss[11])
+                m  = float(ss[11])
+                vl = float(ss[12])
                 self.xs.append(x); self.ys.append(y); self.zs.append(z)
                 self.ls.append(l); self.bs.append(b); self.rs.append(r)
                 self.vxs.append(vx); self.vys.append(vy); self.vzs.append(vz)
@@ -269,8 +269,9 @@ class nbody_running_env:
                          -o " + self.path + "quick_plots/outputs/" + simulation_hist + ".out "
         
         #final piece to the run command. includes the number of threads, output format, and visualizer args
-        end_piece = "-n 10 -b  --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr
-        #end_piece = "-n 10 -b  --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + self.path +"test2.out"
+        #end_piece = "-n 10 -b  --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr
+        #end_piece = "-n 10 -b -u --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + self.path +"test2.out"
+        end_piece = "-n 10 -b -u --visualizer-bin=" + self.path + "nbody_test/bin/milkyway_nbody_graphics -i " + (ft) + " " + bt + " " + rl + " " + rr + " " + ml + " " + mr + " " + self.path + "test3.out"
         
         if(not comparison_hist and  not pipe): ##this willl produce a single run of nbody, without comparing the end result to anything
             run_command += end_piece #completing the run command

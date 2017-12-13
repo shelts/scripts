@@ -30,8 +30,9 @@ n = False
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
 args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+#args_run = [4.0, 1, 0.2, 0.2, 11.25, 0.2]
 #args_run = [0.01, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [3.96075974078845, 1, 0.19567754715682, 0.203238252364086, 12.0086713461195, 0.204088919190691]
 #args_run_comp = [3.28828657813, 0.98, 0.2, 0.2, 12, 0.2]
 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
@@ -41,9 +42,9 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
-remake                    = n                 #
-run_and_compare           = y                 #
+run_nbody                 = y                 #
+remake                    = y                 #
+run_and_compare           = n                 #
 match_histograms          = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -85,11 +86,12 @@ histogram_v166 = 'hist_v166_3p95_0p98_0p2_0p2_12_0p2__9_27_17'
 correct1 = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_diff_seed'
 
 #    hist to match against for compare after run  #
-correct_hist = 'hist_v166_3p95_0p98_0p2_0p2_12_0p2__9_27_17'
-compare_hist = 'mw@h_test_hist'
+correct_hist = 'hist_v166_3p95_0p2_0p2_12_0p2__12_5_17'
+compare_hist = 'mw@h_best_fit'
+initial_hist = 'output_plummer_plummer_0gy'
 
 #    hist name for the nbody run   #
-correctans_hist = correct_hist
+correctans_hist = 'manual_test'
 comparison_hist = compare_hist
 
 plot_name = compare_hist
@@ -99,9 +101,9 @@ plot_name = compare_hist
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-lua = "full_control.lua"
+#lua = "full_control.lua"
 #lua = "manual_body_input.lua"
-#lua = "halo_object_dev.lua"
+lua = "halo_object_dev.lua"
 #lua = "EMD_v164.lua"
 
 #    pathways  #

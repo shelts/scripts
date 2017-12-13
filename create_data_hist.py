@@ -9,13 +9,15 @@ class data:#class system for reading in data and making a data histogram
         self.vgsr_file = vgsr_file
         self.on_field_counts_file = on_field_counts_file
         self.off_field_counts_file = off_field_counts_file
-        
         self.star_N = []
         self.bnd_counts_ON = []
         self.bnd_counts_OFF = []
         self.bnd_diff = []
         self.bnd_vel_disp = []
         self.bnd_vgsr_counts = []
+        
+        self.ON_count_err = []
+        self.OFF_count_err = []
         
         self.read_vgsr()
         self.read_counts()
@@ -174,7 +176,7 @@ class data:#class system for reading in data and making a data histogram
             self.bnd_counts_ON = bnd_counts
         elif(field == "OFF"):
             self.bnd_counts_OFF = bnd_counts
-
+        
         del star_N_lbda, bnd_counts
         
         return 0
@@ -240,32 +242,36 @@ class data:#class system for reading in data and making a data histogram
     
     
     
-    def binned_diff(self):
+    def binned_diff(self):#take the difference between the on and off fields.
+        self.bnd_diff_err = []
         if(len(self.bnd_counts_ON) > 0 and len(self.bnd_counts_OFF) > 0):
             for i in range(0, len(self.bnd_counts_ON)):
                 self.bnd_diff.append(abs(self.bnd_counts_ON[i] - self.bnd_counts_OFF[i]))
+                self.bnd_diff_err.append( (self.bnd_counts_ON[i] + self.bnd_counts_OFF[i])**0.5)
     
 
     
-    def convert_strN_simN(self):#data is in solar masses. need to convert to simulation units
-        self.N_sim_units = []
+    def normalize_counts(self, N, Nerr):#need to normalize counts in the mw@home data histogram
         self.mass_per_count = 5.0 / 222288.47 
-        for i in range(0, len(self.bnd_diff)):
-            n = self.bnd_diff[i] #each count is fturn off star which reps about a cluster of 5 solar masses
-            self.N_sim_units.append(n)
-            
-    def normalize_counts(self, N):#need to normalize counts in the mw@home data histogram
         total = 0.0
+        total_error = 0.0
         self.N_normed = []
         self.N_error = []
         for i in range(0, len(N)):
             total += N[i]
+            total_error +=  Nerr[i] * Nerr[i]
+        total_error = total_error **0.5
         
         self.total = total
+        c2 = total_error / total
         for i in range(0, len(N)):
             self.N_normed.append(N[i] / total)
+            
             if(N[i] > 0):
-                self.N_error.append( (N[i]**0.5) / total)
+                c1 = Nerr[i] / N[i]
+                er = (N[i] / total) * (c1 * c1 + c2 *c2)**0.5
+                self.N_error.append(er)
+                #self.N_error.append( (N[i]**0.5) / total)
             else:
                 self.N_error.append(1.0 / total)
 
@@ -335,19 +341,6 @@ class data:#class system for reading in data and making a data histogram
         plt.clf()
         #plt.show()
     
-    def plot_simN(self):
-        plt.xlim(50, -50)
-        #plt.ylim(0, 1500)
-        plt.xlabel("$\Lambda_{Orphan}$")
-        plt.ylabel("N (sim units)")
-        plt.xticks( [50, 40, 30, 20, 10, 0, -10, -20, -30, -40, -50])
-        #plt.tick_params(which='minor', length=4, color='r')
-        w = 2.6
-        plt.bar(self.bnd_count_lda, self.N_sim_units, width = w, color = "b", edgecolor = "b", alpha = 0.5)
-        plt.savefig('figure5_simunits.png', format='png')
-        plt.clf()
-        #plt.show()
-        
     def plot_simN_normed(self):
         plt.xlim(50, -50)
         #plt.ylim(0, 1500)
@@ -382,9 +375,8 @@ class data:#class system for reading in data and making a data histogram
             del self.bnd_counts_OFF
         if(stage == 'binned diff'):
             del self.bnd_diff
+            del self.bnd_diff_err
             del self.bin_N
-        if(stage == 'converted'):
-            del self.N_sim_units
 
     
 def main():
@@ -400,8 +392,8 @@ def main():
     
     
     dat.bin_counts(dat.ON_star_N_lbda, "ON", dat.bin_lowers, dat.bin_uppers)    # bin the on field #
-    dat.bin_counts(dat.OFF_star_N_lbda, "OFF", dat.bin_lowers, dat.bin_uppers)  # bin the off field #
-    
+    dat.bin_counts(dat.OFF_star_N_lbda, "OFF", dat.bin_lowers, dat.bin_uppers, )  # bin the off field #
+
     dat.bin_vgsr(dat.bin_lowers, dat.bin_uppers)    #bin the vgsr los, and vel disp
     dat.plot_vgsr()     # plot the vgsr points #
     
@@ -410,25 +402,21 @@ def main():
     dat.data_clear('data lists')   #clears the data lists, only need binned #
 
     dat.binned_diff()   # get the binned diff #
-    
+    #print dat.bnd_diff_err
     
     dat.plot_counts()   # plot the binned counts #
     dat.data_clear('binned counts')   #deletes the on and off field bin data. only need diff
     
-    dat.convert_strN_simN()
-    dat.plot_simN()
+    #dat.convert_strN_simN()
+    #dat.plot_simN()
 
-    dat.data_clear('binned diff')   #deletes binned diff. only need converted
     
-    dat.normalize_counts(dat.N_sim_units)   #normalizes the counts
+    dat.normalize_counts(dat.bnd_diff, dat.bnd_diff_err)   #normalizes the counts
     dat.plot_simN_normed()
     dat.vel_disp_error()
     
-    dat.data_clear('converted')   #deletes sim unit converted. only need normed
+    dat.data_clear('binned diff')   #deletes binned diff. only need converted
    
-    #print dat.bnd_count_lda
-    #print dat.bnd_diff
-    #print dat.bin_N
     
     dat.make_mw_hist()
     
