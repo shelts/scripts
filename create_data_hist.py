@@ -25,6 +25,8 @@ class binned_data:                          # class to store binned data and bin
         self.count_lda = []                 # to store the bin centers for plotting
         self.Nbins = None                   # the number of bins
         
+        self.N_normed = []                  # to store the normalized counts
+        self.N_error = []                   # normalized count errors
         if(file_name):                      # if there is a data file with bin beginnings and endings then we can use that
             file_name = open(file_name, "r")
             for line in file_name:
@@ -62,6 +64,8 @@ class data:#class system for reading in data and making a data histogram
         
         self.read_vgsr()
         self.read_counts()
+        
+        
         
     def read_vgsr(self):
         self.vel = vel_data()
@@ -304,25 +308,24 @@ class data:#class system for reading in data and making a data histogram
         self.mass_per_count = 5.0 / 222288.47   # each count represents about 5 solar masses #
         total = 0.0
         total_error = 0.0
-        self.N_normed = []
-        self.N_error = []
+        
         for i in range(0, len(N)):
             total += N[i]                       # calc the total counts #
             total_error +=  Nerr[i] * Nerr[i]   # total error is sum in quadrature of each error #
         total_error = total_error **0.5         # take the sqr root #
         
-        self.total = total
+        self.total_count = total                # for use when printing the histogram
         c2 = total_error / total                # coeff for use later #
         for i in range(0, len(N)):
-            self.N_normed.append(N[i] / total)  # normalized counts #
+            self.bnd.N_normed.append(N[i] / total)  # normalized counts #
             
             if(N[i] > 0):                       # error for bins with counts in them #
                 c1 = Nerr[i] / N[i]             # another coeff #     
                 er = (N[i] / total) * (c1 * c1 + c2 *c2)**0.5 # follows the error formula for division of two things with error, in this case the individual count and the total #
-                self.N_error.append(er)
+                self.bnd.N_error.append(er)
                 #self.N_error.append( (N[i]**0.5) / total)
             else:
-                self.N_error.append(1.0 / total)              # if there is no counts, then the error is set to this default #
+                self.bnd.N_error.append(1.0 / total)              # if there is no counts, then the error is set to this default #
 
 
     def plot_vgsr(self):
@@ -396,11 +399,11 @@ class data:#class system for reading in data and making a data histogram
     def make_mw_hist(self):
         hist = open("data_hist_fall_2017.hist", "w")
         hist.write("# Orphan Stream histogram \n# Generated from data from Dr. Yanny from Orphan stream paper\n# format is same as other MW@Home histograms\n#\n#\n")
-        hist.write("n = %i\n" % (int(self.total)))
+        hist.write("n = %i\n" % (int(self.total_count)))
         hist.write("massPerParticle = %.15f\n" % (self.mass_per_count))
         hist.write("lambdaBins = %i\nbetaBins = 1\n" % (len(self.bnd.count_lda)))
         for i in range(0, len(self.bnd.count_lda)):
-            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.count_lda[i], 0, self.N_normed[i], self.N_error[i],  self.vel.disp[i], self.vel.disp_err[i]))
+            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.count_lda[i], 0, self.bnd.N_normed[i], self.bnd.N_error[i],  self.vel.disp[i], self.vel.disp_err[i]))
         
     def data_clear(self, stage):
         if(stage == 'data lists'):      # first stage of deletion. Deletes stored data
