@@ -331,6 +331,19 @@ class data:#class system for reading in data and making a data histogram
                 self.beta_diff.sqsums.append(abs(self.beta_ON.sqsums[i] - self.beta_OFF.sqsums[i]))
                 self.beta_diff.binN.append(  abs(self.beta_ON.binN[i]   - self.beta_OFF.binN[i]))
     
+    def beta_dispersion(self):
+        for i in range(0, len(self.beta_diff.sums)):
+            sums = self.beta_diff.sums[i]
+            sqsums = self.beta_diff.sqsums[i]
+            
+            N = beta_diff.binN[i]
+            dispsq = sqsums / (N - 1.)
+            dispsq -= (N / (N - 1.) ) * (sums / N)**2.
+            
+            dispsq = dispsq**0.5
+            self.beta_diff.disp.append(dispsq)
+            
+        print self.beta_diff.disp
     
     def normalize_counts(self, N, Nerr):# need to normalize counts in the mw@home data histogram
         self.bin_normed = binned_data()
