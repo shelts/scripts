@@ -10,23 +10,25 @@ class vel_data:     # place to store the velocity data. Makes it a little easier
         self.disp = []; self.disp_err = []; 
         self.bnd_N = [];
         
-
-class binned_data:                          # class to store binned data and binner parameters
+class beta_data:
+    def __init__(self):
+        self.sums = []; self.sqsums = []
+        self.disp = []; self.disp_err = []
+        self.binN = []
+        
+class binned_data:                          # class to store binned data
+    def __init__(self):
+        self.counts = []
+        self.err = []
+        
+class bin_parameters:                        # class to store binner parameters
     def __init__(self, file_name = None):   # init the data bins since its common between star counts and vgsr disp.
-        self.counts_ON = []                 # to store the binned on and off field counts
-        self.counts_OFF = []
-        self.diff = []                      # to store the binned difference between the two fields
-        self.diff_err = []                  # error in each bin of the binned difference
-        self.vel_disp = []                  # to store the binned velocity dispersion after binning the velocities 
-        self.vgsr_counts = []               # to store the number of objects in the velocity bins
         self.bin_lowers = []                # the lower coordinates for each bin 
         self.bin_uppers = []                # the upper coordinates for each bin
         self.bin_N = []                     # to store the counts from Yannys data to compare with out own binned counts
         self.count_lda = []                 # to store the bin centers for plotting
         self.Nbins = None                   # the number of bins
         
-        self.N_normed = []                  # to store the normalized counts
-        self.N_error = []                   # normalized count errors
         if(file_name):                      # if there is a data file with bin beginnings and endings then we can use that
             file_name = open(file_name, "r")
             for line in file_name:
@@ -85,8 +87,8 @@ class data:#class system for reading in data and making a data histogram
                 ss = line.split(" ")
                 v_disp_lda  = float(ss[50])
                 v_disp      = float(ss[29])
-                v_err       = float(ss[30])
-                
+                v_err       = float(ss[17])
+                #print v_disp, v_err, v_disp_lda
                 self.vel.los.append(v_disp)
                 self.vel.lda.append(v_disp_lda)
                 self.vel.err.append(v_err)
@@ -95,7 +97,11 @@ class data:#class system for reading in data and making a data histogram
         
     def read_counts(self):
         self.ON_star_N_lbda = []; self.OFF_star_N_lbda = [];
-        
+        self.ON_star_N_beta = []; self.OFF_star_N_beta = [];
+        self.beta_ON  = beta_data()
+        self.beta_OFF = beta_data()
+        self.bin_ON   = binned_data()
+        self.bin_OFF  = binned_data()
         
         f = open(self.on_field_counts_file, 'r')
         g = open(self.off_field_counts_file, 'r')
@@ -113,12 +119,14 @@ class data:#class system for reading in data and making a data histogram
                 line = line.replace('  ', ' ')
 
                 ss = line.split(" ")
+                #print ss
                 str_N_lbda  = float(ss[0])
+                str_N_beta  = float(ss[1])
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
                 
                 self.ON_star_N_lbda.append(str_N_lbda)
-        
+                self.ON_star_N_beta.append(str_N_beta)
         read_data = False
         for line in g:
             if(line.startswith("#")):
@@ -134,17 +142,21 @@ class data:#class system for reading in data and making a data histogram
 
                 ss = line.split(" ")
                 str_N_lbda  = float(ss[0])
+                str_N_beta  = float(ss[1])
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
                 
                 self.OFF_star_N_lbda.append(str_N_lbda)
+                self.OFF_star_N_beta.append(str_N_beta)
         f.close()
         g.close()
     
     
     
-    def bin_counts(self, star_N_lbda, field, bin_lowers = None, bin_uppers = None):#need to bin the data into regularly sized bins
+    def bin_counts(self, star_N_lbda, star_N_beta, field, bin_lowers = None, bin_uppers = None):#need to bin the data into regularly sized bins
         bnd_counts = []
+        beta_sums = []; beta_sqsums = []; beta_binN = []
+        
         #obs = [[]]#for debugging
         bin_lower = None
         bin_upper = None
@@ -158,8 +170,12 @@ class data:#class system for reading in data and making a data histogram
         
         for i in range(0, self.bnd.Nbins):
             bnd_counts.append(0.0)
-            #obs.append([])#for debugging
+            beta_sums.append(0.0)
+            beta_sqsums.append(0.0)
+            beta_binN.append(0.0)
             
+            #obs.append([])#for debugging
+
         for i in range(0, len(star_N_lbda)):        #go through all the stars
             bin_upper = bin_upper_init              #restart at the beginning of the histogram
             bin_lower = bin_lower_init
@@ -171,22 +187,29 @@ class data:#class system for reading in data and making a data histogram
                     bin_upper = bin_uppers[j]       #current upper bin
                 
                 if(star_N_lbda[i] >= bin_lower and star_N_lbda[i] < bin_upper):
-                    #print star_N_lbda[i]
-                    bnd_counts[j] += 1.0
-                    #obs[j].append(star_N_lbda[i]) #for debugging
+                    bnd_counts[j]      += 1.0
+                    beta_sums[j]       += star_N_beta[i]
+                    beta_sqsums[j]     += star_N_beta[i]**2.
+                    beta_binN[j]       += 1.0
+                    #obs[j].append(star_N_lbda[i])  #for debugging
                     break                           #if bin found no need to keep searching
 
                 if(not bin_lowers):                 #if it is standard binning, advance the bins
                     bin_lower = bin_upper           #shift the search brackets by 1 bin
                     bin_upper = bin_lower + self.bin_size
                 #print bin_lower, bin_upper
-
         if(field == "ON"):
-            self.bnd.counts_ON = bnd_counts
+            self.bin_ON.counts  = bnd_counts
+            self.beta_ON.sums   = beta_sums
+            self.beta_ON.sqsums = beta_sqsums
+            self.beta_ON.binN   = beta_binN
         elif(field == "OFF"):
-            self.bnd.counts_OFF = bnd_counts
+            self.bin_OFF.counts  = bnd_counts
+            self.beta_OFF.sums   = beta_sums
+            self.beta_OFF.sqsums = beta_sqsums
+            self.beta_OFF.binN   = beta_binN
         
-        del star_N_lbda, bnd_counts
+        del star_N_lbda, bnd_counts, star_N_beta, beta_sums, beta_sqsums, beta_binN
         
         return 0
     
@@ -249,7 +272,6 @@ class data:#class system for reading in data and making a data histogram
                     bin_lower = bin_upper   # shift the search brackets by 1 bin
                     bin_upper = bin_lower + self.bnd.bin_size
 
-        
         for i in range(0, self.bnd.Nbins):                                  # go through the bins
             v_sumerr[i]   = v_sumerr[i] ** 0.5                              # error is the square root of the sums
             vsq_sumerr[i] = vsq_sumerr[i] ** 0.5
@@ -269,12 +291,14 @@ class data:#class system for reading in data and making a data histogram
                 bnd_vel_disp[i] = ( a - b * c * c ) ** 0.5                  # vel dispersion equation rewritten for computational ease 
                 
                 cc_err = 2.0 * c_err * c                                    # error in the c * c part
+                
                 bcc_err = cc_err * b                                        # error is multiplied by constant
                 
                 a_min_b_err = ( a_err * a_err + bcc_err * bcc_err)**0.5     # error in the difference, a - bcc
+                #print N1, '\t', N2, '\t', b,'\t',  a, '\t',   a_err, '\t',b, '\t', c, '\t', c_err, '\t',  cc_err, '\t',  bcc_err, '\t', bnd_vel_disp[i], '\t', a_min_b_err
                 
-                velDisp_err[i] = a_min_b_err * a_min_b_err / (4.0 * bnd_vel_disp[i])                    # error due to square root. error formula for smething to a power of .5
-            
+                #velDisp_err[i] = a_min_b_err * a_min_b_err / (4.0 * bnd_vel_disp[i])                    # error due to square root. error formula for smething to a power of .5
+                velDisp_err[i] = (N2**0.5 / N1 ) * bnd_vel_disp[i]
                 #Nerr1 = (bnd_vgsr_counts[i] - 1.0) ** 0.5               # error for reduced count
                 #Nerr2 = (bnd_vgsr_counts[i]) ** 0.5                     # error in total count
                 #a_err = a * ( (vsq_sumerr[i] / bnd_vel_sqsum[i])**2.0 + (Nerr1 / N1)**2  ) **0.5       # error due to division of two things with error for coeff1
@@ -294,22 +318,30 @@ class data:#class system for reading in data and making a data histogram
         #print obs
         return 0
     
-    
-    
     def binned_diff(self):                                                                          # take the difference between the on and off fields.
-        if(len(self.bnd.counts_ON) > 0 and len(self.bnd.counts_OFF) > 0):
-            for i in range(0, len(self.bnd.counts_ON)):
-                self.bnd.diff.append(abs(self.bnd.counts_ON[i] - self.bnd.counts_OFF[i]))           # find the difference in the on and off field in each bin
-                self.bnd.diff_err.append( (self.bnd.counts_ON[i] + self.bnd.counts_OFF[i])**0.5)    # error in the difference. The error in the counts is the sq root of the counts. The sum of the squares is then this.    
-    
+        self.beta_diff = beta_data()
+        self.bin_diff = binned_data()
 
+        if(len(self.bin_ON.counts) > 0 and len(self.bin_OFF.counts) > 0):
+            for i in range(0, len(self.bin_ON.counts)):
+                self.bin_diff.counts.append(abs(self.bin_ON.counts[i] - self.bin_OFF.counts[i]))           # find the difference in the on and off field in each bin
+                self.bin_diff.err.append( (self.bin_ON.counts[i] + self.bin_OFF.counts[i])**0.5)    # error in the difference. The error in the counts is the sq root of the counts. The sum of the squares is then this.    
+                
+                self.beta_diff.sums.append(  abs(self.beta_ON.sums[i]   - self.beta_OFF.sums[i]))
+                self.beta_diff.sqsums.append(abs(self.beta_ON.sqsums[i] - self.beta_OFF.sqsums[i]))
+                self.beta_diff.binN.append(  abs(self.beta_ON.binN[i]   - self.beta_OFF.binN[i]))
+    
     
     def normalize_counts(self, N, Nerr):# need to normalize counts in the mw@home data histogram
-        self.mass_per_count = 5.0 / 222288.47   # each count represents about 5 solar masses #
+        self.bin_normed = binned_data()
+        f_turn_offs = 7.5
+        self.mass_per_count = 1.0 / 222288.47   # each count represents about 5 solar masses #
         total = 0.0
         total_error = 0.0
         
         for i in range(0, len(N)):
+            N[i] *= f_turn_offs
+            Nerr[i] *= f_turn_offs
             total += N[i]                       # calc the total counts #
             total_error +=  Nerr[i] * Nerr[i]   # total error is sum in quadrature of each error #
         total_error = total_error **0.5         # take the sqr root #
@@ -317,15 +349,15 @@ class data:#class system for reading in data and making a data histogram
         self.total_count = total                # for use when printing the histogram
         c2 = total_error / total                # coeff for use later #
         for i in range(0, len(N)):
-            self.bnd.N_normed.append(N[i] / total)  # normalized counts #
+            self.bin_normed.counts.append(N[i] / total)  # normalized counts #
             
             if(N[i] > 0):                       # error for bins with counts in them #
                 c1 = Nerr[i] / N[i]             # another coeff #     
                 er = (N[i] / total) * (c1 * c1 + c2 *c2)**0.5 # follows the error formula for division of two things with error, in this case the individual count and the total #
-                self.bnd.N_error.append(er)
-                #self.N_error.append( (N[i]**0.5) / total)
+                self.bin_normed.err.append(er)
+                ###self.N_error.append( (N[i]**0.5) / total)
             else:
-                self.bnd.N_error.append(1.0 / total)              # if there is no counts, then the error is set to this default #
+                self.bin_normed.err.append(1.0 / total)              # if there is no counts, then the error is set to this default #
 
 
     def plot_vgsr(self):
@@ -370,13 +402,13 @@ class data:#class system for reading in data and making a data histogram
         plt.xticks( [50, 40, 30, 20, 10, 0, -10, -20, -30, -40, -50])
         #plt.tick_params(which='minor', length=4, color='r')
         w = 2.6
-        if(len(self.bnd.counts_ON) > 0):
-            plt.bar(self.bnd.count_lda, self.bnd.counts_ON, width = w, color = "w", edgecolor = "k", alpha = 1)
-        if(len(self.bnd.counts_OFF) > 0):
-            plt.bar(self.bnd.count_lda, self.bnd.counts_OFF, width = w, color = "w", edgecolor = "r", alpha = 0.5)
+        if(len(self.bin_ON.counts) > 0):
+            plt.bar(self.bnd.count_lda, self.bin_ON.counts, width = w, color = "w", edgecolor = "k", alpha = 1)
+        if(len(self.bin_OFF.counts) > 0):
+            plt.bar(self.bnd.count_lda, self.bin_OFF.counts, width = w, color = "w", edgecolor = "r", alpha = 0.5)
         
-        if(len(self.bnd.diff) > 0):
-            plt.bar(self.bnd.count_lda, self.bnd.diff, width = w, color = "b", edgecolor = "b", alpha = 0.5)
+        if(len(self.bin_diff.counts) > 0):
+            plt.bar(self.bnd.count_lda, self.bin_diff.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
             plt.bar(self.bnd.count_lda, self.bnd.bin_N, width = w, color = "k", edgecolor = "b", alpha = 0.5)
         plt.savefig('figure5_recreation.png', format='png')
         plt.clf()
@@ -390,7 +422,7 @@ class data:#class system for reading in data and making a data histogram
         plt.xticks( [50, 40, 30, 20, 10, 0, -10, -20, -30, -40, -50])
         #plt.tick_params(which='minor', length=4, color='r')
         w = 2.6
-        plt.bar(self.bnd.count_lda, self.N_normed, width = w, color = "b", edgecolor = "b", alpha = 0.5)
+        plt.bar(self.bnd.count_lda, self.bin_normed.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
         plt.savefig('figure5_simunits_normed.png', format='png')
         plt.clf()
         #plt.show()   
@@ -403,38 +435,41 @@ class data:#class system for reading in data and making a data histogram
         hist.write("massPerParticle = %.15f\n" % (self.mass_per_count))
         hist.write("lambdaBins = %i\nbetaBins = 1\n" % (len(self.bnd.count_lda)))
         for i in range(0, len(self.bnd.count_lda)):
-            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.count_lda[i], 0, self.bnd.N_normed[i], self.bnd.N_error[i],  self.vel.disp[i], self.vel.disp_err[i]))
+            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.count_lda[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  self.vel.disp[i], self.vel.disp_err[i]))
         
     def data_clear(self, stage):
         if(stage == 'data lists'):      # first stage of deletion. Deletes stored data
             del self.ON_star_N_lbda     # delets the on and off field data when no longer needed #
             del self.OFF_star_N_lbda
+            del self.ON_star_N_beta
+            del self.OFF_star_N_beta
             del self.vel.los            # dels the line of sight vels #
             del self.vel.lda            # dels the coordinates for the line of sight vels #
             del self.vel.err            # dels the errors for the line of sight vels
         if(stage == 'binned counts'):   # stage deletes the binned data for each field
-            del self.bnd.counts_ON      
-            del self.bnd.counts_OFF
+            del self.bin_ON
+            del self.bin_OFF
+            del self.beta_ON
+            del self.beta_OFF
         if(stage == 'binned diff'):     # deletes binned data of the difference between fields after normalization
-            del self.bnd.diff
-            del self.bnd.diff_err
+            del self.bin_diff
             del self.bnd.bin_N
 
     
 def main():
     vgsr_file = "my16lambet2bg.specbhb.dist.lowmet.stream"
-    on_field_counts_file = "l270soxlbfgcxNTbcorr.newonR"
-    off_field_counts_file = "l270soxlbfgcxNTbcorr.newoffR"
+    on_field_counts_file = "l270soxlbfgcxNTbcorr.newon"
+    off_field_counts_file = "l270soxlbfgcxNTbcorr.newoff"
     bin_data = "data_from_yanny.dat"
     # get the data #
     dat = data(vgsr_file, on_field_counts_file, off_field_counts_file)
-    
+    #print dat.vel.err
     # initiaze bins #
-    dat.bnd = binned_data(bin_data)                         # initialize the bin parameters
+    dat.bnd = bin_parameters(bin_data)                         # initialize the bin parameters
     #print dat.bnd.count_lda
     
-    dat.bin_counts(dat.ON_star_N_lbda, "ON", dat.bnd.bin_lowers, dat.bnd.bin_uppers)        # bin the on field #
-    dat.bin_counts(dat.OFF_star_N_lbda, "OFF", dat.bnd.bin_lowers, dat.bnd.bin_uppers, )    # bin the off field #
+    dat.bin_counts(dat.ON_star_N_lbda, dat.ON_star_N_beta, "ON", dat.bnd.bin_lowers, dat.bnd.bin_uppers)        # bin the on field #
+    dat.bin_counts(dat.OFF_star_N_lbda, dat.OFF_star_N_beta, "OFF", dat.bnd.bin_lowers, dat.bnd.bin_uppers, )    # bin the off field #
 
     dat.bin_vgsr(dat.bnd.bin_lowers, dat.bnd.bin_uppers)    #bin the vgsr los, and vel disp
     dat.plot_vgsr()                                         # plot the vgsr points #
@@ -453,7 +488,7 @@ def main():
     #dat.plot_simN()
 
     #print dat.bnd.diff
-    dat.normalize_counts(dat.bnd.diff, dat.bnd.diff_err)   # normalizes the counts #
+    dat.normalize_counts(dat.bin_diff.counts, dat.bin_diff.err)   # normalizes the counts #
     dat.plot_simN_normed()  
     #dat.vel_disp_error()
     

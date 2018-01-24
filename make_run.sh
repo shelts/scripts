@@ -11,12 +11,12 @@
 
 
     ./milkyway_nbody \
-    -f ~/Desktop/research/lua/full_control.lua \
+    -f full_control.lua \
     -o some_output.out \
     -h path_to_input_hist \
     -z path_to_output_hist \
     -n 8 -b  -P -u\
-    -i 3.95 1.0 0.2 0.2 12 0.2  path_to_object_list\
+    -i 3.95 1.0 0.2 0.2 12 0.2 \
 
 
 #if you run:

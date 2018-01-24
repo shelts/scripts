@@ -29,11 +29,12 @@ n = False
 #args_run_comp = [4.037308903030000, 0.98, 0.2, 0.2, 12, 0.2]
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run = [3.95, 0.98, 0.2, 0.2, 12, 1.43] 
-args_run = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
+args_run = [3.95, 0.98, 0.8, 0.2, 12, 0.2] 
+#args_run = [3.9577, 1, 0.19675, 0.19964, 12.05486, 0.19988]
 #args_run = [4.0, 1, 0.2, 0.2, 11.25, 0.2]
 #args_run = [0.01, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.96075974078845, 1, 0.19567754715682, 0.203238252364086, 12.0086713461195, 0.204088919190691]
-#args_run_comp = [3.28828657813, 0.98, 0.2, 0.2, 12, 0.2]
+#args_run_comp = [3.96075974078845, 1, 0.19567754715682, 0.203238252364086, 12.0086713461195, 0.204088919190691]
+args_run_comp = [3.95, 0.98, 0.8, 0.2, 12, 0.4] 
 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
@@ -44,8 +45,8 @@ args_run_comp = [3.96075974078845, 1, 0.19567754715682, 0.203238252364086, 12.00
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = y                 #
 remake                    = y                 #
-run_and_compare           = n                 #
-match_histograms          = n                 #
+run_and_compare           = y                 #
+match_histograms          = y                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -83,16 +84,21 @@ histogram_v166 = 'hist_v166_3p95_0p98_0p2_0p2_12_0p2__9_27_17'
 
 #    histograms for runs  #
 #correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_mw'
-correct1 = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_diff_seed'
+correct1 = 'hist_v166_3p95_0p2_0p2_12_0p2__1_2_2018_init'
+best_fit = 'test'
+best_fit2 = 'test2'
+data1 = 'data_hist_fall_2017_theoretical_error'
+data2 = 'data_hist_fall_2017_propagated_error'
 
 #    hist to match against for compare after run  #
-correct_hist = 'hist_v166_3p95_0p2_0p2_12_0p2__12_5_17'
-compare_hist = 'mw@h_best_fit'
+correct_hist = 'data_hist_fall_2017'
+mw_data_hist_comparison_ex = 'mw_data_hist_comparison_ex'
+compare_hist = 'hist_v166_3p95_0p2_0p2_12_0p2__12_5_17'
 initial_hist = 'output_plummer_plummer_0gy'
 
 #    hist name for the nbody run   #
-correctans_hist = 'manual_test'
-comparison_hist = compare_hist
+correctans_hist = best_fit
+comparison_hist = best_fit2
 
 plot_name = compare_hist
 
@@ -101,9 +107,9 @@ plot_name = compare_hist
 #    run specfics   #
 #version = '_1.62_x86_64-pc-linux-gnu__mt'
 version  = ''
-#lua = "full_control.lua"
+lua = "full_control.lua"
 #lua = "manual_body_input.lua"
-lua = "halo_object_dev.lua"
+#lua = "halo_object_dev.lua"
 #lua = "EMD_v164.lua"
 
 #    pathways  #
