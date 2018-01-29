@@ -34,7 +34,7 @@ args_run = [3.95, 0.98, 0.8, 0.2, 12, 0.2]
 #args_run = [4.0, 1, 0.2, 0.2, 11.25, 0.2]
 #args_run = [0.01, 0.98, 0.2, 0.2, 12, 0.2] 
 #args_run_comp = [3.96075974078845, 1, 0.19567754715682, 0.203238252364086, 12.0086713461195, 0.204088919190691]
-args_run_comp = [3.95, 0.98, 0.8, 0.2, 12, 0.4] 
+args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.4] 
 
 #args_run_comp = [2.08, 0.98, 0.2, 0.3, 12, 0.45] 
 #args_run = [0.001, 0.98, 0.2, 0.2, 12, 0.2] 
@@ -43,7 +43,7 @@ args_run_comp = [3.95, 0.98, 0.8, 0.2, 12, 0.4]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = y                 #
+run_nbody                 = n                 #
 remake                    = y                 #
 run_and_compare           = y                 #
 match_histograms          = y                 #
@@ -85,7 +85,7 @@ histogram_v166 = 'hist_v166_3p95_0p98_0p2_0p2_12_0p2__9_27_17'
 #    histograms for runs  #
 #correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_mw'
 correct1 = 'hist_v166_3p95_0p2_0p2_12_0p2__1_2_2018_init'
-best_fit = 'test'
+best_fit = 'test1'
 best_fit2 = 'test2'
 data1 = 'data_hist_fall_2017_theoretical_error'
 data2 = 'data_hist_fall_2017_propagated_error'
@@ -110,7 +110,7 @@ version  = ''
 lua = "full_control.lua"
 #lua = "manual_body_input.lua"
 #lua = "halo_object_dev.lua"
-#lua = "EMD_v164.lua"
+#lua = "EMD_v166.lua"
 
 #    pathways  #
 #I am tired of constantly adapting it for the servers

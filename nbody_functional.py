@@ -296,7 +296,7 @@ class nbody_running_env:
         if(not pipe):#produces the comparison to stdout
             call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  
                 + " -h " + self.path + "quick_plots/hists/" + hist1 + '.hist'
-                + " -D " + self.path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
+                + " -S " + self.path + "quick_plots/hists/" + hist2 + '.hist'], shell=True)
             
         elif(pipe):#will pipe the result of the comparison to a file
             call([" " + self.path + "nbody_test/bin/milkyway_nbody" + self.version  

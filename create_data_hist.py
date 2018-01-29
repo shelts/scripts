@@ -189,7 +189,9 @@ class data:#class system for reading in data and making a data histogram
                 if(star_N_lbda[i] >= bin_lower and star_N_lbda[i] < bin_upper):
                     bnd_counts[j]      += 1.0
                     beta_sums[j]       += star_N_beta[i]
+                    #print beta_sums[j], star_N_beta[i]
                     beta_sqsums[j]     += star_N_beta[i]**2.
+                    #print beta_sqsums[j], star_N_beta[i]**2., '\n'
                     beta_binN[j]       += 1.0
                     #obs[j].append(star_N_lbda[i])  #for debugging
                     break                           #if bin found no need to keep searching
@@ -327,22 +329,36 @@ class data:#class system for reading in data and making a data histogram
                 self.bin_diff.counts.append(abs(self.bin_ON.counts[i] - self.bin_OFF.counts[i]))           # find the difference in the on and off field in each bin
                 self.bin_diff.err.append( (self.bin_ON.counts[i] + self.bin_OFF.counts[i])**0.5)    # error in the difference. The error in the counts is the sq root of the counts. The sum of the squares is then this.    
                 
-                self.beta_diff.sums.append(  abs(self.beta_ON.sums[i]   - self.beta_OFF.sums[i]))
-                self.beta_diff.sqsums.append(abs(self.beta_ON.sqsums[i] - self.beta_OFF.sqsums[i]))
-                self.beta_diff.binN.append(  abs(self.beta_ON.binN[i]   - self.beta_OFF.binN[i]))
+                #self.beta_diff.sums.append(  (self.beta_ON.sums[i]   - self.beta_OFF.sums[i]))
+                #self.beta_diff.sqsums.append((self.beta_ON.sqsums[i] - self.beta_OFF.sqsums[i]))
+                #self.beta_diff.binN.append(  abs(self.beta_ON.binN[i]   - self.beta_OFF.binN[i]))
+                
+                self.beta_diff.sums.append(  (self.beta_ON.sums[i]))
+                self.beta_diff.sqsums.append((self.beta_ON.sqsums[i] ))
+                self.beta_diff.binN.append(  abs(self.beta_ON.binN[i]))
     
     def beta_dispersion(self):
+        #print self.beta_diff.sums
+        #print self.beta_diff.sqsums
         for i in range(0, len(self.beta_diff.sums)):
             sums = self.beta_diff.sums[i]
             sqsums = self.beta_diff.sqsums[i]
             
-            N = beta_diff.binN[i]
-            dispsq = sqsums / (N - 1.)
-            dispsq -= (N / (N - 1.) ) * (sums / N)**2.
-            
-            dispsq = dispsq**0.5
-            self.beta_diff.disp.append(dispsq)
-            
+            N = self.beta_diff.binN[i]
+            if(N > 2):
+                dispsq = sqsums / (N - 1.)
+                #print dispsq, sqsums, sums**2.
+                dispsq -= ( N / (N - 1.) ) * (sums / N)**2.
+                #print dispsq, ( N / (N - 1.) ) * (sums / N)**2., N, '\n'
+                dispsq = dispsq**0.5
+                self.beta_diff.disp.append(dispsq)
+                
+                
+                
+                
+            else:
+                self.beta_diff.disp.append(-1)
+                
         print self.beta_diff.disp
     
     def normalize_counts(self, N, Nerr):# need to normalize counts in the mw@home data histogram
@@ -496,7 +512,7 @@ def main():
     
     dat.plot_counts()                                       # plot the binned counts #
     dat.data_clear('binned counts')                         # deletes the on and off field bin data. only need bin diff data#
-    
+    dat.beta_dispersion()
     #dat.convert_strN_simN()
     #dat.plot_simN()
 
