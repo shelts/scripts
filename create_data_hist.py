@@ -315,9 +315,6 @@ class data:#class system for reading in data and making a data histogram
         self.vel.disp = bnd_vel_disp
         self.vel.disp_err = velDisp_err
         self.vel.bnd_N = bnd_vgsr_counts
-        #print bnd_vgsr_counts
-        #print bnd_vel_disp 
-        #print obs
         return 0
     
     def binned_diff(self):                                                                          # take the difference between the on and off fields.
