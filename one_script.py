@@ -17,6 +17,7 @@ import math as mt
 import matplotlib.patches as mpatches
 import random
 from nbody_functional import *
+from useful_plots import *
 random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
@@ -32,16 +33,16 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
-run_and_compare           = y                 #
-match_histograms          = y                 #
+remake                    = n                 #
+run_and_compare           = n                 #
+match_histograms          = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Hist Plot Switches             #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_hists                = n                 #
+plot_hists                = y                 #
 plot_veldisp_switch       = n                 #
 vlos_plot_switch          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
