@@ -64,13 +64,8 @@ class test_data():
         plt.savefig('quick_plots/test_data.png', format='png')
 
 
-class parameter:
-    def __init__(self, ranges):
-        self.lower = ranges[0]
-        self.upper = ranges[1]
-            
         
-class population:
+class population: # a class to create, store and update a population for differential evolution 
     def __init__(self, population_size, Nparameters):
         self.cur_pop = []
         self.pop_costs = []
@@ -119,6 +114,11 @@ class population:
     
     
 class diff_evo:
+    class parameter:
+        def __init__(self, ranges):
+            self.lower = ranges[0]
+            self.upper = ranges[1]
+                
     def __init__(self):
         self.cross_over = 0.9
         self.differential_weight = 0.8
@@ -128,7 +128,7 @@ class diff_evo:
         self.ranges = []
         
         for i in range(0, self.Nparameters):
-            val = parameter(search_ranges[i])
+            val = self.parameter(search_ranges[i])
             self.ranges.append(val)
         
         # create the initial population: 
