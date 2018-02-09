@@ -1,8 +1,10 @@
 #! /usr/bin/python
 import os
+from mpl_toolkits.mplot3d import Axes3D
 from subprocess import call
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
+from curve_fit import *
 
 class vel_data:     # place to store the velocity data. Makes it a little easier to keep track of the variables
     def __init__(self):
@@ -15,13 +17,14 @@ class beta_data:
         self.sums = []; self.sqsums = []
         self.disp = []; self.disp_err = []
         self.binN = []
+        self.beta_coors = []
         
 class binned_data:                          # class to store binned data
     def __init__(self):
         self.counts = []
         self.err = []
         
-class bin_parameters:                        # class to store binner parameters
+class bin_parameters:                       # class to store binner parameters
     def __init__(self, file_name = None):   # init the data bins since its common between star counts and vgsr disp.
         self.bin_lowers = []                # the lower coordinates for each bin 
         self.bin_uppers = []                # the upper coordinates for each bin
@@ -39,21 +42,149 @@ class bin_parameters:                        # class to store binner parameters
                 self.bin_lowers.append(bn_lower)    # store bin upper and lower coordinates
                 self.bin_uppers.append(bn_upper)
                 self.bin_N.append(bn_n)
-                self.count_lda.append( bn_lower + (bn_upper - bn_lower) / 2.0 ) # center of the bin which is what we will plot
+                self.count_lda.append(bn_lower + (bn_upper - bn_lower) / 2.0) # center of the bin which is what we will plot
                 
             self.Nbins = len(self.bin_lowers) 
             
         else: # regularly size the bins automatically if we don't use Yanny's bin coordinates
-            self.bin_size = 4.0
-            self.bin_start = -50.0
-            self.bin_end   = 50.0
-            self.Nbins = int( abs(self.bin_start - self.bin_end) / self.bin_size)
+            self.Nbins = 5 
+            self.bin_start = -30.0
+            self.bin_end   = 30.0
+            self.bin_size = (abs(self.bin_start - self.bin_end) / self.Nbins)
             self.count_lda = []
             for i in range(0, self.Nbins):
                 self.count_lda.append(self.bin_start + self.bin_size * (0.5  + i) ) # middle bin coordinates
+
+class bin_betas:#class to make histogram of betas in each bin
+    def __init__(self, beta_coors_ON, beta_coors_OFF, lmda_bnd):#(on field beta coordinates, Off field beta coordinates, lambda bin parameters)
+        self.binned_coors_ON  = []
+        self.binned_coors_OFF = []
         
+        # bin the on and off field seperately so you can adjust it until they have same number of bins #
+        self.beta_Nbins_OFF = 30
+        self.lower_OFF  = -5.0
+        self.upper_OFF = 5.0
         
+        self.beta_Nbins_ON = 30
+        self.lower_ON = -5.0
+        self.upper_ON = 5.0
+        
+        self.bin_width_ON    = abs(self.lower_ON - self.upper_ON) / self.beta_Nbins_ON
+        self.bin_width_OFF   = abs(self.lower_OFF - self.upper_OFF) / self.beta_Nbins_OFF
+        self.bin_centers_ON  = []
+        self.bin_centers_OFF = []
+        
+        center  = self.lower_ON + self.bin_width_ON / 2.0
+        for i in range(0, self.beta_Nbins_ON): # initial beta bin centers On field
+            self.bin_centers_ON.append(center)
+            center += self.bin_width_ON
+            
+        center = self.lower_OFF + self.bin_width_OFF / 2.0
+        for i in range(0, self.beta_Nbins_OFF): # initial beta bin centers off field
+            self.bin_centers_OFF.append(center)
+            center += self.bin_width_OFF
+        
+        for i in range(0, lmda_bnd.Nbins):  # create array for storing beta count data
+            self.binned_coors_ON.append([]) # empty vessel for each Lambda bin for the beta bins
+            self.binned_coors_OFF.append([])
+            
+            for j in range(0, self.beta_Nbins_ON): # for each beta bins
+                self.binned_coors_ON[i].append(0.0) # initialize the counts for the beta bins
+                
+            for j in range(0, self.beta_Nbins_OFF):
+                self.binned_coors_OFF[i].append(0.0)
+            self.binner(i, beta_coors_ON[i], beta_coors_OFF[i]) # send the beta coors for this lambda bin for binning
+
+        # print (self.binned_coors_OFF)
+        del beta_coors_ON, beta_coors_OFF
+        #self.plot_3d(lmda_bnd.Nbins, lmda_bnd.count_lda) # make one 3D plot of the stream
+        
+        self.off_field_average(lmda_bnd)# does a simple ave of the off field counts.
+        self.correction(lmda_bnd)
+        self.plot_each_bin(lmda_bnd.Nbins) # plot each lambda bin seperately
+        
+    def binner(self, lmbda_bin, coors_ON, coors_OFF): # (current lambda bin, beta coors on field, beta coors off field)
+        for j in range(0, len(coors_ON)): # for each beta coordinate in the lmda bin
+            for k in range(0, self.beta_Nbins_ON): # for each beta bin
+                lower_bound = (self.bin_centers_ON[k] - self.bin_width_ON / 2.0) # bin bounds
+                upper_bound = (self.bin_centers_ON[k] + self.bin_width_ON / 2.0)
+                #print lower_bound, upper_bound
+                if(coors_ON[j] >= lower_bound  and coors_ON[j] <= upper_bound): # check if beta coor is in the bin
+                    self.binned_coors_ON[lmbda_bin][k] += 1.0
+        
+        for j in range(0, len(coors_OFF)): # for each beta coordinate in the lmda bin
+            for k in range(0, self.beta_Nbins_OFF): # for each beta bin
+                lower_bound = (self.bin_centers_OFF[k] - self.bin_width_OFF / 2.0)
+                upper_bound = (self.bin_centers_OFF[k] + self.bin_width_OFF / 2.0)
+                #print lower_bound, upper_bound
+                if(coors_OFF[j] >= lower_bound  and coors_OFF[j] <= upper_bound):
+                    self.binned_coors_OFF[lmbda_bin][k] += 1.0
     
+    def plot_each_bin(self, lmda_Nbin):
+        w = 0.25
+        os.system("rm -r quick_plots/stream_beta_plots/lamb*")
+        test_dat = test_data()
+        for i in range(0, lmda_Nbin):
+            plt.figure()
+            plt.xlim(self.lower_OFF, self.upper_OFF)
+            plt.ylim(0, 400)
+            plt.ylabel("counts")
+            plt.xlabel(r"$\beta_{Orphan}$")
+            plt.bar(self.bin_centers_OFF, self.binned_coors_OFF[i], width=w, color='r', alpha = 0.75, label = 'OFF')
+            plt.bar(self.bin_centers_ON,  self.binned_coors_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
+            plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
+            plt.legend()
+            plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '.png', format = 'png')
+            plt.close()
+            #plt.clf()
+        os.system("xdg-open quick_plots/stream_beta_plots/lambda_bin_0.png")
+        return 0
+    
+    def plot_3d(self, lmda_Nbins,lmda_centers):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        w = 0.25
+        ax.set_xlabel(r"$\beta_{Orphan}$")
+        ax.set_zlabel("counts")
+        ax.set_ylabel(r"$\Lambda_{Orphan}$")
+        for i in range(0, lmda_Nbins):
+            ax.bar(self.bin_centers_OFF, self.binned_coors_OFF[i], width=w,zs=lmda_centers[i], zdir='y', color='r', alpha = 0.75)
+            ax.bar(self.bin_centers_ON, self.binned_coors_ON[i], width=w, zs=lmda_centers[i], zdir='y',  color='b', alpha = 0.5, )
+        plt.savefig('quick_plots/stream_beta_plots/lambda_beta_bins.png', format = 'png')
+        plt.show()
+        
+        return 0
+    
+    def off_field_average(self, lmda_bnd):
+        self.bin_off_field_aves = []
+        bins_with_counts = []
+        for i in range(0, lmda_bnd.Nbins): # for each lambda bin
+            off_field_ave = 0.0
+            bns = 0.0
+            for j in range(0, self.beta_Nbins_OFF): # for each of the beta bins
+                if(self.binned_coors_OFF[i][j] > 0.0): # make sure ave includes only bins with counts
+                    off_field_ave += self.binned_coors_OFF[i][j]
+                    bns += 1.0
+            bins_with_counts.append(bns)
+            self.bin_off_field_aves.append(off_field_ave)
+        
+        #print bin_off_field_aves
+        for i in range(0, lmda_bnd.Nbins):
+            if(float(bins_with_counts[i]) > 0.0):
+                self.bin_off_field_aves[i] = self.bin_off_field_aves[i] / float(bins_with_counts[i])
+        return 0
+    
+    def correction(self, lmda_bnd):
+        for i in range(0, lmda_bnd.Nbins):
+            for j in range(0, self.beta_Nbins_ON):
+                if(self.binned_coors_ON[i][j] > 0.0):
+                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * 1.5
+
+        for i in range(0, lmda_bnd.Nbins):
+            for j in range(0, self.beta_Nbins_OFF):
+                if(self.binned_coors_OFF[i][j] > 0.0):
+                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * 1.5
+        return 0
 
 class data:#class system for reading in data and making a data histogram
     def __init__(self, vgsr_file, on_field_counts_file, off_field_counts_file):
@@ -153,16 +284,17 @@ class data:#class system for reading in data and making a data histogram
     
     
     
-    def bin_counts(self, star_N_lbda, star_N_beta, field, bin_lowers = None, bin_uppers = None):#need to bin the data into regularly sized bins
+    def bin_counts(self, star_N_lbda, star_N_beta, field):#need to bin the data into regularly sized bins
         bnd_counts = []
         beta_sums = []; beta_sqsums = []; beta_binN = []
         
         #obs = [[]]#for debugging
         bin_lower = None
         bin_upper = None
-        if(bin_lowers):
-            bin_upper_init = bin_uppers[0]
-            bin_lower_init = bin_lowers[0]
+        
+        if(self.bnd.bin_lowers):
+            bin_upper_init = self.bnd.bin_uppers[0]
+            bin_lower_init = self.bnd.bin_lowers[0]
         else:
             bin_upper_init = self.bnd.bin_start + self.bnd.bin_size     #reinitiaze the bin search brackets
             bin_lower_init = self.bnd.bin_start
@@ -173,43 +305,54 @@ class data:#class system for reading in data and making a data histogram
             beta_sums.append(0.0)
             beta_sqsums.append(0.0)
             beta_binN.append(0.0)
-            
+            if(field == "ON"):
+                self.beta_ON.beta_coors.append([])
+            else:
+                self.beta_OFF.beta_coors.append([])
+        
             #obs.append([])#for debugging
-
+            
         for i in range(0, len(star_N_lbda)):        #go through all the stars
             bin_upper = bin_upper_init              #restart at the beginning of the histogram
             bin_lower = bin_lower_init
             
             #print bin_lower, bin_upper
             for j in range(0, self.bnd.Nbins):
-                if(bin_lowers):
-                    bin_lower = bin_lowers[j]       #current lower bin
-                    bin_upper = bin_uppers[j]       #current upper bin
+                if(self.bnd.bin_lowers):
+                    bin_lower = self.bnd.bin_lowers[j]       #current lower bin
+                    bin_upper = self.bnd.bin_uppers[j]       #current upper bin
                 
                 if(star_N_lbda[i] >= bin_lower and star_N_lbda[i] < bin_upper):
                     bnd_counts[j]      += 1.0
+
                     beta_sums[j]       += star_N_beta[i]
-                    #print beta_sums[j], star_N_beta[i]
                     beta_sqsums[j]     += star_N_beta[i]**2.
-                    #print beta_sqsums[j], star_N_beta[i]**2., '\n'
                     beta_binN[j]       += 1.0
+                    
+                    if(field == "ON"):
+                        self.beta_ON.beta_coors[j].append(star_N_beta[i])
+                    elif(field == "OFF"):
+                        self.beta_OFF.beta_coors[j].append(star_N_beta[i])
+                        
                     #obs[j].append(star_N_lbda[i])  #for debugging
                     break                           #if bin found no need to keep searching
 
-                if(not bin_lowers):                 #if it is standard binning, advance the bins
+                if(not self.bnd.bin_lowers):                 #if it is standard binning, advance the bins
                     bin_lower = bin_upper           #shift the search brackets by 1 bin
-                    bin_upper = bin_lower + self.bin_size
+                    bin_upper = bin_lower + self.bnd.bin_size
                 #print bin_lower, bin_upper
         if(field == "ON"):
             self.bin_ON.counts  = bnd_counts
             self.beta_ON.sums   = beta_sums
             self.beta_ON.sqsums = beta_sqsums
             self.beta_ON.binN   = beta_binN
+            #print self.beta_ON.beta_coors
         elif(field == "OFF"):
             self.bin_OFF.counts  = bnd_counts
             self.beta_OFF.sums   = beta_sums
             self.beta_OFF.sqsums = beta_sqsums
             self.beta_OFF.binN   = beta_binN
+            #print self.beta_OFF.beta_coors
         
         del star_N_lbda, bnd_counts, star_N_beta, beta_sums, beta_sqsums, beta_binN
         
@@ -356,7 +499,7 @@ class data:#class system for reading in data and making a data histogram
             else:
                 self.beta_diff.disp.append(-1)
                 
-        print self.beta_diff.disp
+        #print self.beta_diff.disp
     
     def normalize_counts(self, N, Nerr):# need to normalize counts in the mw@home data histogram
         self.bin_normed = binned_data()
@@ -483,45 +626,62 @@ class data:#class system for reading in data and making a data histogram
 
     
 def main():
+    # name of the data files # 
     vgsr_file = "my16lambet2bg.specbhb.dist.lowmet.stream"
     on_field_counts_file = "l270soxlbfgcxNTbcorr.newon"
     off_field_counts_file = "l270soxlbfgcxNTbcorr.newoff"
     bin_data = "data_from_yanny.dat"
-    # get the data #
+    
+    
+    # get the data  #
     dat = data(vgsr_file, on_field_counts_file, off_field_counts_file)
-    #print dat.vel.err
-    # initiaze bins #
-    dat.bnd = bin_parameters(bin_data)                         # initialize the bin parameters
-    #print dat.bnd.count_lda
     
-    dat.bin_counts(dat.ON_star_N_lbda, dat.ON_star_N_beta, "ON", dat.bnd.bin_lowers, dat.bnd.bin_uppers)        # bin the on field #
-    dat.bin_counts(dat.OFF_star_N_lbda, dat.OFF_star_N_beta, "OFF", dat.bnd.bin_lowers, dat.bnd.bin_uppers, )    # bin the off field #
+    # initiaze bins parameters #
+    #dat.bnd = bin_parameters(bin_data)
+    dat.bnd = bin_parameters()
+    
+    # bin the star counts #
+    dat.bin_counts(dat.ON_star_N_lbda,  dat.ON_star_N_beta,  "ON" )
+    dat.bin_counts(dat.OFF_star_N_lbda, dat.OFF_star_N_beta, "OFF")
 
-    dat.bin_vgsr(dat.bnd.bin_lowers, dat.bnd.bin_uppers)    #bin the vgsr los, and vel disp
-    dat.plot_vgsr()                                         # plot the vgsr points #
-    #print dat.vel.los
+    
+    # bin the vgsr los, and vel disp #
+    #dat.bin_vgsr(dat.bnd.bin_lowers, dat.bnd.bin_uppers)
+    
+    # plot the vgsr points #
+    #dat.plot_vgsr()                                         
+    
+    # clears the data lists, only need binned data #
+    dat.data_clear('data lists')                            
     
     
-    dat.data_clear('data lists')                            #clears the data lists, only need binned data #
-
-    dat.binned_diff()                                       # get the binned diff of the two fields. also the error in the difference#
-    #print dat.bnd.diff_err
+    # get the binned diff of the two fields. also the error in the difference #
+    dat.binned_diff()      
     
-    dat.plot_counts()                                       # plot the binned counts #
-    dat.data_clear('binned counts')                         # deletes the on and off field bin data. only need bin diff data#
-    dat.beta_dispersion()
-    #dat.convert_strN_simN()
-    #dat.plot_simN()
-
-    #print dat.bnd.diff
-    dat.normalize_counts(dat.bin_diff.counts, dat.bin_diff.err)   # normalizes the counts #
-    dat.plot_simN_normed()  
-    #dat.vel_disp_error()
     
-    dat.data_clear('binned diff')                          #deletes binned diff. only need converted
-   
+    # plot the binned counts #
+    #dat.plot_counts()                                       
     
-    dat.make_mw_hist()
+    # bin the beta counts #
+    betas = bin_betas(dat.beta_ON.beta_coors, dat.beta_OFF.beta_coors, dat.bnd)
+    
+    
+    # deletes the on and off field bin data. only need bin diff data # 
+    dat.data_clear('binned counts')                         
+    
+    # calculate beta dispersion # 
+    #dat.beta_dispersion()
+    
+    # normalize the binned counts #
+    #dat.normalize_counts(dat.bin_diff.counts, dat.bin_diff.err)
+    
+    #dat.plot_simN_normed()  
+    
+    # deletes binned diff. only need converted #
+    dat.data_clear('binned diff')
+    
+    # makes the actual mw@h histogram #
+    #dat.make_mw_hist()
     
 main()
     

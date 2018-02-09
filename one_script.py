@@ -10,14 +10,10 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 import os
 import subprocess
-from subprocess import call
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import math as mt
-import matplotlib.patches as mpatches
 import random
 from nbody_functional import *
-from useful_plots import *
+from nbody_useful_plots import *
 random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
@@ -33,7 +29,7 @@ args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2]
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = n                 #
+remake                    = y                 #
 run_and_compare           = n                 #
 match_histograms          = n                 #
 run_from_checkpoint       = n                 #
@@ -69,34 +65,30 @@ plot_overlapping          = y                 #
                 #\# # # # # # # # # # # # # # /#
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #    Histogram names      #
-histogram_v168 = 'hist_v168_3p95_0p2_0p2_12_0p2__1_31_18'
+histogram_v168 = 'hist_v168_3p95_0p2_0p2_12_0p2__1_31_18_diffSeed'
 
-#    histograms for runs  #
-#correct = 'arg_3.95_0.98_0.2_0.2_12_0.2_correct_mw'
-data1 = 'data_hist_fall_2017_theoretical_error'
-data2 = 'data_hist_fall_2017_propagated_error'
-release_testing_correct = 'release_testing_correct'
-release_testing_compare = 'release_testing_compare'
 
 #    hist to match against for compare after run  #
-correct_hist = 'data_hist_fall_2017'
-compare_hist = 'hist_v166_3p95_0p2_0p2_12_0p2__12_5_17'
+correct_hist = 'hist_v168_3p95_0p2_0p2_12_0p2__1_31_18_diffSeed'
+compare_hist = 'data_hist_fall_2017'
 
-#    hist name for the nbody run   #
-correctans_hist = release_testing_correct
-comparison_hist = release_testing_compare
+
+
+#    hist name for the nbody run: either set them manually or use from the list above #
+correctans_hist = correct_hist
+comparison_hist = compare_hist
 
 plot_name = compare_hist
 
 
 
 #    run specfics   #
-version = '_1.68_x86_64-pc-linux-gnu__mt'
-#version  = ''
+#version = '_1.68_x86_64-pc-linux-gnu__mt'
+version  = ''
 lua = "full_control.lua"
 #lua = "manual_body_input.lua"
 #lua = "halo_object_dev.lua"
-#lua = "EMD_v166.lua"
+#lua = "EMD_v168.lua"
 
 #    pathways  #
 #I am tired of constantly adapting it for the servers
@@ -142,21 +134,6 @@ def standard_run():
     return 0
 # #        
 
-
-
-# # # # # # # # # # # # # # # # # # # # # #
-#        different test functions         #
-# # # # # # # # # # # # # # # # # # # # # #
-# #
-
-# # # # # # # # # # # # # # # # # # # # # #
-#               MISC                      #
-# # # # # # # # # # # # # # # # # # # # # #
-# #
-
-def clean():
-    os.system("rm boinc_*")
-# #      
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Generator           #
