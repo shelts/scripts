@@ -1,4 +1,6 @@
 #! /usr/bin/python
+#/* Copyright (c) 2018 Siddhartha Shelton */
+# Algorithm to take in stream data and create a milkyway@home compatible histogram
 import os
 from mpl_toolkits.mplot3d import Axes3D
 from subprocess import call
@@ -61,6 +63,7 @@ class bin_betas:#class to make histogram of betas in each bin
         self.binned_coors_OFF = []
         
         # bin the on and off field seperately so you can adjust it until they have same number of bins #
+        # these parameters should be kept the same. But the option is there.
         self.beta_Nbins_OFF = 30
         self.lower_OFF  = -5.0
         self.upper_OFF = 5.0
@@ -74,41 +77,60 @@ class bin_betas:#class to make histogram of betas in each bin
         self.bin_centers_ON  = []
         self.bin_centers_OFF = []
         
+        
+        # initialize the beta bin centers ON field #
         center  = self.lower_ON + self.bin_width_ON / 2.0
         for i in range(0, self.beta_Nbins_ON): # initial beta bin centers On field
             self.bin_centers_ON.append(center)
             center += self.bin_width_ON
-            
+        
+        # initialize the beta bin centers OFF field #
         center = self.lower_OFF + self.bin_width_OFF / 2.0
         for i in range(0, self.beta_Nbins_OFF): # initial beta bin centers off field
             self.bin_centers_OFF.append(center)
             center += self.bin_width_OFF
         
-        for i in range(0, lmda_bnd.Nbins):  # create array for storing beta count data
+        # create array for storing beta count data #
+        for i in range(0, lmda_bnd.Nbins):  
             self.binned_coors_ON.append([]) # empty vessel for each Lambda bin for the beta bins
             self.binned_coors_OFF.append([])
             
+            # initialize the counts to zero in each bin ON field #
             for j in range(0, self.beta_Nbins_ON): # for each beta bins
                 self.binned_coors_ON[i].append(0.0) # initialize the counts for the beta bins
-                
+            
+            # initialize the counts to zero in each bin OFF field #
             for j in range(0, self.beta_Nbins_OFF):
                 self.binned_coors_OFF[i].append(0.0)
-            self.binner(i, beta_coors_ON[i], beta_coors_OFF[i]) # send the beta coors for this lambda bin for binning
+                
+            # send the beta coors for this lambda bin for binning #    
+            self.binner(i, beta_coors_ON[i], beta_coors_OFF[i]) 
 
         # print (self.binned_coors_OFF)
-        del beta_coors_ON, beta_coors_OFF
+        del beta_coors_ON, beta_coors_OFF # free up some space
         #self.plot_3d(lmda_bnd.Nbins, lmda_bnd.count_lda) # make one 3D plot of the stream
         
         self.off_field_average(lmda_bnd)# does a simple ave of the off field counts.
-        self.correction(lmda_bnd)
+        #self.correction(lmda_bnd) # substract the simple ave from the off and on fields
+        self.combine(lmda_bnd) # combin the two fields in one histogram to fit the data
         self.plot_each_bin(lmda_bnd.Nbins) # plot each lambda bin seperately
         
+    def combine(self, lmda_bnd):
+        self.binned_combined = []
+        for i in range(0, lmda_bnd.Nbins):
+            self.binned_combined.append([])
+            for j in range(0, len(self.bin_centers_ON)):
+                self.binned_combined[i].append(0)
+                self.binned_combined[i][j] = (self.binned_coors_ON[i][j] + self.binned_coors_OFF[i][j])
+        #print self.binned_combined
+        return 0
+    
     def binner(self, lmbda_bin, coors_ON, coors_OFF): # (current lambda bin, beta coors on field, beta coors off field)
         for j in range(0, len(coors_ON)): # for each beta coordinate in the lmda bin
             for k in range(0, self.beta_Nbins_ON): # for each beta bin
                 lower_bound = (self.bin_centers_ON[k] - self.bin_width_ON / 2.0) # bin bounds
                 upper_bound = (self.bin_centers_ON[k] + self.bin_width_ON / 2.0)
-                #print lower_bound, upper_bound
+                
                 if(coors_ON[j] >= lower_bound  and coors_ON[j] <= upper_bound): # check if beta coor is in the bin
                     self.binned_coors_ON[lmbda_bin][k] += 1.0
         
@@ -125,13 +147,18 @@ class bin_betas:#class to make histogram of betas in each bin
         os.system("rm -r quick_plots/stream_beta_plots/lamb*")
         #test_dat = test_data()
         for i in range(0, lmda_Nbin):
+            fit = diff_evo(self.bin_centers_ON , self.binned_combined[i] )
+            fit_xs, fit_fs = fit.generate_plot_points()
+            fit_paras = fit.pop.cur_pop[fit.best_index]
+            print fit_paras
             plt.figure()
             plt.xlim(self.lower_OFF, self.upper_OFF)
             plt.ylim(0, 400)
             plt.ylabel("counts")
             plt.xlabel(r"$\beta_{Orphan}$")
+            plt.bar(fit_xs,  fit_fs, width=w, color='m', alpha = 1., label = 'paras = ' + str(round(fit_paras[0], 2)) + ' ' + str(round(fit_paras[1], 2)) + ' ' + str(round(fit_paras[2], 2)) + ' ' + str(round(fit_paras[3], 2)) + ' ' + str(round(fit_paras[4], 2)) )
             plt.bar(self.bin_centers_OFF, self.binned_coors_OFF[i], width=w, color='r', alpha = 0.75, label = 'OFF')
-            plt.bar(self.bin_centers_ON,  self.binned_coors_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
+            plt.bar(self.bin_centers_ON,  self.binned_coors_ON[i], width=w, color='b', alpha = 0.75, label = 'ON')
             #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
             plt.legend()
             plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '.png', format = 'png')
@@ -178,12 +205,12 @@ class bin_betas:#class to make histogram of betas in each bin
         for i in range(0, lmda_bnd.Nbins):
             for j in range(0, self.beta_Nbins_ON):
                 if(self.binned_coors_ON[i][j] > 0.0):
-                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * .5
+                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * .75
 
         for i in range(0, lmda_bnd.Nbins):
             for j in range(0, self.beta_Nbins_OFF):
                 if(self.binned_coors_OFF[i][j] > 0.0):
-                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * .5
+                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * .75
         return 0
 
 class data:#class system for reading in data and making a data histogram
