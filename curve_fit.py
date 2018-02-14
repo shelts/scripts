@@ -16,7 +16,6 @@ search_ranges = [ [0.0, 10.],# line slope a \
                   [-2.0, 2.0],    # guass mu \
                   [0.1, 5]       # guass sigma \
                 ] 
-        #correct: 0.0, 25, 50, 0, 0.7
 
 class test_data(): # class to create a test data set with guassian noise
     def __init__(self):
@@ -70,7 +69,39 @@ class test_data(): # class to create a test data set with guassian noise
         plt.scatter(self.xs, self.fsn, s = 8, color = 'b', marker='o')
         plt.savefig('quick_plots/test_data.png', format='png')
 
+class cost_function: # function to get the cost associated with a parameter set
+    def __init__(self, xs, ys):
+        self.ys = ys
+        self.xs = xs
         
+    def least_square(self, function_values): # does a least square calculation. Not fitting function specific
+        Rsq = 0.0
+        for i in range(0, len(function_values)): 
+            Rsq += (self.ys[i] - function_values[i])**2.0
+            
+        return Rsq**0.5
+    
+    def function(self, parameters, x_value):# this is the fitting function. Specific to the problem at hand
+        m = parameters[0]
+        b = parameters[1]
+        
+        A   = parameters[2]
+        mu  = parameters[3]
+        sig = parameters[4]
+        
+        linear = m * x_value + b # linear model to fit the background
+        guass = A * mt.exp( -(x_value - mu)**2.0 / (2.0 * sig**2.0)) # guass model to fit the on field 
+        
+        return linear + guass
+        
+    def get_cost(self, parameters): #function to get the costs from a set of parameters
+        function_values = []
+        for i in range(0, len(self.xs)):
+            function_values.append(self.function(parameters, self.xs[i])) # get the function values for each of the data's x values
+        
+        cost = self.least_square(function_values) # get the cost associated with the function values
+        return cost
+            
 class population: # a class to create, store and update a population for differential evolution 
     def __init__(self, population_size, Nparameters):
         self.cur_pop = [] # to hold the entire population of parameters
@@ -120,40 +151,7 @@ class population: # a class to create, store and update a population for differe
             self.cur_pop[x] = possible_new_set # replace the current population member with the new set
             self.pop_costs[x] = possible_new_cost # replace the cost with the new
         return 0
-    
-class cost_function: # function to get the cost associated with a parameter set
-    def __init__(self, xs, ys):
-        self.ys = ys
-        self.xs = xs
-        
-    def least_square(self, function_values): # does a least square calculation. Not fitting function specific
-        Rsq = 0.0
-        for i in range(0, len(function_values)): 
-            Rsq += (self.ys[i] - function_values[i])**2.0
-            
-        return Rsq**0.5
-    
-    def function(self, parameters, x_value):# this is the fitting function. Specific to the problem at hand
-        m = parameters[0]
-        b = parameters[1]
-        
-        A   = parameters[2]
-        mu  = parameters[3]
-        sig = parameters[4]
-        
-        linear = m * x_value + b # linear model to fit the background
-        guass = A * mt.exp( -(x_value - mu)**2.0 / (2.0 * sig**2.0)) # guass model to fit the on field 
-        
-        return linear + guass
-        
-    def get_cost(self, parameters): #function to get the costs from a set of parameters
-        function_values = []
-        for i in range(0, len(self.xs)):
-            function_values.append(self.function(parameters, self.xs[i])) # get the function values for each of the data's x values
-        
-        cost = self.least_square(function_values) # get the cost associated with the function values
-        return cost
-    
+
 class diff_evo: 
     class parameter: # quick class for the parameter search ranges
         def __init__(self, ranges):
