@@ -36,10 +36,12 @@ class bin_parameters:                       # class to store binner parameters
                 ss = line.split(" ")
                 bn_lower = float(ss[0])             # read the lower and upper bin coordinates from file
                 bn_upper = float(ss[1])
-                bn_n     = float(ss[3])
+                if(len(ss) > 3):
+                    bn_n     = float(ss[3])             # the counts yanny has in his data for that bin    
                 self.bin_lowers.append(bn_lower)    # store bin upper and lower coordinates
                 self.bin_uppers.append(bn_upper)
-                self.bin_N.append(bn_n)
+                if(len(ss) > 3):
+                    self.bin_N.append(bn_n)
                 self.bin_centers.append(bn_lower + (bn_upper - bn_lower) / 2.0) # center of the bin which is what we will plot
                 
             self.Nbins = len(self.bin_lowers) 
@@ -95,7 +97,7 @@ class data:#class system for reading in data and making a data histogram
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
                 
-                self.ON_star_N_lbda.append(str_N_lbda)
+                self.ON_star_N_lbda.append(-str_N_lbda)
                 self.ON_star_N_beta.append(str_N_beta)
         read_data = False
         for line in g:
@@ -116,7 +118,7 @@ class data:#class system for reading in data and making a data histogram
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
                 
-                self.OFF_star_N_lbda.append(str_N_lbda)
+                self.OFF_star_N_lbda.append(-str_N_lbda)
                 self.OFF_star_N_beta.append(str_N_beta)
         f.close()
         g.close()
@@ -272,7 +274,7 @@ class data:#class system for reading in data and making a data histogram
         
         if(len(self.bin_diff.counts) > 0):
             plt.bar(self.bnd.bin_centers, self.bin_diff.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
-            plt.bar(self.bnd.bin_centers, self.bnd.bin_N, width = w, color = "k", edgecolor = "b", alpha = 0.5)
+            #plt.bar(self.bnd.bin_centers, self.bnd.bin_N, width = w, color = "k", edgecolor = "b", alpha = 0.5)
         plt.savefig('figure5_recreation.png', format='png')
         plt.clf()
         #plt.show()
@@ -291,15 +293,17 @@ class data:#class system for reading in data and making a data histogram
         #plt.show()   
         
         
-    def make_mw_hist(self):
+    def make_mw_hist(self, vgsr = None):
         hist = open("data_hist_fall_2017.hist", "w")
         hist.write("# Orphan Stream histogram \n# Generated from data from Dr. Yanny from Orphan stream paper\n# format is same as other MW@Home histograms\n#\n#\n")
         hist.write("n = %i\n" % (int(self.total_count)))
         hist.write("massPerParticle = %.15f\n" % (self.mass_per_count))
         hist.write("lambdaBins = %i\nbetaBins = 1\n" % (len(self.bnd.bin_centers)))
         for i in range(0, len(self.bnd.bin_centers)):
-            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.bin_centers[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  -1, -1)) # not using vgsr anymore
-            #hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.bin_centers[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  self.vel.disp[i], self.vel.disp_err[i]))
+            if(vgsr == None):
+                hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.bin_centers[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  -1, -1)) # not using vgsr anymore
+            else:
+                hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.bin_centers[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  vgsr.vel.disp[i], vgsr.vel.disp_err[i]))
    
     def data_clear(self, stage):
         if(stage == 'data lists'):      # first stage of deletion. Deletes stored data
@@ -307,9 +311,6 @@ class data:#class system for reading in data and making a data histogram
             del self.OFF_star_N_lbda
             del self.ON_star_N_beta
             del self.OFF_star_N_beta
-            #del self.vel.los            # dels the line of sight vels #
-            #del self.vel.lda            # dels the coordinates for the line of sight vels #
-            #del self.vel.err            # dels the errors for the line of sight vels
         if(stage == 'binned counts'):   # stage deletes the binned data for each field
             del self.bin_ON
             del self.bin_OFF
@@ -327,7 +328,7 @@ def main():
     make_hist = False
     normalize_counts =  False
     
-    plot_counts = False
+    plot_counts = True
     plot_normed_counts = False
     
     # name of the data files # 
@@ -335,6 +336,7 @@ def main():
     on_field_counts_file = "l270soxlbfgcxNTbcorr.newon"
     off_field_counts_file = "l270soxlbfgcxNTbcorr.newoff"
     bin_data = "data_from_yanny.dat"
+    bin_data = "custom_bins.dat"
     
     dat = data(on_field_counts_file, off_field_counts_file)
     # initiaze bins parameters #
@@ -342,7 +344,7 @@ def main():
         dat.bnd = bin_parameters(bin_data)
     else:
         dat.bnd = bin_parameters()
-    
+    print dat.bnd.bin_centers
     # get the data  #
     
     # bin the star counts #
@@ -353,8 +355,10 @@ def main():
     dat.data_clear('data lists')                            
 
     # get the binned diff of the two fields. also the error in the difference #
-    dat.binned_diff()      
-    
+    dat.binned_diff()  
+    print dat.bin_ON.counts
+    print dat.bin_OFF.counts
+    print dat.bin_diff.counts
     # plot the binned counts #
     if(plot_counts):
         dat.plot_counts()                                       

@@ -10,12 +10,20 @@ import matplotlib.pyplot as plt
 random.seed(a = 12345678)
 # the search ranges used for each parameter. This is generalized for the optimizer so you can add more parameters. 
 # you would need to change the cost class. and if you want to train, the test data class.
-search_ranges = [ [0.0, 10.],# line slope a \
+#search_ranges = [ [0.0, 10.],# line slope a \
+                  #[0.0, 100.0],   # y-inter b \
+                  #[0.0, 100.0],   # guass amp A \
+                  #[-2.0, 2.0],    # guass mu \
+                  #[0.1, 5]       # guass sigma \
+                #] 
+
+search_ranges = [ [0.0, 0.],# line slope a \
                   [0.0, 100.0],   # y-inter b \
                   [0.0, 100.0],   # guass amp A \
                   [-2.0, 2.0],    # guass mu \
                   [0.1, 5]       # guass sigma \
                 ] 
+
 
 class test_data(): # class to create a test data set with guassian noise
     def __init__(self):
@@ -115,13 +123,16 @@ class population: # a class to create, store and update a population for differe
     def initialize(self, ranges, cost): # function to initialize the population 
         for i in range(0, self.pop_size): # for every member of the population
             for j in range(0, self.Nparas): # for each parameter in each population member
-                val = random.uniform(ranges[j].lower, ranges[j].upper) # get a random value within the search range for that parameter
+                if(ranges[j].lower == ranges[j].upper):
+                    val = ranges[j].lower
+                else:
+                    val = random.uniform(ranges[j].lower, ranges[j].upper) # get a random value within the search range for that parameter
                 self.cur_pop[i].append(val) 
             cost_value = cost.get_cost(self.cur_pop[i]) # get cost for each member of the population
             self.pop_costs.append(cost_value)
 
                  
-    def update(self, x, cross_over, differential_weight, cost): # function to update the population set using the diff evo algorithm
+    def update(self, x, cross_over, differential_weight, cost, ranges): # function to update the population set using the diff evo algorithm
         a = -1 # to get them into the loop
         b = -1
         c = -1
@@ -137,13 +148,15 @@ class population: # a class to create, store and update a population for differe
         # uses the diff evolution aglorithm
         for i in range(0, self.Nparas):
             ri = random.uniform(0, 1)
-            if(ri < cross_over or i == dimentionality):
+            if(ranges[i].lower == ranges[i].upper):
+                y = ranges[i].lower
+            elif(ri < cross_over or i == dimentionality):
                 y = self.cur_pop[a][i] + differential_weight * (self.cur_pop[b][i] - self.cur_pop[c][i])
-                possible_new_set.append(y)
             else:
                 y = self.cur_pop[x][i]
-                possible_new_set.append(y)
+            possible_new_set.append(y)
         
+        possible_new_set[2] = abs(possible_new_set[2])
         # get the cost associated with this new set
         possible_new_cost = cost.get_cost(possible_new_set)
         
@@ -163,7 +176,7 @@ class diff_evo:
         self.differential_weight = 0.8 # algorithm specific parameter
         self.pop_size = 50 # size of the population
         self.Nparameters = len(search_ranges) # using the len of the search ranges as the number of parameters to keep it general
-        self.optimization_iterations = 20000 # number of iterations to run the optimization
+        self.optimization_iterations = 40000 # number of iterations to run the optimization
         self.ranges = []
         
         for i in range(0, self.Nparameters): # setting up the search ranges
@@ -192,7 +205,7 @@ class diff_evo:
         while(counter < self.optimization_iterations): # TODO: instead of running for a fixed number of iterations, should have a threshold on the cost
             # note: this updates the population as you go. does not create a new updated population list. 
             for i in range(0, self.pop_size): # will go through each member of the current population to update it
-                self.pop.update(i, self.cross_over, self.differential_weight, self.cost) # this will update the member of the population
+                self.pop.update(i, self.cross_over, self.differential_weight, self.cost, self.ranges) # this will update the member of the population
                 counter += 1
             self.best_index = self.get_bests()
             

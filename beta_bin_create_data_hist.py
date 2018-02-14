@@ -61,9 +61,9 @@ class bin_betas:#class to make histogram of betas in each bin
         #self.plot_3d(lmda_bnd.Nbins, lmda_bnd.count_lda) # make one 3D plot of the stream
         
         self.off_field_average(lmda_bnd)# does a simple ave of the off field counts.
-        #self.correction(lmda_bnd) # substract the simple ave from the off and on fields
+        self.correction(lmda_bnd) # substract the simple ave from the off and on fields
         self.combine(lmda_bnd) # combin the two fields in one histogram to fit the data
-        self.plot_each_bin(lmda_bnd.Nbins) # plot each lambda bin seperately
+        self.plot_each_bin(lmda_bnd) # plot each lambda bin seperately
         
     def combine(self, lmda_bnd):
         self.binned_combined = []
@@ -92,11 +92,11 @@ class bin_betas:#class to make histogram of betas in each bin
                 if(coors_OFF[j] >= lower_bound  and coors_OFF[j] <= upper_bound):
                     self.binned_coors_OFF[lmbda_bin][k] += 1.0
     
-    def plot_each_bin(self, lmda_Nbin):
+    def plot_each_bin(self, lmda_bnd):
         w = 0.25
         os.system("rm -r quick_plots/stream_beta_plots/lamb*")
         #test_dat = test_data()
-        for i in range(0, lmda_Nbin):
+        for i in range(0, lmda_bnd.Nbins):
             fit = diff_evo(self.bin_centers_ON , self.binned_combined[i] )
             fit_xs, fit_fs = fit.generate_plot_points()
             fit_paras = fit.pop.cur_pop[fit.best_index]
@@ -111,10 +111,10 @@ class bin_betas:#class to make histogram of betas in each bin
             plt.bar(self.bin_centers_ON,  self.binned_coors_ON[i], width=w, color='b', alpha = 0.75, label = 'ON')
             #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
             plt.legend()
-            plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '_' + str(lmda_Nbin.bin_centers[i]) + '.png', format = 'png')
+            plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '_' + str(lmda_bnd.bin_centers[i]) + '.png', format = 'png')
             plt.close()
             #plt.clf()
-        os.system("xdg-open quick_plots/stream_beta_plots/lambda_bin_0.png")
+        os.system('xdg-open quick_plots/stream_beta_plots/lambda_bin_' + str(0) + '_' + str(lmda_bnd.bin_centers[0]) + '.png')
         return 0
     
     def plot_3d(self, lmda_Nbins,lmda_centers):
@@ -155,10 +155,10 @@ class bin_betas:#class to make histogram of betas in each bin
         for i in range(0, lmda_bnd.Nbins):
             for j in range(0, self.beta_Nbins_ON):
                 if(self.binned_coors_ON[i][j] > 0.0):
-                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * .75
+                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * 1.
 
         for i in range(0, lmda_bnd.Nbins):
             for j in range(0, self.beta_Nbins_OFF):
                 if(self.binned_coors_OFF[i][j] > 0.0):
-                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * .75
+                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * 1.
         return 0
