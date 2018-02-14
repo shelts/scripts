@@ -47,7 +47,7 @@ class bin_parameters:                       # class to store binner parameters
             self.Nbins = len(self.bin_lowers) 
             
         else: # regularly size the bins automatically if we don't use Yanny's bin coordinates
-            self.Nbins = 5 
+            self.Nbins = 22 
             self.bin_start = -30.0
             self.bin_end   = 30.0
             self.bin_size = (abs(self.bin_start - self.bin_end) / self.Nbins)
@@ -123,7 +123,7 @@ class bin_betas:#class to make histogram of betas in each bin
     def plot_each_bin(self, lmda_Nbin):
         w = 0.25
         os.system("rm -r quick_plots/stream_beta_plots/lamb*")
-        test_dat = test_data()
+        #test_dat = test_data()
         for i in range(0, lmda_Nbin):
             plt.figure()
             plt.xlim(self.lower_OFF, self.upper_OFF)
@@ -132,7 +132,7 @@ class bin_betas:#class to make histogram of betas in each bin
             plt.xlabel(r"$\beta_{Orphan}$")
             plt.bar(self.bin_centers_OFF, self.binned_coors_OFF[i], width=w, color='r', alpha = 0.75, label = 'OFF')
             plt.bar(self.bin_centers_ON,  self.binned_coors_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
-            plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
+            #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
             plt.legend()
             plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '.png', format = 'png')
             plt.close()
@@ -178,12 +178,12 @@ class bin_betas:#class to make histogram of betas in each bin
         for i in range(0, lmda_bnd.Nbins):
             for j in range(0, self.beta_Nbins_ON):
                 if(self.binned_coors_ON[i][j] > 0.0):
-                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * 1.5
+                    self.binned_coors_ON[i][j] -= self.bin_off_field_aves[i] * .5
 
         for i in range(0, lmda_bnd.Nbins):
             for j in range(0, self.beta_Nbins_OFF):
                 if(self.binned_coors_OFF[i][j] > 0.0):
-                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * 1.5
+                    self.binned_coors_OFF[i][j] -= self.bin_off_field_aves[i] * .5
         return 0
 
 class data:#class system for reading in data and making a data histogram

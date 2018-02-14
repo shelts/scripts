@@ -229,4 +229,4 @@ def main():
     test = test_data()
     #test.plot()
     diff_evo(test.fsn, test.xs)
-main()
+#main()
