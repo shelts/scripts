@@ -111,7 +111,7 @@ class bin_betas:#class to make histogram of betas in each bin
             plt.bar(self.bin_centers_ON,  self.binned_coors_ON[i], width=w, color='b', alpha = 0.75, label = 'ON')
             #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
             plt.legend()
-            plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '.png', format = 'png')
+            plt.savefig('quick_plots/stream_beta_plots/lambda_bin_' + str(i) + '_' + str(lmda_Nbin.bin_centers[i]) + '.png', format = 'png')
             plt.close()
             #plt.clf()
         os.system("xdg-open quick_plots/stream_beta_plots/lambda_bin_0.png")

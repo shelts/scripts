@@ -27,7 +27,7 @@ class bin_parameters:                       # class to store binner parameters
         self.bin_lowers = []                # the lower coordinates for each bin 
         self.bin_uppers = []                # the upper coordinates for each bin
         self.bin_N = []                     # to store the counts from Yannys data to compare with out own binned counts
-        self.count_lda = []                 # to store the bin centers for plotting
+        self.bin_centers = []                 # to store the bin centers for plotting
         self.Nbins = None                   # the number of bins
         
         if(file_name):                      # if there is a data file with bin beginnings and endings then we can use that
@@ -40,7 +40,7 @@ class bin_parameters:                       # class to store binner parameters
                 self.bin_lowers.append(bn_lower)    # store bin upper and lower coordinates
                 self.bin_uppers.append(bn_upper)
                 self.bin_N.append(bn_n)
-                self.count_lda.append(bn_lower + (bn_upper - bn_lower) / 2.0) # center of the bin which is what we will plot
+                self.bin_centers.append(bn_lower + (bn_upper - bn_lower) / 2.0) # center of the bin which is what we will plot
                 
             self.Nbins = len(self.bin_lowers) 
             
@@ -49,9 +49,9 @@ class bin_parameters:                       # class to store binner parameters
             self.bin_start = -30.0
             self.bin_end   = 30.0
             self.bin_size = (abs(self.bin_start - self.bin_end) / self.Nbins)
-            self.count_lda = []
+            self.bin_centers = []
             for i in range(0, self.Nbins):
-                self.count_lda.append(self.bin_start + self.bin_size * (0.5  + i) ) # middle bin coordinates
+                self.bin_centers.append(self.bin_start + self.bin_size * (0.5  + i) ) # middle bin coordinates
 
 
 
@@ -266,13 +266,13 @@ class data:#class system for reading in data and making a data histogram
         #plt.tick_params(which='minor', length=4, color='r')
         w = 2.6
         if(len(self.bin_ON.counts) > 0):
-            plt.bar(self.bnd.count_lda, self.bin_ON.counts, width = w, color = "w", edgecolor = "k", alpha = 1)
+            plt.bar(self.bnd.bin_centers, self.bin_ON.counts, width = w, color = "w", edgecolor = "k", alpha = 1)
         if(len(self.bin_OFF.counts) > 0):
-            plt.bar(self.bnd.count_lda, self.bin_OFF.counts, width = w, color = "w", edgecolor = "r", alpha = 0.5)
+            plt.bar(self.bnd.bin_centers, self.bin_OFF.counts, width = w, color = "w", edgecolor = "r", alpha = 0.5)
         
         if(len(self.bin_diff.counts) > 0):
-            plt.bar(self.bnd.count_lda, self.bin_diff.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
-            plt.bar(self.bnd.count_lda, self.bnd.bin_N, width = w, color = "k", edgecolor = "b", alpha = 0.5)
+            plt.bar(self.bnd.bin_centers, self.bin_diff.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
+            plt.bar(self.bnd.bin_centers, self.bnd.bin_N, width = w, color = "k", edgecolor = "b", alpha = 0.5)
         plt.savefig('figure5_recreation.png', format='png')
         plt.clf()
         #plt.show()
@@ -285,7 +285,7 @@ class data:#class system for reading in data and making a data histogram
         plt.xticks( [50, 40, 30, 20, 10, 0, -10, -20, -30, -40, -50])
         #plt.tick_params(which='minor', length=4, color='r')
         w = 2.6
-        plt.bar(self.bnd.count_lda, self.bin_normed.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
+        plt.bar(self.bnd.bin_centers, self.bin_normed.counts, width = w, color = "b", edgecolor = "b", alpha = 0.5)
         plt.savefig('figure5_simunits_normed.png', format='png')
         plt.clf()
         #plt.show()   
@@ -296,10 +296,10 @@ class data:#class system for reading in data and making a data histogram
         hist.write("# Orphan Stream histogram \n# Generated from data from Dr. Yanny from Orphan stream paper\n# format is same as other MW@Home histograms\n#\n#\n")
         hist.write("n = %i\n" % (int(self.total_count)))
         hist.write("massPerParticle = %.15f\n" % (self.mass_per_count))
-        hist.write("lambdaBins = %i\nbetaBins = 1\n" % (len(self.bnd.count_lda)))
-        for i in range(0, len(self.bnd.count_lda)):
-            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.count_lda[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  -1, -1)) # not using vgsr anymore
-            #hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.count_lda[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  self.vel.disp[i], self.vel.disp_err[i]))
+        hist.write("lambdaBins = %i\nbetaBins = 1\n" % (len(self.bnd.bin_centers)))
+        for i in range(0, len(self.bnd.bin_centers)):
+            hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.bin_centers[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  -1, -1)) # not using vgsr anymore
+            #hist.write("1 %.15f %.15f %.15f %.15f %.15f %.15f\n" % (self.bnd.bin_centers[i], 0, self.bin_normed.counts[i], self.bin_normed.err[i],  self.vel.disp[i], self.vel.disp_err[i]))
    
     def data_clear(self, stage):
         if(stage == 'data lists'):      # first stage of deletion. Deletes stored data
