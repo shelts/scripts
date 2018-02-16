@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from subprocess import call
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
-from curve_fit import *
+from differential_evolution import *
 
 class bin_betas:#class to make histogram of betas in each bin
     def __init__(self, beta_coors_ON, beta_coors_OFF, lmda_bnd):#(on field beta coordinates, Off field beta coordinates, lambda bin parameters)
@@ -33,24 +33,15 @@ class bin_betas:#class to make histogram of betas in each bin
         self.initialize_beta_bins(beta_coors_ON, beta_coors_OFF) # sets up the beta bins
         del beta_coors_ON, beta_coors_OFF # free up some space
         
-        self.off_field_average()# does a simple ave of the off field counts.
         self.off_field_star_density()
         self.den_correction()
-        self.correction() # substract the simple ave from the off and on fields
+        #self.off_field_average()# does a simple ave of the off field counts.
+        #self.correction() # substract the simple ave from the off and on fields
         self.combine() # combin the two fields in one histogram to fit the data
         
         #self.plot_3d() # make one 3D plot of the stream
-        os.system("rm -r stream_beta_plots/lamb*")
-        do_fit = True
-        iters = 40000
-        for i in range(0, self.lmda_bnd.Nbins):
-            if(do_fit):
-                self.fit = diff_evo(self.bin_centers_ON , self.binned_combined[i], iters )
-                self.fit_paras = self.fit.pop.cur_pop[self.fit.best_index]
-                print self.fit_paras
-            self.plot_each_bin(i, do_fit) # plot each lambda bin seperately
-        os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
-        
+        self.optimize()
+        #self.plot_each_bin()
     def initialize_beta_bins(self, beta_coors_ON, beta_coors_OFF):
         self.bin_centers_ON  = []
         self.bin_centers_OFF = []
@@ -111,7 +102,18 @@ class bin_betas:#class to make histogram of betas in each bin
                 if(coors_OFF[j] >= lower_bound  and coors_OFF[j] <= upper_bound):
                     self.binned_beta_OFF[lmbda_bin][k] += 1.0
     
-    def plot_each_bin(self, i, do_fit):
+    def optimize(self):
+        iters = 40000
+        os.system("rm -r stream_beta_plots/lamb*")
+        for i in range(0, self.lmda_bnd.Nbins):
+            self.fit = diff_evo(self.bin_centers_ON , self.binned_combined[i], iters )
+            self.fit_paras = self.fit.pop.cur_pop[self.fit.best_index]
+            print self.fit_paras
+            self.plot_each_bin(i) # plot each lambda bin seperately
+            os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
+        
+        
+    def plot_each_bin(self, i = None):
         w = 0.25
         #test_dat = test_data()
         plt.figure()
@@ -119,17 +121,34 @@ class bin_betas:#class to make histogram of betas in each bin
         plt.ylim(0, 400)
         plt.ylabel("counts")
         plt.xlabel(r"$\beta_{Orphan}$")
-        if(do_fit):
+        
+        # this is sloppy.
+        if(i != None):
             fit_paras = self.fit_paras
             fit_xs, fit_fs = self.fit.generate_plot_points()
             plt.plot(fit_xs,  fit_fs, color='k',linewidth = 2, alpha = 1., label = 'paras = ' + str(round(fit_paras[0], 2)) + ' ' + str(round(fit_paras[1], 2)) + ' ' + str(round(fit_paras[2], 2)) + ' ' + str(round(fit_paras[3], 2)) + ' ' + str(round(fit_paras[4], 2)) )
-        plt.bar(self.bin_centers_OFF, self.binned_combined[i], width=w, color='m', alpha = 1., label = 'C')
-        plt.bar(self.bin_centers_OFF, self.binned_beta_OFF[i], width=w, color='r', alpha = 0.5, label = 'OFF')
-        plt.bar(self.bin_centers_ON,  self.binned_beta_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
-        #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
-        plt.legend()
-        plt.savefig('stream_beta_plots/lambda_bin_' + str(i) + '_' + str(self.lmda_bnd.bin_centers[i]) + '.png', format = 'png')
-        plt.close()
+            plt.bar(self.bin_centers_OFF, self.binned_combined[i], width=w, color='m', alpha = 1., label = 'C')
+            plt.bar(self.bin_centers_OFF, self.binned_beta_OFF[i], width=w, color='r', alpha = 0.5, label = 'OFF')
+            plt.bar(self.bin_centers_ON,  self.binned_beta_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
+            plt.legend()
+            plt.savefig('stream_beta_plots/lambda_bin_' + str(i) + '_' + str(self.lmda_bnd.bin_centers[i]) + '.png', format = 'png')
+            plt.close()
+        else:
+            os.system("rm -r stream_beta_plots/lamb*")
+            for i in range(0, self.lmda_bnd.Nbins):
+                plt.figure()
+                plt.xlim(self.lower_OFF, self.upper_OFF)
+                plt.ylim(0, 400)
+                plt.ylabel("counts")
+                plt.xlabel(r"$\beta_{Orphan}$")
+                plt.bar(self.bin_centers_OFF, self.binned_combined[i], width=w, color='m', alpha = 1., label = 'C')
+                plt.bar(self.bin_centers_OFF, self.binned_beta_OFF[i], width=w, color='r', alpha = 0.5, label = 'OFF')
+                plt.bar(self.bin_centers_ON,  self.binned_beta_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
+                #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
+                plt.legend()
+                plt.savefig('stream_beta_plots/lambda_bin_' + str(i) + '_' + str(self.lmda_bnd.bin_centers[i]) + '.png', format = 'png')
+                plt.close()
+                os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
         #plt.clf()
         
         return 0
@@ -204,9 +223,9 @@ class bin_betas:#class to make histogram of betas in each bin
     
     def off_field_star_density(self):
         self.star_density = []
-        length = abs(self.lower_OFF - self.upper_OFF)
+        length = abs(self.lower_OFF - self.upper_OFF) # length of each beta bin
         for i in range(0, self.lmda_bnd.Nbins):
-            width = abs(self.lmda_bnd.bin_uppers[i] - self.lmda_bnd.bin_lowers[i])
+            width = abs(self.lmda_bnd.bin_uppers[i] - self.lmda_bnd.bin_lowers[i]) #width of each lambda bin
             area = width * length
             self.star_density.append(0)
             for j in range(0, self.beta_Nbins_OFF):
