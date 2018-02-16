@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import AutoMinorLocator
-from curve_fit import *
 from vel_disp import *
 from beta_bins import *
         
