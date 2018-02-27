@@ -15,7 +15,7 @@ from cost import *
 
 #random.seed(a = 12345678)
 
-#search_ranges = [ [-100.0, 100.0], # line slope a \
+#search_ranges = [ [-100.0, 100.0], # line slope m \
                   #[0.0, 100.0],    # y-inter b \
                   #[0.0, 300.0],    # guass amp A \
                   #[-4.0, 4.0],     # guass mu \
@@ -97,6 +97,16 @@ class population: # a class to create, store and update a population for differe
             self.pop_costs[x] = possible_new_cost # replace the cost with the new
         return 0
 
+    def get_bests(self): # finds the best cost in the population
+        best_index = 0
+        self.best_paras = []
+        for i in range(1, self.pop_size):
+            if(self.pop_costs[i] < self.pop_costs[best_index]): # check for the best cost
+                best_index = i # just keep the best index. that maps to everything needed
+        self.best_paras = self.cur_pop[best_index]
+        self.best_cost = self.pop_costs[best_index]
+        return best_index
+    
 class diff_evo: 
     class parameter: # quick class for the parameter search ranges
         def __init__(self, ranges):
@@ -124,12 +134,6 @@ class diff_evo:
         self.run_optimization() # runs the optimization
         
     
-    def get_bests(self): # finds the best cost in the population
-        best_index = 0
-        for i in range(1, self.pop_size):
-            if(self.pop.pop_costs[i] < self.pop.pop_costs[best_index]): # check for the best cost
-                best_index = i # just keep the best index. that maps to everything needed
-        return best_index
     
     def run_optimization(self): # runs through the optimization. Each iteration updates the population
         counter = 0
@@ -139,12 +143,11 @@ class diff_evo:
             for i in range(0, self.pop_size): # will go through each member of the current population to update it
                 self.pop.update(i, self.cross_over, self.differential_weight, self.cost, self.ranges) # this will update the member of the population
                 counter += 1
-            self.best_index = self.get_bests()
-            
+            self.pop.get_bests()
             #if(counter % 100 and (cost != self.pop.pop_costs[self.best_index]) ): # used for plotting the fits as it optimizes. not putting in if statement because not too needed or used.
                 #self.plot_current_best(counter)
                 #cost = self.pop.pop_costs[self.best_index]
-
+        
 
 
     def generate_plot_points(self): # uses the fitting function with the best set of parameters to generate plottable points
@@ -153,7 +156,7 @@ class diff_evo:
         xs = []
         fs = []
         for i in range(0, 100): 
-            f = self.cost.function(self.pop.cur_pop[self.best_index], x) # simple way of getting my function points out
+            f = self.cost.function(self.pop.best_paras, x) # simple way of getting my function points out
             x += dx
             fs.append(f)
             xs.append(x)
@@ -162,7 +165,7 @@ class diff_evo:
             
     def plot_current_best(self, counter): # plots the current best parameter set. unique to this problem
         xs, fs = self.generate_plot_points()
-        print self.pop.cur_pop[self.best_index], self.pop.pop_costs[self.best_index]
+        print self.pop.best_paras, self.pop.best_cost
         plt.ylim(0, 100)
         plt.xlim(-6, 6)
         plt.plot(xs, fs, linewidth = 2, color = 'r')

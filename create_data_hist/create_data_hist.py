@@ -326,18 +326,18 @@ class data:#class system for reading in data and making a data histogram
 def main():
     use_vgsr = False
     use_yanny_bins = True
-    calc_beta_dispersions = False
+    calc_beta_dispersions = True
     make_hist = False
     normalize_counts =  False
     
-    plot_counts = True
+    plot_counts = False
     plot_normed_counts = False
     
     # name of the data files # 
     vgsr_file = "my16lambet2bg.specbhb.dist.lowmet.stream"
     on_field_counts_file = "l270soxlbfgcxNTbcorr.newon"
     off_field_counts_file = "l270soxlbfgcxNTbcorr.newoff"
-    bin_data = "data_from_yanny.dat"
+    #bin_data = "data_from_yanny.dat"
     bin_data = "custom_bins.dat"
     
     dat = data(on_field_counts_file, off_field_counts_file)

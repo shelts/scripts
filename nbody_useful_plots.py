@@ -18,11 +18,11 @@ from nbody_functional import *
 # # 
 
 def plot(hist1, hist2, name, label1, label2): #plots two histograms. 
-    ylimit = 1.0
+    ylimit = 0.4
     xlower = 180 
     xupper = -180
     w_overlap = 2.5
-    w_adjacent = 1.5
+    w_adjacent = 3.5
     folder = 'quick_plots/hists/'
     #folder = ''
     #folder = 'like_surface/'
@@ -48,8 +48,8 @@ def plot(hist1, hist2, name, label1, label2): #plots two histograms.
     plt.title('Histogram of Light Matter Distribution After 4 Gy')
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
-    plt.ylabel('counts')
-    plt.xlabel('Lambda')
+    plt.ylabel('N')
+    plt.xlabel(r'$\Lambda$')
     plt.legend()
     plt.savefig(save_folder_ove + name + '_overlapping.png', format='png')
     plt.clf()
@@ -58,21 +58,22 @@ def plot(hist1, hist2, name, label1, label2): #plots two histograms.
     # plot_adjacent #
     plt.subplot(211)
     #f, (f1, f2) = plt.subplots(2, sharex = True, sharey = True)
-    plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='b')
-    plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
-    plt.title('Histogram of Light Matter Distribution After 4 Gy')
+    plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='k')
+    plt.legend(handles=[mpatches.Patch(color='b', label= label1)])
+    #plt.title('Milkyway@home')
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
-    plt.ylabel('counts')
-    plt.xlabel('Lambda')
-
+    plt.ylabel('N')
+    #plt.xlabel(r'$\Lambda$')
+    
     plt.subplot(212)
     plt.bar(hist2.lbins, hist2.counts, width = w_adjacent, color='k')
-    plt.legend(handles=[mpatches.Patch(color='k', label= plot_hist2)])
+    plt.legend(handles=[mpatches.Patch(color='k', label= label2)])
+    #plt.title('')
     plt.xlim((xlower, xupper))
     plt.ylim((0.0, ylimit))
-    plt.xlabel('l')
-    plt.ylabel('counts')
+    plt.ylabel('N')
+    plt.xlabel(r'$\Lambda$')
     #f.subplots_adjust(hspace=0)
     plt.savefig(save_folder_adj + name + '.png', format='png')
     plt.clf()
@@ -140,6 +141,33 @@ def plot_veldisp(hist1, hist2, name, label1, label2):#plots the velocity dispers
     #plt.show()
     return 1
 # # 
+
+def plot_single(hist1, name):
+    ylimit = 0.6
+    xlower = 100 
+    xupper = -100
+    w_adjacent = 4
+    folder = 'quick_plots/hists/'
+    save_folder = 'quick_plots/'
+    print "plot histogram 1: ", hist1
+    plot_hist1 = hist1 + ".hist"
+
+    
+    print("plotting histograms\n")
+    hist1 = nbody_histograms(folder + plot_hist1)
+            
+    plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='b')
+    #plt.legend(handles=[mpatches.Patch(color='b', label= plot_hist1)])
+    plt.title('MW@h Test Histogram')
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, ylimit))
+    plt.ylabel('N')
+    plt.xlabel('Lambda')
+
+    plt.savefig(save_folder + name + '.png', format='png')
+    plt.clf()
+    #plt.show()
+    return 1
 
 # # # # # # # # # # # # # # # # # # # # # #
 #        NON-histogram plot               #
@@ -608,7 +636,58 @@ def plot_hist_lambda_beta(file1, file2, file_name = None):
             
     return 0 
 
-
+def plot_hist_lambda_beta_single(file1, file_name = None):
+    path = 'quick_plots/'
+    hist = path + 'hists/'
+    outs = path + 'outputs/'
+    
+    out1 = nbody_outputs(outs + file1 + ".out")
+    
+    hist1 = nbody_histograms(hist + file1 + ".hist")
+    
+    w_overlap = 2.5
+    w_adjacent = 1.5
+    count_y_limit = 0.4
+    out1.dark_light_split()
+    out1.convert_lambda_beta(True)
+    
+    xlower = -180.0
+    xupper = 180.0
+    yupper = 30
+    ylower = -yupper
+    
+    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+    f.subplots_adjust(hspace=0)
+    f.subplots_adjust(wspace=0)
+    #plt.figure(figsize=(10, 5))
+    ax1 = plt.subplot(211)
+    plt.xlim((xlower, xupper))
+    plt.ylim((ylower, yupper))
+    plt.ylabel(r'$\beta$')
+    plt.title(r'$\Lambda$ vs $\beta$')
+    plt.yticks( [ 20, 10, 0, -10, -20])
+    #default to just plot lm
+    if(not file_name):
+        plt.plot(out1.dark_lambda, out1.dark_beta, '.', markersize = .5, color = 'black', alpha=.75, marker = '.', label = 'dark matter')
+    plt.plot(out1.light_lambda, out1.light_beta, '.', markersize = .75, color = 'b', alpha=1.0, marker = '.', label = 'baryons')
+    plt.legend()
+    #plt.subplots(4, sharex = True, sharey = True)
+    
+    
+    
+    ax5 = plt.subplot(212)
+    plt.bar(hist1.lbins, hist1.counts, width = w_adjacent, color='b')
+    plt.xlim((xlower, xupper))
+    plt.ylim((0.0, count_y_limit))
+    plt.xlabel(r'$\Lambda$')
+    plt.ylabel('counts')
+    
+    if(not file_name):
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/lambda_beta_with_dark', format='png')
+    else:
+        plt.savefig('/home/sidd/Desktop/research/quick_plots/lambda_beta_without_dark', format='png')
+            
+    return 0 
 def plot_lmda_beta(file1, file2):
     path = 'quick_plots/'
     hist = path + 'hists/'
@@ -835,12 +914,17 @@ def main():
     
     #plot_hist_lambda_beta(file1, file2)
     
-    #plot_hist_lambda_beta(file1, file2, True)
     #plot_lmda_beta(file1, file2)
     #veldisp(file2)
     #veldisp_lbda_beta(file1)
     
-    chi_sq_dist_plot()
+    #chi_sq_dist_plot()
+    hist1 = 'hist_v168_3p95_0p2_0p2_12_0p2__1_31_18_diffSeed'
+    hist2 = 'mw@home_best_fit'
+    name = 'mwh_hist'
+    #plot_single(hist1, name)
+    #plot(hist1, hist2, 'mw@home_best_fit', 'MilkyWay@home', 'Best Fit')
+    plot_hist_lambda_beta_single(hist2, True)
     return 0 
 
 main()

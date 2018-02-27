@@ -9,6 +9,7 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 from differential_evolution import *
+#from hessian import *
 
 class bin_betas:#class to make histogram of betas in each bin
     def __init__(self, beta_coors_ON, beta_coors_OFF, lmda_bnd):#(on field beta coordinates, Off field beta coordinates, lambda bin parameters)
@@ -35,7 +36,7 @@ class bin_betas:#class to make histogram of betas in each bin
         #self.correction() # substract the simple ave from the off and on fields
         
         #self.plot_3d() # make one 3D plot of the stream
-        self.plot_each_bin()
+        #self.plot_each_bin()
         self.optimize()
         
         
@@ -86,7 +87,8 @@ class bin_betas:#class to make histogram of betas in each bin
         os.system("rm -r stream_beta_plots/lamb*")
         for i in range(0, self.lmda_bnd.Nbins):
             self.fit = diff_evo(self.bin_centers , self.binned_beta_combined[i], iters )
-            self.fit_paras = self.fit.pop.cur_pop[self.fit.best_index]
+            self.fit_paras = self.fit.pop.best_paras
+            self.cost = self.fit.pop.best_cost
             print self.fit_paras
             self.plot_each_bin(i) # plot each lambda bin seperately
         #os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
@@ -105,7 +107,7 @@ class bin_betas:#class to make histogram of betas in each bin
         if(i != None):
             fit_paras = self.fit_paras
             fit_xs, fit_fs = self.fit.generate_plot_points()
-            plt.plot(fit_xs,  fit_fs, color='k',linewidth = 2, alpha = 1., label = 'paras = ' + str(round(fit_paras[0], 2)) + ' ' + str(round(fit_paras[1], 2)) + ' ' + str(round(fit_paras[2], 2)) + ' ' + str(round(fit_paras[3], 2)) + ' ' + str(round(fit_paras[4], 2)) )
+            plt.plot(fit_xs,  fit_fs, color='k',linewidth = 2, alpha = 1., label = 'paras: m=' + str(round(fit_paras[0], 2)) + ' b=' + str(round(fit_paras[1], 2)) + ' A=' + str(round(fit_paras[2], 2)) + r" $x_{0}$=" + str(round(fit_paras[3], 2)) + r' $\sigma$=' + str(round(fit_paras[4], 2)) + ' L=' + str(self.cost) )
             plt.bar(self.bin_centers, self.binned_beta_combined[i], width=w, color='k', alpha = 1., label = 'C')
             plt.bar(self.bin_centers, self.binned_beta_OFF[i], width=w, color='r', alpha = 0.5, label = 'OFF')
             plt.bar(self.bin_centers, self.binned_beta_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
@@ -120,14 +122,14 @@ class bin_betas:#class to make histogram of betas in each bin
                 plt.ylim(0, 400)
                 plt.ylabel("counts")
                 plt.xlabel(r"$\beta_{Orphan}$")
-                plt.bar(self.bin_centers, self.binned_beta_combined[i], width=w, color='k', alpha = 1., label = 'C')
+                plt.bar(self.bin_centers, self.binned_beta_combined[i], width=w, color='k', alpha = 1., label = 'combined')
                 plt.bar(self.bin_centers, self.binned_beta_OFF[i], width=w, color='r', alpha = 0.5, label = 'OFF')
                 plt.bar(self.bin_centers, self.binned_beta_ON[i], width=w, color='b', alpha = 0.5, label = 'ON')
                 #plt.scatter(test_dat.xs, test_dat.fs, s = 0.9, color = 'k')
                 plt.legend()
                 plt.savefig('stream_beta_plots/lambda_bin_' + str(i) + '_' + str(self.lmda_bnd.bin_centers[i]) + '.png', format = 'png')
                 plt.close()
-                os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
+            os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
         #plt.clf()
         
         return 0

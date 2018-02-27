@@ -24,13 +24,13 @@ y = True
 n = False
 args_run = [3.95, 1, 0.2, 0.2, 12, 0.2] 
 args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-
+args_run_comp = [3.94243049428117, 1, 0.204575760168173, 0.179013230102704, 12.0318620456042, 0.140573755762348]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
 remake                    = y                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 match_histograms          = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -38,7 +38,7 @@ run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Hist Plot Switches             #
 # # # # # # # # # # # # # # # # # # # # # # # #
-plot_hists                = y                 #
+plot_hists                = n                 #
 plot_veldisp_switch       = n                 #
 vlos_plot_switch          = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -75,8 +75,8 @@ compare_hist = 'data_hist_fall_2017'
 
 
 #    hist name for the nbody run: either set them manually or use from the list above #
-correctans_hist = correct_hist
-comparison_hist = compare_hist
+correctans_hist = histogram_v168
+comparison_hist = 'test'
 
 plot_name = compare_hist
 
