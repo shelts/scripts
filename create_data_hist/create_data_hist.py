@@ -66,8 +66,10 @@ class data:#class system for reading in data and making a data histogram
         
         self.ON_count_err = []
         self.OFF_count_err = []
-        
+        #self.negate = True
+        self.negate = False
         self.read_counts()
+        self.data_correction()
         
     def read_counts(self):
         self.ON_star_N_lbda = []; self.OFF_star_N_lbda = [];
@@ -99,7 +101,10 @@ class data:#class system for reading in data and making a data histogram
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
                 
-                self.ON_star_N_lbda.append(-str_N_lbda)
+                if(self.negate):
+                    str_N_lbda = -str_N_lbda
+                    
+                self.ON_star_N_lbda.append(str_N_lbda)
                 self.ON_star_N_beta.append(str_N_beta)
         read_data = False
         for line in g:
@@ -120,10 +125,26 @@ class data:#class system for reading in data and making a data histogram
                 if(len(ss) > 1):
                     str_N       = float(ss[3])
                 
-                self.OFF_star_N_lbda.append(-str_N_lbda)
+                if(self.negate):
+                    str_N_lbda = -str_N_lbda
+                    
+                self.OFF_star_N_lbda.append(str_N_lbda)
                 self.OFF_star_N_beta.append(str_N_beta)
         f.close()
         g.close()
+    
+    def data_correction(self):
+        cut = -15
+        #if(self.negate):
+            #cut = -cut
+            
+        for i in range(0, len(self.ON_star_N_lbda)):
+            if(self.ON_star_N_lbda[i] < cut):
+                self.ON_star_N_beta[i] += 0.00628 * self.ON_star_N_lbda[i]**2.0 + 0.42 * self.ON_star_N_lbda[i] + 5.00
+                
+        for i in range(0, len(self.OFF_star_N_lbda)):
+            if(self.OFF_star_N_lbda[i] < cut):
+                self.OFF_star_N_beta[i] += 0.00628 * self.OFF_star_N_lbda[i]**2.0 + 0.42 * self.OFF_star_N_lbda[i] + 5.00
     
     def bin_counts(self, star_N_lbda, star_N_beta, field):#need to bin the data into regularly sized bins
         bnd_counts = []
@@ -330,15 +351,15 @@ def main():
     make_hist = False
     normalize_counts =  False
     
-    plot_counts = False
+    plot_counts = True
     plot_normed_counts = False
     
     # name of the data files # 
     vgsr_file = "my16lambet2bg.specbhb.dist.lowmet.stream"
     on_field_counts_file = "l270soxlbfgcxNTbcorr.newon"
     off_field_counts_file = "l270soxlbfgcxNTbcorr.newoff"
-    #bin_data = "data_from_yanny.dat"
-    bin_data = "custom_bins.dat"
+    bin_data = "data_from_yanny.dat"
+    #bin_data = "custom_bins.dat"
     
     dat = data(on_field_counts_file, off_field_counts_file)
     # initiaze bins parameters #
@@ -360,20 +381,19 @@ def main():
     dat.binned_diff()  
     #print dat.bin_ON.counts
     #print dat.bin_OFF.counts
-    #print dat.bin_diff.counts
+    print dat.bin_diff.counts
+    #print dat.bnd.bin_centers
     # plot the binned counts #
     if(plot_counts):
         dat.plot_counts()                                       
     
     # bin the beta counts #
-    betas = bin_betas(dat.beta_ON.beta_coors, dat.beta_OFF.beta_coors, dat.bnd)
+    if(calc_beta_dispersions):
+        betas = bin_betas(dat.beta_ON.beta_coors, dat.beta_OFF.beta_coors, dat.bnd)
     
     # deletes the on and off field bin data. only need bin diff data # 
     dat.data_clear('binned counts')                         
     
-    # calculate beta dispersion # 
-    if(calc_beta_dispersions):
-        dat.beta_dispersion()
     
     # normalize the binned counts #
     if(normalize_counts):

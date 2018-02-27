@@ -29,8 +29,8 @@ args_run_comp = [3.94243049428117, 1, 0.204575760168173, 0.179013230102704, 12.0
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
 run_nbody                 = n                 #
-remake                    = y                 #
-run_and_compare           = y                 #
+remake                    = n                 #
+run_and_compare           = n                 #
 match_histograms          = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -130,7 +130,7 @@ def standard_run():
     if(vlos_plot_switch):
         vlos_plot(correctans_hist, comparison_hist)
         vlos_plot_single(correctans_hist)
-        
+    
     return 0
 # #        
 
@@ -142,7 +142,9 @@ def standard_run():
 def main():
     standard_run()
     
-    
+    t = nbody_outputs(sid_dir + 'quick_plots/outputs/mw@home_best_fit.out')
+    print t.convert_to_Lambda_Beta(255.0, 38., 0, False)
+    print t.convert_to_Lambda_Beta(268.0, 48., 0, False)
     if(lb_plot_switch):
         lb_plot(output)
     

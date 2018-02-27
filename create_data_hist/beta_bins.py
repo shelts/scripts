@@ -9,7 +9,7 @@ from subprocess import call
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 from differential_evolution import *
-#from hessian import *
+from hessian import *
 
 class bin_betas:#class to make histogram of betas in each bin
     def __init__(self, beta_coors_ON, beta_coors_OFF, lmda_bnd):#(on field beta coordinates, Off field beta coordinates, lambda bin parameters)
@@ -36,7 +36,7 @@ class bin_betas:#class to make histogram of betas in each bin
         #self.correction() # substract the simple ave from the off and on fields
         
         #self.plot_3d() # make one 3D plot of the stream
-        #self.plot_each_bin()
+        self.plot_each_bin()
         self.optimize()
         
         
@@ -83,13 +83,15 @@ class bin_betas:#class to make histogram of betas in each bin
                 #print lower_bound, upper_bound
     
     def optimize(self):
-        iters = 40000
+        iters = 50000
         os.system("rm -r stream_beta_plots/lamb*")
         for i in range(0, self.lmda_bnd.Nbins):
             self.fit = diff_evo(self.bin_centers , self.binned_beta_combined[i], iters )
             self.fit_paras = self.fit.pop.best_paras
             self.cost = self.fit.pop.best_cost
-            print self.fit_paras
+            print 'Paras: ', self.fit_paras
+            errors = hessian(self.fit.cost, self.fit_paras)
+            print 'ERRORS: ', errors.diags, '\n'
             self.plot_each_bin(i) # plot each lambda bin seperately
         #os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
         
@@ -99,7 +101,7 @@ class bin_betas:#class to make histogram of betas in each bin
         #test_dat = test_data()
         plt.figure()
         plt.xlim(self.lower, self.upper)
-        plt.ylim(0, 400)
+        plt.ylim(-100, 200)
         plt.ylabel("counts")
         plt.xlabel(r"$\beta_{Orphan}$")
         
@@ -119,7 +121,7 @@ class bin_betas:#class to make histogram of betas in each bin
             for i in range(0, self.lmda_bnd.Nbins):
                 plt.figure()
                 plt.xlim(self.lower, self.upper)
-                plt.ylim(0, 400)
+                plt.ylim(-100, 200)
                 plt.ylabel("counts")
                 plt.xlabel(r"$\beta_{Orphan}$")
                 plt.bar(self.bin_centers, self.binned_beta_combined[i], width=w, color='k', alpha = 1., label = 'combined')
@@ -187,8 +189,8 @@ class bin_betas:#class to make histogram of betas in each bin
                 interlopers = self.star_density[i] * area
                 self.binned_beta_combined[i][j] -= interlopers
                     
-                if(self.binned_beta_combined[i][j] < 0.0):
-                    self.binned_beta_combined[i][j] = 0.0
+                #if(self.binned_beta_combined[i][j] < 0.0):
+                    #self.binned_beta_combined[i][j] = 0.0
                 #print '\t\t\t\t', self.binned_beta_ON[i][j], self.binned_beta_OFF[i][j], self.binned_beta_combined[i][j], interlopers
 
         return 0

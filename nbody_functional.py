@@ -204,6 +204,12 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
         
         
     def convert_to_Lambda_Beta(self, x1, x2, x3, cartesian):#can convert l,b or x,y,z to lambda beta
+        # note: this uses a left handed coordinate system #
+        # it assumes that xyz are lefted handed. l,b are  #
+        # assumed to be right handed. stupid              #
+        left_handed = True                                #
+        # this is the system that is used in MW@home.     #
+    
         phi   = mt.radians(128.79)
         theta = mt.radians(54.39)
         psi   = mt.radians(90.70)
@@ -212,18 +218,21 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
             x_coor = x1
             y_coor = x2
             z_coor = x3
-            x_coor += 8.0 #convert to solar centric
+            if(left_handed):
+                x_coor += 8.0 #convert to solar centric
+            else:
+                x_coor -= 8.0 
         else:
             l = mt.radians(x1)
             b = mt.radians(x2)
-            r = x3
             
-            x_coor = r * mt.cos(l) * mt.cos(b) #this is solar centered x
-            y_coor = r * mt.sin(l) * mt.cos(b)
-            z_coor = r * mt.sin(b)
+            x_coor = mt.cos(l) * mt.cos(b) #this is solar centered x
+            y_coor = mt.sin(l) * mt.cos(b) #also, the r doesn't really matter. It cancels
+            z_coor = mt.sin(b)
         
         #A = MB
         B = [x_coor, y_coor, z_coor]
+        
         M_row1 = [mt.cos(psi) * mt.cos(phi) - mt.cos(theta) * mt.sin(phi) * mt.sin(psi),
                 mt.cos(psi) * mt.sin(phi) + mt.cos(theta) * mt.cos(phi) * mt.sin(psi),
                 mt.sin(psi) * mt.sin(theta)]
@@ -240,7 +249,10 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
         A2 = M_row2[0] * B[0] + M_row2[1] * B[1] + M_row2[2] * B[2]
         A3 = M_row3[0] * B[0] + M_row3[1] * B[1] + M_row3[2] * B[2]
         
-        beta = mt.asin(-A3 / mt.sqrt(A1 * A1 + A2 * A2 + A3 * A3))
+        if(left_handed):
+            A3 = -A3
+
+        beta = mt.asin(A3 / mt.sqrt(A1 * A1 + A2 * A2 + A3 * A3))
         lamb = mt.atan2(A2, A1)
         
         beta = mt.degrees(beta)
