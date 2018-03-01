@@ -31,26 +31,30 @@ class hessian:
             for j in range(0, self.dim):
                 derivative = self.calc_derivative(i, j)
                 self.H[i].append(derivative)
-            print self.H[i]
+            #print self.H[i]
        
        
     def calc_derivative(self, i, j):
-        h1 = 0.00001
-        h2 = 0.00001
+        n = len(self.paras)
+        h1 = .95 * self.paras[n - 1]# setting the step size to the fitted sigma
+        #h1 = 0.001
+        #print h1
+        h2 = h1
         
         a = self.paras[i]
         b = self.paras[j]
-        p = self.paras
+        p = list(self.paras)
+        #print p
         if(i == j): # straight up second derivative
-            f1 = function(p)
+            #f1 = function(p)
             f1 = self.cost.get_cost(p)
             
             p[i] = a + h1
-            f2 = function(p)
+            #f2 = function(p)
             f2 = self.cost.get_cost(p)
             
             p[i] = a - h1
-            f3 = function(p)
+            #f3 = function(p)
             f3 = self.cost.get_cost(p)
             
             der = f2 - 2.0 * f1 + f3
@@ -59,22 +63,23 @@ class hessian:
         else: # second partial derivative
             p[i] = a + h1
             p[j] = b + h2
-            f1 = function(p)
+            #f1 = function(p)
             f1 = self.cost.get_cost(p)
         
             p[i] = a + h1
             p[j] = b - h2
-            f2 = function(p)
+            #f2 = function(p)
+            #print p, i, j
             f2 = self.cost.get_cost(p)
             
             p[i] = a - h1
             p[j] = b + h2
-            f3 = function(p)
+            #f3 = function(p)
             f3 = self.cost.get_cost(p)
             
             p[i] = a - h1
             p[j] = b - h2
-            f4 = function(p)
+            #f4 = function(p)
             f4 = self.cost.get_cost(p)
             
             der = f1 - f2 - f3 + f4
@@ -84,12 +89,12 @@ class hessian:
         return der
         
     def invert(self):
-        self.diags = []
+        self.errs = []
         array = []
         for i in range(0, self.dim):
             array.append(self.H[i])
-        a = np.array(array)
-        a_inv = inv(a)
+        H = np.array(array)
+        H_inv = inv(H)
         for i in range(0, self.dim):
-            self.diags.append(a_inv[i][i])
-        print a_inv
+            errs = (2.0 * abs(H_inv[i][i]))**0.5
+            self.errs.append(errs)

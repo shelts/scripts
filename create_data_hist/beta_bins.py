@@ -36,7 +36,7 @@ class bin_betas:#class to make histogram of betas in each bin
         #self.correction() # substract the simple ave from the off and on fields
         
         #self.plot_3d() # make one 3D plot of the stream
-        self.plot_each_bin()
+        #self.plot_each_bin()
         self.optimize()
         
         
@@ -73,6 +73,7 @@ class bin_betas:#class to make histogram of betas in each bin
                 if(coors_ON[j] >= lower_bound  and coors_ON[j] <= upper_bound): # check if beta coor is in the bin
                     self.binned_beta_ON[lmbda_bin][k] += 1.0
                     self.binned_beta_combined[lmbda_bin][k] += 1.0
+        
         for j in range(0, len(coors_OFF)): # for each beta coordinate in the lmda bin
             for k in range(0, self.beta_Nbins): # for each beta bin
                 lower_bound = (self.bin_centers[k] - self.bin_width / 2.0)
@@ -83,15 +84,17 @@ class bin_betas:#class to make histogram of betas in each bin
                 #print lower_bound, upper_bound
     
     def optimize(self):
-        iters = 50000
+        iters = 100000
         os.system("rm -r stream_beta_plots/lamb*")
         for i in range(0, self.lmda_bnd.Nbins):
             self.fit = diff_evo(self.bin_centers , self.binned_beta_combined[i], iters )
+            self.fit.pop.save_population("bin_" + str(i) + '.pop')
+            #self.fit = diff_evo(self.bin_centers , self.binned_beta_combined[i], iters,"bin_" + str(i) + '.pop' )
             self.fit_paras = self.fit.pop.best_paras
             self.cost = self.fit.pop.best_cost
             print 'Paras: ', self.fit_paras
             errors = hessian(self.fit.cost, self.fit_paras)
-            print 'ERRORS: ', errors.diags, '\n'
+            print 'ERRORS: ', errors.errs, '\n'
             self.plot_each_bin(i) # plot each lambda bin seperately
         #os.system('xdg-open stream_beta_plots/lambda_bin_' + str(0) + '_' + str(self.lmda_bnd.bin_centers[0]) + '.png')
         
@@ -108,7 +111,7 @@ class bin_betas:#class to make histogram of betas in each bin
         # this is sloppy.
         if(i != None):
             fit_paras = self.fit_paras
-            fit_xs, fit_fs = self.fit.generate_plot_points()
+            fit_xs, fit_fs = self.fit.cost.generate_plot_points(fit_paras)
             plt.plot(fit_xs,  fit_fs, color='k',linewidth = 2, alpha = 1., label = 'paras: m=' + str(round(fit_paras[0], 2)) + ' b=' + str(round(fit_paras[1], 2)) + ' A=' + str(round(fit_paras[2], 2)) + r" $x_{0}$=" + str(round(fit_paras[3], 2)) + r' $\sigma$=' + str(round(fit_paras[4], 2)) + ' L=' + str(self.cost) )
             plt.bar(self.bin_centers, self.binned_beta_combined[i], width=w, color='k', alpha = 1., label = 'C')
             plt.bar(self.bin_centers, self.binned_beta_OFF[i], width=w, color='r', alpha = 0.5, label = 'OFF')

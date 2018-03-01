@@ -3,20 +3,21 @@
 #     rm -r nbody_test
 #     mkdir nbody_test
 #     cd nbody_test
-#     cmake  -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DNBODY_GL=OFF -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    milkywayathome_client/
+#     cmake  -DCMAKE_BUILD_TYPE=Release -DNBODY_DEV_OPTIONS=ON -DNBODY_GL=ON -DBOINC_APPLICATION=OFF -DSEPARATION=OFF -DNBODY_OPENMP=ON    ~/Desktop/research/milkywayathome_client/
 #     make -j 
-    cd nbody_test/bin
+
+
+    cd ~/Desktop/research/nbody_test/bin
     
 
 
 
     ./milkyway_nbody \
-    -f ~/Desktop/research/lua/full_control.lua \
+    -f ~/Desktop/research/lua/halo_object_dev.lua \
     -o some_output.out \
-    -h path_to_input_hist \
     -z path_to_output_hist \
-    -n 8 -b  -P -u\
-    -i 4.0 path_to_body_list_input\
+    -n 8 -b  -u\
+    -i 4.0 1 0.2 0.5 12 0.5 ~/Desktop/research/disk.out\
 
 
 #if you run:

@@ -87,7 +87,7 @@ plot_name = compare_hist
 version  = ''
 lua = "full_control.lua"
 #lua = "manual_body_input.lua"
-#lua = "halo_object_dev.lua"
+lua = "halo_object_dev.lua"
 #lua = "EMD_v168.lua"
 
 #    pathways  #

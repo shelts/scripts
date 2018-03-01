@@ -22,15 +22,12 @@ from cost import *
                   #[0.1, 10],        # guass sigma \
                 #] 
 
-search_ranges = [ [-100.0, 100.0], # line slope a \
-                  [-10.0, 100.0],    # y-inter b \
-                  [0.0, 10000.0],    # guass amp A \
-                  [-4.0, 4.0],     # guass mu \
-                  [0.01, 100],        # guass sigma \
+search_ranges = [ [-1000.0, 1000.0], # line slope a \
+                  [-1000.0, 1000.0],    # y-inter b \
+                  [-1000, 1000.0],    # guass amp A \
+                  [-10.0, 10.0],     # guass mu \
+                  [0.01, 10],        # guass sigma \
                 ]
-                  #[-1000.0, 1000.0], # line slope a \
-                  #[-1000.0, 1000.0],    # y-inter b \
-                #] 
 
 
             
@@ -54,8 +51,20 @@ class population: # a class to create, store and update a population for differe
                 self.cur_pop[i].append(val) 
             cost_value = cost.get_cost(self.cur_pop[i]) # get cost for each member of the population
             self.pop_costs.append(cost_value)
-
-                 
+            
+    def initialize_from_file(self, file_name):
+        print "\nreading in population values from file..."
+        f = open(file_name, 'r')
+        counter = 0
+        for line in f:
+            ss = line.split("\t")
+            file_cost = float(ss[0])
+            self.pop_costs.append(file_cost)
+            for i in range(1, len(ss)):
+                self.cur_pop[counter].append(float(ss[i]))
+            counter += 1
+        print "done\n"
+        
     def update(self, x, cross_over, differential_weight, cost, ranges): # function to update the population set using the diff evo algorithm
         a = -1 # to get them into the loop
         b = -1
@@ -92,7 +101,7 @@ class population: # a class to create, store and update a population for differe
         # get the cost associated with this new set
         possible_new_cost = cost.get_cost(possible_new_set)
         
-        if(possible_new_cost < self.pop_costs[x]): # if the new cost is better keep it. closer to zero is better.
+        if(possible_new_cost > self.pop_costs[x]): # if the new cost is better keep it. closer to zero is better.
             self.cur_pop[x] = possible_new_set # replace the current population member with the new set
             self.pop_costs[x] = possible_new_cost # replace the cost with the new
         return 0
@@ -105,7 +114,18 @@ class population: # a class to create, store and update a population for differe
                 best_index = i # just keep the best index. that maps to everything needed
         self.best_paras = self.cur_pop[best_index]
         self.best_cost = self.pop_costs[best_index]
-        return best_index
+        return 0
+    
+    
+    
+    def save_population(self, file_name):
+        f = open(file_name, 'w')
+        for i in range(0, self.pop_size):    
+            f.write("%0.15f" % self.pop_costs[i])
+            for j in range(0, self.Nparas):
+                f.write("\t%0.15f" % self.cur_pop[i][j])
+            f.write("\n")
+        f.close()
     
 class diff_evo: 
     class parameter: # quick class for the parameter search ranges
@@ -113,7 +133,7 @@ class diff_evo:
             self.lower = ranges[0]
             self.upper = ranges[1]
                 
-    def __init__(self, xs, ys, iters):
+    def __init__(self, xs, ys, iters, population_file = None):
         self.cross_over = 0.9 # algorithm specific parameter
         self.differential_weight = 0.8 # algorithm specific parameter
         self.pop_size = 10 * (len(search_ranges)) # size of the population
@@ -129,10 +149,13 @@ class diff_evo:
         
         # create the initial population: 
         self.pop = population(self.pop_size, self.Nparameters)# creates an empty population
-        self.pop.initialize(self.ranges, self.cost)# gives random values to the parameters for each pop member and gets their cost
+        if(population_file):
+            self.pop.initialize_from_file(population_file)
+        else:
+            self.pop.initialize(self.ranges, self.cost)# gives random values to the parameters for each pop member and gets their cost
         
         self.run_optimization() # runs the optimization
-        
+            
     
     
     def run_optimization(self): # runs through the optimization. Each iteration updates the population
@@ -144,41 +167,9 @@ class diff_evo:
                 self.pop.update(i, self.cross_over, self.differential_weight, self.cost, self.ranges) # this will update the member of the population
                 counter += 1
             self.pop.get_bests()
-            #if(counter % 100 and (cost != self.pop.pop_costs[self.best_index]) ): # used for plotting the fits as it optimizes. not putting in if statement because not too needed or used.
-                #self.plot_current_best(counter)
-                #cost = self.pop.pop_costs[self.best_index]
+            #if(counter % 100 and (cost != self.pop.best_cost) ): # used for plotting the fits as it optimizes. not putting in if statement because not too needed or used.
+                #cost = self.pop.best_cost
+                #self.cost.plot_current_best(counter, self.pop.best_paras, cost)
         
+    
 
-
-    def generate_plot_points(self): # uses the fitting function with the best set of parameters to generate plottable points
-        x = -6.0 #TODO: make the parameters here generalizable. right now these are hard coded to my problem
-        dx = (6.0 - -6.0) / 100.0
-        xs = []
-        fs = []
-        for i in range(0, 100): 
-            f = self.cost.function(self.pop.best_paras, x) # simple way of getting my function points out
-            x += dx
-            fs.append(f)
-            xs.append(x)
-            
-        return xs, fs
-            
-    def plot_current_best(self, counter): # plots the current best parameter set. unique to this problem
-        xs, fs = self.generate_plot_points()
-        print self.pop.best_paras, self.pop.best_cost
-        plt.ylim(0, 100)
-        plt.xlim(-6, 6)
-        plt.plot(xs, fs, linewidth = 2, color = 'r')
-        plt.scatter(self.cost.xs, self.cost.ys, s = 8, color = 'b', marker='o')
-        plt.savefig('fitting/fit_' + str(counter) + '.png', format='png')
-        plt.clf()
-        
-
-# main here is to be turned on when you want to test this algorithm. 
-# It will create a test data set and then optimizate on it.
-# can also be used to have it train on test data
-#def main():
-    #test = test_data()
-    #test.plot()
-    #diff_evo(test.xs, test.fsn)
-#main()

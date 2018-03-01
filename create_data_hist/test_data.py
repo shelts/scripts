@@ -7,7 +7,7 @@ import math as mt
 import random
 import matplotlib.pyplot as plt
 
-
+random.seed(a = 12345678)
 
 # class to create a test data set. Currently uses a linear + guassian model, with guassian noise
 class test_data(): # class to create a test data set with guassian noise
@@ -19,7 +19,8 @@ class test_data(): # class to create a test data set with guassian noise
         
         self.A = 50.0 # amplitude
         self.mu = 0 # x-axis offset for the guassian
-        self.sig = mt.sqrt(0.5) # 0.7 dispersion
+        self.sig = 1.5 #mt.sqrt(0.5) # 0.7 dispersion
+        self.correct = [self.m, self.b, self.A, self.mu, self.sig]
         
         self.generate_points()
         

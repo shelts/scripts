@@ -226,7 +226,7 @@ class data:#class system for reading in data and making a data histogram
 
         if(len(self.bin_ON.counts) > 0 and len(self.bin_OFF.counts) > 0):
             for i in range(0, len(self.bin_ON.counts)):
-                self.bin_diff.counts.append(abs(self.bin_ON.counts[i] - self.bin_OFF.counts[i]))           # find the difference in the on and off field in each bin
+                self.bin_diff.counts.append((self.bin_ON.counts[i] - self.bin_OFF.counts[i]))           # find the difference in the on and off field in each bin
                 self.bin_diff.err.append( (self.bin_ON.counts[i] + self.bin_OFF.counts[i])**0.5)    # error in the difference. The error in the counts is the sq root of the counts. The sum of the squares is then this.    
                 
                 #self.beta_diff.sums.append(  (self.beta_ON.sums[i]   - self.beta_OFF.sums[i]))
@@ -359,7 +359,7 @@ def main():
     on_field_counts_file = "l270soxlbfgcxNTbcorr.newon"
     off_field_counts_file = "l270soxlbfgcxNTbcorr.newoff"
     bin_data = "data_from_yanny.dat"
-    #bin_data = "custom_bins.dat"
+    bin_data = "custom_bins.dat"
     
     dat = data(on_field_counts_file, off_field_counts_file)
     # initiaze bins parameters #
