@@ -1,6 +1,8 @@
 #!/bin/bash   
 
-cp create_data_hist/*.py ./scripts/create_data_hist/
+cp nbody_functional.py nbody_tools
+cp one_script.py nbody_tools
+cp nbody_useful_plots.py nbody_tools
 cp *.py ./scripts
 cp *.sh ./scripts
 cd scripts

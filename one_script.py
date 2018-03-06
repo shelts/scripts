@@ -22,15 +22,22 @@ random.seed(a = 12345678)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 y = True
 n = False
-args_run = [3.95, 1, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.95, 0.98, 0.2, 0.2, 12, 0.2] 
-args_run_comp = [3.94243049428117, 1, 0.204575760168173, 0.179013230102704, 12.0318620456042, 0.140573755762348]
+#    pathways  #
+#I am tired of constantly adapting it for the servers
+lmc_dir = '~/research/'
+sid_dir = '/home/sidd/Desktop/research/'
+sgr_dir = '/Users/master/sidd_research/'
+path = sid_dir
+
+args_run = [3.95, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [3.95, 0.2, 0.2, 12, 0.2] 
+args_run_comp = [3.94243049428117, 0.204575760168173, 0.179013230102704, 12.0318620456042, 0.140573755762348]
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
+run_nbody                 = y                 #
 remake                    = n                 #
-run_and_compare           = n                 #
+run_and_compare           = y                 #
 match_histograms          = n                 #
 run_from_checkpoint       = n                 #
 # # # # # # # # # # # # # # # # # # # # # # # #
@@ -75,8 +82,9 @@ compare_hist = 'data_hist_fall_2017'
 
 
 #    hist name for the nbody run: either set them manually or use from the list above #
-correctans_hist = histogram_v168
-comparison_hist = 'test'
+folder = path + 'quick_plots/hists_outs/'
+correctans_hist = folder + histogram_v168
+comparison_hist = folder + 'test'
 
 plot_name = compare_hist
 
@@ -85,17 +93,12 @@ plot_name = compare_hist
 #    run specfics   #
 #version = '_1.68_x86_64-pc-linux-gnu__mt'
 version  = ''
-lua = "full_control.lua"
+lua = path + 'lua/' + "full_control.lua"
 #lua = "manual_body_input.lua"
-lua = "halo_object_dev.lua"
-#lua = "EMD_v168.lua"
+#lua = path + 'lua/' + "halo_object_dev.lua"
+#lua = path + 'lua/' + "EMD_v168.lua"
 
-#    pathways  #
-#I am tired of constantly adapting it for the servers
-lmc_dir = '~/research/'
-sid_dir = '/home/sidd/Desktop/research/'
-sgr_dir = '/Users/master/sidd_research/'
-path = sid_dir
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
                 #          Engine Room         #
@@ -142,9 +145,10 @@ def standard_run():
 def main():
     standard_run()
     
-    t = nbody_outputs(sid_dir + 'quick_plots/outputs/mw@home_best_fit.out')
+    t = nbody_outputs(sid_dir + 'quick_plots/hists_outs/mw@home_best_fit.out')
     print t.convert_to_Lambda_Beta(255.0, 38., 0, False)
     print t.convert_to_Lambda_Beta(268.0, 48., 0, False)
+    
     if(lb_plot_switch):
         lb_plot(output)
     

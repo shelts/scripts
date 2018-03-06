@@ -908,6 +908,66 @@ def chi_sq_dist_plot():
 # #
 
 
+def single_xyz(file_name):
+    path = 'quick_plots/hists_outs/'
+    print file_name
+    plot_light_and_dark = True
+    plot_dm = True
+    
+    out = nbody_outputs(path + file_name + '.out')
+    out.rescale_l()
+    out.dark_light_split()
+    
+    fig = plt.figure()
+    fig.subplots_adjust(hspace = 0.8, wspace = 0.8)
+    # # # # # # # # # #
+            
+    xlower = 50
+    xupper = -50
+    #fig.tight_layout()
+    #plt.axes().set_aspect('equal')
+    plt.figure(figsize=(10, 10))
+    plt.subplot(131,aspect='equal')
+    plt.plot(out.light_x, out.light_y, '.', markersize = 1, color = 'r', marker = 'o')
+    
+    if(plot_light_and_dark == True):
+        plt.plot(out.dark_x, out.dark_y, '.', markersize = 1, color = 'b', marker = '+')
+    
+    plt.xlim((xlower, xupper))
+    plt.ylim((-80, 80))
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('x vs y')
+    
+    plt.subplot(132,aspect='equal')
+    
+    plt.plot(out.light_x, out.light_z, '.', markersize = 1, color = 'r', marker = 'o')
+    
+    if(plot_light_and_dark == True):
+        plt.plot(out.dark_x, out.dark_z, '.', markersize = 1, color = 'b', marker = '+')
+    
+    plt.xlim((xlower, xupper))
+    plt.ylim((-80, 80))
+    plt.xlabel('x')
+    plt.ylabel('z')
+    plt.title('x vs z')
+    
+    plt.subplot(133, aspect='equal')
+    
+    plt.plot(out.light_z, out.light_y, '.', markersize = 1, color = 'r', marker = 'o')
+    if(plot_light_and_dark == True):
+        plt.plot(out.dark_z, out.dark_y, '.', markersize = 1, color = 'b', marker = '+')
+    
+    plt.xlim((xlower, xupper))
+    plt.ylim((-80, 80))
+    plt.xlabel('z')
+    plt.ylabel('y')
+    plt.title('z vs y')
+    plt.savefig('/home/sidd/Desktop/research/quick_plots/tidal_stream_xyz', format='png')
+
+    return 0
+
+
 def main():
     file1 = 'hist_v166_3p95_0p2_0p2_12_0p2__1_2_2018'
     file2 = 'hist_v166_3p95_0p2_0p2_12_0p2__1_2_2018'
@@ -924,7 +984,11 @@ def main():
     name = 'mwh_hist'
     #plot_single(hist1, name)
     #plot(hist1, hist2, 'mw@home_best_fit', 'MilkyWay@home', 'Best Fit')
-    plot_hist_lambda_beta_single(hist2, True)
+    #plot_hist_lambda_beta_single(hist2, True)
+    
+    file1 = "dist_test"
+    #single_xyz(file1)
+    
     return 0 
 
 main()
