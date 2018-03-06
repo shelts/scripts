@@ -2,10 +2,11 @@
 #/* Copyright (c) 2016 Siddhartha Shelton */
 
 rebuild=false
-run=true
+run=false
 run_compare=false
 compare_only=false
-manual_input=false
+with_manual_input=false
+manual_input_only=true
 get_flag_list=false
 
 if $rebuild
@@ -21,10 +22,10 @@ cd nbody_test/bin
 if $run 
 then
     ./milkyway_nbody \
-    -f full_control.lua \
+    -f ~/Desktop/research/lua/full_control.lua \
     -h path_to_input_hist \
     -o some_output.out \
-    -n 8 -b  -P -u\
+    -n 8 -b   -u\
     -i 3.95 1.0 0.2 0.2 12 0.2 \
     
 fi
@@ -32,7 +33,7 @@ fi
 if $run_compare
 then
     ./milkyway_nbody \
-    -f full_control.lua \
+    -f ~/Desktop/research/lua/full_control.lua \
     -o some_output.out \
     -h path_to_input_hist \
     -z path_to_output_hist \
@@ -62,13 +63,24 @@ then
 # it wil show you what all the flags mean
 fi
 
-if $manual_input
+if $with_manual_input
 then
     ./milkyway_nbody \
-    -f ~/Desktop/research/lua/halo_object_dev.lua \
+    -f ~/Desktop/research/lua/full_control.lua \
     -o some_output.out \
     -z path_to_output_hist \
     -n 8 -b  -u\
     -i 4.0 1 0.2 0.5 12 0.5 ~/Desktop/research/disk.out\
+
+fi
+
+if $manual_input_only
+then
+    ./milkyway_nbody \
+    -f ~/Desktop/research/lua/full_control.lua \
+    -o some_output.out \
+    -z path_to_output_hist \
+    -n 8 -b  -u\
+    -i 4.0 ~/Desktop/research/disk.out\
 
 fi

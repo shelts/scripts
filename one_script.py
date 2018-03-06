@@ -35,7 +35,7 @@ args_run_comp = [3.94243049428117, 0.204575760168173, 0.179013230102704, 12.0318
 # # # # # # # # # # # # # # # # # # # # # # # #
 #              Standard Run switches          #
 # # # # # # # # # # # # # # # # # # # # # # # #
-run_nbody                 = n                 #
+run_nbody                 = y                 #
 remake                    = n                 #
 run_and_compare           = n                 #
 match_histograms          = n                 #
@@ -83,7 +83,7 @@ compare_hist = 'data_hist_fall_2017'
 
 #    hist name for the nbody run: either set them manually or use from the list above #
 folder = path + 'quick_plots/hists_outs/'
-correctans_hist = folder + histogram_v168
+correctans_hist = folder + 'test'
 comparison_hist = folder + 'test'
 
 plot_name = compare_hist
