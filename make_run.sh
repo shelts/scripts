@@ -5,6 +5,7 @@ rebuild=false
 run=true
 run_compare=false
 compare_only=false
+manual_input=false
 get_flag_list=false
 
 if $rebuild
@@ -59,4 +60,15 @@ if $get_flag_list
 then
     ./milkyway_nbody --help
 # it wil show you what all the flags mean
+fi
+
+if $manual_input
+then
+    ./milkyway_nbody \
+    -f ~/Desktop/research/lua/halo_object_dev.lua \
+    -o some_output.out \
+    -z path_to_output_hist \
+    -n 8 -b  -u\
+    -i 4.0 1 0.2 0.5 12 0.5 ~/Desktop/research/disk.out\
+
 fi

@@ -207,7 +207,7 @@ class nbody_outputs:#a class that takes in data from nbody output files and make
         # note: this uses a left handed coordinate system #
         # it assumes that xyz are lefted handed. l,b are  #
         # assumed to be right handed. stupid              #
-        left_handed = True                                #
+        left_handed = False                                #
         # this is the system that is used in MW@home.     #
     
         phi   = mt.radians(128.79)
