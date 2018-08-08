@@ -22,7 +22,7 @@ cd nbody_test/bin
 if $run 
 then
     ./milkyway_nbody \
-    -f ~/Desktop/research/lua/full_control.lua \
+    -f ~/Desktop/research/milkywayathome_client/nbody/sample_workunits/for_developers.lua \
     -h path_to_input_hist \
     -o some_output.out \
     -n 8 -b   -u\
@@ -66,10 +66,10 @@ fi
 if $with_manual_input
 then
     ./milkyway_nbody \
-    -f ~/Desktop/research/lua/full_control.lua \
+    -f ~/Desktop/research/milkywayathome_client/nbody/sample_workunits/for_dev_manual_body.lua \
     -o some_output.out \
     -z path_to_output_hist \
-    -n 8 -b  -u\
+    -n 8 -b  -u --visualizer-bin=~/Desktop/research/nbody_test/bin/milkyway_nbody_graphics\
     -i 4.0 1 0.2 0.5 12 0.5 ~/Desktop/research/disk.out\
 
 fi
@@ -77,7 +77,7 @@ fi
 if $manual_input_only
 then
     ./milkyway_nbody \
-    -f ~/Desktop/research/lua/full_control.lua \
+    -f ~/Desktop/research/milkywayathome_client/nbody/sample_workunits/manual_body_input.lua \
     -o some_output.out \
     -z path_to_output_hist \
     -n 8 -b  -u\

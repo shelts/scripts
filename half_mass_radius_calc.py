@@ -10,8 +10,8 @@ from nbody_functional import *
 
 
 def half_mass_radius():
+
     #found
-    
     paras = [3.93649841565613, 1, 0.208372119674464, 0.235151860862976, 12.0055674149201, 0.306476628533526]
 
     rl_f = paras[2]
@@ -38,7 +38,7 @@ def half_mass_radius():
     r = 0.001
     #calculates the density of the dm within the half mass radius of the correct baryon component
     while(1):
-        m_enc_l = ml_c * r**3.0 / (r * r + rl_c * rl_c )**(3.0 / 2.0)
+        m_enc_l   = ml_c * r**3.0 / (r * r + rl_c * rl_c )**(3.0 / 2.0)
         
         m_enc_d_c = md_c * r**3.0 / (r * r + rd_c * rd_c )**(3.0 / 2.0)
         m_enc_d_f = md_f * r**3.0 / (r * r + rd_f * rd_f )**(3.0 / 2.0)
@@ -46,6 +46,7 @@ def half_mass_radius():
         
         plummer_den_d_c = (3.0 / (4.0 * mt.pi * rd_c**3.0)) * md_c / (1.0 + (r * r)/ (rd_c * rd_c))**(5.0 / 2.0)
         plummer_den_d_f = (3.0 / (4.0 * mt.pi * rd_f**3.0)) * md_f / (1.0 + (r * r)/ (rd_f * rd_f))**(5.0 / 2.0)
+        
         if(m_enc_l >= cut):
             break
         else:
@@ -84,7 +85,8 @@ def half_mass_radius():
     #rr_c = 0.2
     #rd_c = (rl_c / rr_c) * (1.0 - rr_c)
     #m_enc_d_c = md_c * r**3.0 / (r * r + rd_c * rd_c )**(3.0 / 2.0)
-    if(False):
+    
+    if(False): #determines an combination of parameters which have constant mass within half light radius
         f = open('cons_den.txt', 'w')
         
         threshold = 0.2
@@ -111,8 +113,6 @@ def half_mass_radius():
         f.close()
     #print m_enc_d_c
 
-def clean():
-    os.system("rm boinc_*")
 # #      
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
                 #/# # # # # # # # # # # # # # \#
